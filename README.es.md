@@ -12,16 +12,16 @@ MŌRI es un matcha bar urbano ficticio en Malasaña, Madrid. Este proyecto es la
 
 ## Capturas
 
-| Colección con scroll horizontal fijado | Sección de visita |
-| --- | --- |
+| Colección con scroll horizontal fijado                                                                                                    | Sección de visita                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | ![La colección: tarjetas de bebidas que se desplazan en horizontal mientras la sección queda fija](docs/screenshots/home-collection.webp) | ![Sección verde bosque «Take a green break» con horarios y una foto del local](docs/screenshots/home-visit.webp) |
 
-| Personalidad de marca | Carta |
-| --- | --- |
+| Personalidad de marca                                                                                           | Carta                                                                                  |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | ![Lista de pares de personalidad de la marca sobre fondo verde bosque](docs/screenshots/story-personality.webp) | ![Carta con fotos de las bebidas, color de vaso y precios](docs/screenshots/menu.webp) |
 
-| Cultura matcha | Dónde estamos |
-| --- | --- |
+| Cultura matcha                                                                               | Dónde estamos                                                                  |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | ![Datos sobre el matcha en grandes cifras verde matcha](docs/screenshots/culture-facts.webp) | ![Mapa ilustrado de Malasaña y horario semanal](docs/screenshots/find-us.webp) |
 
 ![Tres móviles con la portada, la carta y el menú de navegación](docs/screenshots/mobile.webp)
@@ -71,41 +71,61 @@ Las animaciones de entrada de la primera pantalla funcionan con CSS, así que nu
 
 ## Rendimiento
 
-Lighthouse (móvil, build de producción):
+Lighthouse (móvil, build de producción, medido en local):
 
-| Página | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
-| --- | --- | --- | --- | --- |
-| Inicio | 97 | 100 | 100 | 100 |
-| Historia | 98 | 100 | 100 | 100 |
-| Carta | 99 | 100 | 100 | 100 |
-| Cultura matcha | 96 | 100 | 100 | 100 |
-| Dónde estamos | 99 | 100 | 100 | 100 |
-| Contacto | 100 | 100 | 100 | 100 |
+| Página         | Rendimiento | Accesibilidad | Buenas prácticas |
+| -------------- | ----------- | ------------- | ---------------- |
+| Inicio         | 93          | 100           | 100              |
+| Historia       | 92          | 100           | 100              |
+| Carta          | 92          | 100           | 100              |
+| Cultura matcha | 91          | 100           | 100              |
+| Dónde estamos  | 96          | 100           | 100              |
+| Contacto       | 94          | 100           | 100              |
 
-Lo que la hace rápida: salida totalmente estática, imágenes AVIF/WebP en varios tamaños, fuentes alojadas en la propia web con las dos principales precargadas, CSS incrustado en cada página y ningún framework de interfaz en el navegador.
+Lo que la hace rápida:
+
+- Cada página de marca es un Server Component generado de forma estática.
+- Las animaciones de entrada de la primera pantalla van en CSS, así que nunca esperan al JavaScript.
+- GSAP y Lenis se cargan cuando el navegador está libre.
+- El CSS va incrustado en cada página.
+- `next/image` sirve AVIF y WebP, y `next/font` aloja y precarga las fuentes.
 
 ## Arquitectura
 
+El código sigue clean architecture: las dependencias solo apuntan hacia dentro, y ESLint (`eslint-plugin-boundaries`) falla si una capa importa otra que no debe.
+
 ```
 src/
-├─ pages/          Rutas: español en la raíz, inglés bajo /en (envoltorios mínimos)
-├─ views/          Una vista por página, renderizada en los dos idiomas
-├─ components/     Header, Footer, PageHero, Marquee, Wave, OpenNow, símbolos del logo…
-├─ layouts/        Layout base: SEO, hreflang, Open Graph, JSON-LD, scripts
-├─ i18n/ui.ts      Idiomas, rutas traducidas y textos comunes de la interfaz
-├─ data/menu.ts    Bebidas: precios, colores de vaso y textos en los dos idiomas
-├─ scripts/        ui.ts (cabecera, menú, formulario, horario) y motion.ts (GSAP + Lenis)
-├─ styles/         Tema de Tailwind 4 con los tokens de marca
-└─ assets/         Fotografía y archivos de marca originales
+├─ core/
+│  ├─ domain/          Reglas puras: dinero, horario, validación del mensaje de contacto, productos
+│  └─ application/     Casos de uso (GetMenu, GetStoreInfo, SubmitContactMessage) y sus puertos
+├─ infrastructure/     Adaptadores de los puertos (en memoria por ahora, después Supabase y Stripe)
+├─ composition/        Construye los casos de uso con sus adaptadores (solo servidor)
+├─ app/[locale]/       Rutas de Next.js, metadatos y Server Actions
+├─ ui/                 Componentes: marca, motion (GSAP + Lenis), primitivas, SEO
+├─ i18n/               Rutas traducidas con next-intl
+└─ styles/             Tema de Tailwind 4 con los tokens de marca
+messages/              Textos en ES y EN
+e2e/                   Tests de Playwright y axe
 ```
 
-- **Generación estática:** Astro genera cada página en HTML al compilar. No hay servidor ni framework en el cliente.
-- **Mejora progresiva:** todo el contenido está en el HTML. El JavaScript solo añade comportamiento (menú, validación, horario) y movimiento. Si un script falla, el contenido que esperaba su animación se muestra igualmente.
-- **Contenido separado de la presentación:** los textos de cada página viven en su vista, por idioma. Las rutas y los textos comunes están en `i18n/`, y los datos de producto en `data/`.
+- **Servidor primero:** las páginas y la carga de datos son React Server Components generados al compilar. Solo van al cliente las partes con interacción o movimiento.
+- **Mutaciones a través de casos de uso:** el formulario de contacto envía a una Server Action. La acción valida con zod y llama al caso de uso `SubmitContactMessage`, que reutiliza la misma validación de dominio que usa el formulario en el navegador.
+- **Mejora progresiva:** todo el contenido está en el HTML. Si el JavaScript falla o se pide reducir el movimiento, todo sigue siendo legible y usable.
+
+## Tests
+
+| Nivel                  | Herramienta       | Qué cubre                                                                                                                                          |
+| ---------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dominio y casos de uso | Vitest            | Dinero, horario con hora de Madrid, validación de contacto, casos de uso de la carta y de la tienda (100 % de cobertura obligatoria en el dominio) |
+| Extremo a extremo      | Playwright        | Todas las páginas en ES y EN, selector de idioma, navegación en cliente, menú móvil, formulario, 404 y precarga                                    |
+| Accesibilidad          | axe en Playwright | WCAG 2.2 AA en todas las páginas y en los dos idiomas                                                                                              |
+
+La integración continua ejecuta formato, lint, tipos, tests unitarios con cobertura y la suite de extremo a extremo en cada push y pull request.
 
 ## Stack
 
-[Astro 7](https://astro.build) · [Tailwind CSS 4](https://tailwindcss.com) · [GSAP](https://gsap.com) (ScrollTrigger, SplitText) · [Lenis](https://lenis.darkroom.engineering) · TypeScript · Fontsource · Vercel
+[Next.js 16](https://nextjs.org) (App Router, React 19) · TypeScript · [Tailwind CSS 4](https://tailwindcss.com) · [next-intl](https://next-intl.dev) · [GSAP](https://gsap.com) (ScrollTrigger, SplitText) · [Lenis](https://lenis.darkroom.engineering) · zod · Vitest · Playwright · axe · Vercel
 
 ## Ejecutarla en local
 
@@ -114,12 +134,15 @@ npm install
 npm run dev
 ```
 
-| Script | Qué hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo en `localhost:4321` |
-| `npm run build` | Build de producción en `dist/` |
-| `npm run preview` | Sirve la build de producción |
-| `npm run check` | Comprobación de tipos y plantillas |
+| Script              | Qué hace                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| `npm run dev`       | Servidor de desarrollo en `localhost:3000`                                                        |
+| `npm run build`     | Build de producción                                                                               |
+| `npm run start`     | Sirve la build de producción                                                                      |
+| `npm run lint`      | ESLint, con las reglas de arquitectura                                                            |
+| `npm run typecheck` | Comprobación de tipos                                                                             |
+| `npm run test`      | Tests unitarios (`test:coverage` para la cobertura)                                               |
+| `npm run e2e`       | Tests de extremo a extremo y accesibilidad (ejecuta `npm run e2e:install` una vez, tras compilar) |
 
 Requiere Node 22 o superior.
 

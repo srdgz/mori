@@ -1,0 +1,444 @@
+{
+  "common": {
+    "skip": "Skip to content",
+    "navLabel": "Main navigation",
+    "langLabel": "Language",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
+    "home": "MŌRI, home",
+    "footClaim": "Your new <accent>favourite break.</accent>",
+    "footVisit": "Visit us",
+    "footHours": "Opening hours",
+    "footExplore": "Explore",
+    "footFollow": "Follow us",
+    "weekdays": "Monday to Friday",
+    "weekend": "Saturday & Sunday",
+    "weekdaysShort": "Mon–Fri",
+    "weekendShort": "Sat–Sun",
+    "metro": "Tribunal metro (L1, L10)",
+    "note": "Fictional brand · Portfolio project",
+    "openUntil": "Open now · until {time}",
+    "closedOpensAt": "Closed now · we open at {time}",
+    "closedTomorrow": "Closed now · back tomorrow",
+    "pauseMarquee": "Pause animation",
+    "playMarquee": "Resume animation",
+    "prev": "Previous",
+    "next": "Next",
+    "discoverMenu": "Explore the menu",
+    "notFound": "This page popped out for a matcha.",
+    "notFoundTitle": "Page not found",
+    "backHome": "Back to home",
+    "newTab": "(opens in a new tab)",
+    "email": "Email",
+    "closed": "Closed"
+  },
+  "nav": {
+    "home": "Home",
+    "story": "Our Story",
+    "menu": "The Menu",
+    "culture": "Matcha Culture",
+    "findUs": "Find Us",
+    "contact": "Contact"
+  },
+  "home": {
+    "title": "MŌRI — Matcha Bar & Culture · Malasaña, Madrid",
+    "description": "MŌRI is a matcha bar in Malasaña, Madrid. Quality matcha, signature drinks and a new way to take a break. Not just matcha. It's a mood.",
+    "heroAlt": "Iced matcha latte in a tall glass on a stone table in morning light",
+    "eyebrow": "Matcha Bar & Culture · Malasaña, Madrid",
+    "cta2": "Come say hi",
+    "scroll": "Scroll",
+    "introEyebrow": "What is MŌRI",
+    "statement": "It's not another coffee. It's your MŌRI moment. A well-made matcha, a sunlit corner and ten minutes that are all yours.",
+    "introP": "Mori (森) means forest. We take it literally: deep green, no solemnity, no posing. Quality matcha for your real routine, the one before the office and the one mid-afternoon.",
+    "introLink": "Read our story",
+    "collEyebrow": "Signature matcha",
+    "collH": "The Matcha Collection",
+    "findEyebrow": "Find us",
+    "captions": ["To go", "The pour", "Slow mornings", "Better together"],
+    "collP": "Six drinks, six moods. Each one has its own cup colour, so you'll know it before the first sip.",
+    "collLabel": "Featured drinks",
+    "fullMenu": "See the full menu",
+    "ritualEyebrow": "The ritual",
+    "ritualAlt": "Hands whisking matcha with a bamboo chasen in a ceramic bowl",
+    "steps": [
+      {
+        "title": "Sifted",
+        "text": "Every matcha is sifted to order. No lumps, all the colour."
+      },
+      {
+        "title": "Hand-whisked",
+        "text": "Water at 80 °C and a bamboo chasen, zigzagging until the foam appears."
+      },
+      {
+        "title": "Your way",
+        "text": "Iced or hot, with dairy or plant milk. You pick the mood."
+      }
+    ],
+    "ritualLink": "Discover matcha culture",
+    "visitP": "Right in the heart of Malasaña, two minutes from Tribunal metro. A long bar, morning light and room to stay (or grab it to go).",
+    "address": "Address",
+    "directions": "Get directions",
+    "sceneAlt": "Inside MŌRI: a travertine bar, plants and a matcha on the counter",
+    "moodP": "To go around the city, to share at the bar or to sip slowly. This is the MŌRI way.",
+    "tag": "Tag us at",
+    "tagEnd": "and show up on our wall.",
+    "alts": [
+      "Takeaway matcha cup on a city street",
+      "Matcha being poured over iced milk",
+      "Matcha cup on the bar in afternoon light",
+      "Two people sharing matcha and a sweet at the bar"
+    ],
+    "ctaP": "Today calls for something green. Drop by, pick your mood and we'll take care of the rest."
+  },
+  "story": {
+    "title": "Our Story — MŌRI Matcha Bar & Culture",
+    "description": "Mori means forest. The story and philosophy behind MŌRI: an urban matcha bar that turns matcha into a small daily ritual.",
+    "eyebrow": "Story & philosophy",
+    "heroLines": ["Our", "Story"],
+    "lede": "Mori (森) means forest in Japanese. A short, green, easy-to-remember name for a place that wants to make matcha part of everyday life.",
+    "bannerAlt": "MŌRI's travertine bar with daylight coming through the windows",
+    "nameK": "The name",
+    "nameH": "Four letters and a whole forest.",
+    "name": [
+      "We wanted a name that works just as well on a cup, a shopfront and a T-shirt. Mori, Japanese for forest, speaks of matcha's plant origin and the green that fills everything.",
+      "The macron over the O is our small detail: it gives the written name character, even though it's pronounced as usual. MO-ri.",
+      "We didn't want a solemn tea house or a romantic café. We wanted an urban, fresh place with personality, one that could live in Madrid, Barcelona or any European city."
+    ],
+    "ideaK": "The idea",
+    "ideaH": "Matcha as a break, not a ceremony.",
+    "idea": "The Japanese tea ceremony is beautiful, but it isn't what happens on a Tuesday at nine. MŌRI takes the best of matcha culture and brings it into your routine: a great product, carefully prepared and served without rush, even if you only have ten minutes.",
+    "togetherAlt": "Two people sharing matcha at the bar",
+    "takeawayAlt": "Takeaway matcha around the city",
+    "personaK": "Personality",
+    "personaH": "Who we are (and who we're not).",
+    "pairs": [
+      {
+        "yes": "Urban",
+        "no": "but never cold"
+      },
+      {
+        "yes": "Modern",
+        "no": "but not a fad"
+      },
+      {
+        "yes": "Natural",
+        "no": "but not overly organic"
+      },
+      {
+        "yes": "Young",
+        "no": "but not childish"
+      },
+      {
+        "yes": "Premium",
+        "no": "but accessible"
+      }
+    ],
+    "cupsK": "A cup for every mood",
+    "cupsH": "Spot your drink before you read the label.",
+    "cupsP": "Every drink in the collection has its own cup colour. The logo always stays the same; the colour changes with you.",
+    "quoteCite": "The idea behind MŌRI",
+    "cta": "Now, go and taste it"
+  },
+  "menu": {
+    "title": "The Menu — MŌRI Matcha Bar",
+    "description": "The MŌRI menu: Classic, Strawberry, Vanilla, Coconut, Dirty and Iced Mango Matcha, plus Seasonal Drops, Pure Matcha and Matcha Specials.",
+    "eyebrow": "Signature matcha",
+    "heroLines": ["The", "Menu"],
+    "lede": "A short, visual menu with names of its own. Six drinks that sell themselves and three collections for when you fancy something different.",
+    "collH": "The Matcha Collection",
+    "cup": "Cup",
+    "size": "Regular 350 ml",
+    "moreK": "More collections",
+    "moreH": "For every mood.",
+    "colls": [
+      {
+        "name": "Seasonal Drops",
+        "kicker": "Limited edition",
+        "text": "Seasonal drinks that come and go: yuzu in winter, peach in summer, spiced pumpkin in autumn."
+      },
+      {
+        "name": "Pure Matcha",
+        "kicker": "Traditional",
+        "text": "Ceremonial matcha with water only, whisked to order. Light usucha or intense koicha for the purists."
+      },
+      {
+        "name": "Matcha Specials",
+        "kicker": "Only at MŌRI",
+        "text": "Combinations you'll only find here: tonic, black sesame cold foam, hojicha… Ask at the bar."
+      }
+    ],
+    "extrasK": "Make it yours",
+    "extras": [
+      {
+        "title": "Plant milks",
+        "rows": [
+          {
+            "label": "Oat",
+            "value": "+€0.40"
+          },
+          {
+            "label": "Almond",
+            "value": "+€0.40"
+          },
+          {
+            "label": "Coconut",
+            "value": "+€0.40"
+          },
+          {
+            "label": "Soy",
+            "value": "+€0.40"
+          }
+        ]
+      },
+      {
+        "title": "Extras",
+        "rows": [
+          {
+            "label": "Extra matcha shot",
+            "value": "+€1.00"
+          },
+          {
+            "label": "Cold foam",
+            "value": "+€0.80"
+          },
+          {
+            "label": "House vanilla syrup",
+            "value": "+€0.50"
+          },
+          {
+            "label": "No sugar",
+            "value": "€0.00"
+          }
+        ]
+      },
+      {
+        "title": "Sizes",
+        "rows": [
+          {
+            "label": "Regular · 350 ml",
+            "value": "Base"
+          },
+          {
+            "label": "Large · 470 ml",
+            "value": "+€0.90"
+          },
+          {
+            "label": "Mug to stay",
+            "value": "Base"
+          },
+          {
+            "label": "Bring your own cup",
+            "value": "−€0.30"
+          }
+        ]
+      }
+    ],
+    "note": "This menu is an initial product proposal, not a final selection of ingredients or recipes. If you have any allergy or intolerance, just ask us.",
+    "ctaH": "Already know what you're ordering?",
+    "ctaP": "We're waiting for you in Malasaña, seven days a week.",
+    "cta": "Get directions"
+  },
+  "culture": {
+    "title": "Matcha Culture — What matcha is and how it's made · MŌRI",
+    "description": "Everything about matcha: where it comes from, how it's prepared step by step, ceremonial vs culinary grade and a short glossary.",
+    "eyebrow": "The world of matcha",
+    "heroLines": ["Matcha", "Culture"],
+    "lede": "You don't need to be an expert to enjoy it, but knowing a little makes it even better. Here are the essentials, no solemnity required.",
+    "whatK": "What it is",
+    "whatH": "Green tea, but the whole leaf.",
+    "what": [
+      "Matcha is Japanese green tea ground into a powder. The plants are shaded for a few weeks before harvest, so they produce more chlorophyll and more L-theanine: that's where the deep green and the sweet, umami taste come from.",
+      "The leaves are then dried, stripped of stems and veins and slowly ground in stone mills. Unlike regular tea, you don't steep it and throw the leaf away: you drink the whole leaf."
+    ],
+    "ingredientsAlt": "Matcha tools: matcha tin, chashaku, chasen, bowl and cloth",
+    "factsK": "By the numbers",
+    "facts": [
+      {
+        "value": "2",
+        "unit": "g",
+        "text": "of matcha per drink, roughly two bamboo scoops."
+      },
+      {
+        "value": "80",
+        "unit": "°C",
+        "text": "at most. Boiling water makes matcha bitter."
+      },
+      {
+        "value": "70",
+        "unit": "ml",
+        "text": "of water for usucha, the light everyday matcha."
+      },
+      {
+        "value": "20",
+        "unit": "s",
+        "text": "of zigzag whisking for a fine foam."
+      }
+    ],
+    "howK": "Step by step",
+    "howH": "How we make your matcha.",
+    "steps": [
+      {
+        "title": "Pick the powder",
+        "text": "First-harvest ceremonial matcha, bright green and as fine as talc.",
+        "alt": "Bowl of matcha powder"
+      },
+      {
+        "title": "Sift",
+        "text": "Passing matcha through a fine sieve prevents lumps and helps it dissolve evenly.",
+        "alt": "Matcha being whisked with a chasen in a bowl"
+      },
+      {
+        "title": "Whisk",
+        "text": "Water at around 80 °C and a bamboo chasen in a quick zigzag from the wrist until the foam appears.",
+        "alt": "Hands whisking matcha in a ceramic bowl"
+      },
+      {
+        "title": "Serve",
+        "text": "Over iced milk or in a hot cup. That's how every drink on our menu begins.",
+        "alt": "Matcha being poured over iced milk"
+      }
+    ],
+    "gradesK": "Grades",
+    "gradesH": "Ceremonial vs culinary.",
+    "grades": [
+      {
+        "name": "Ceremonial",
+        "sub": "The one we use in every drink.",
+        "items": [
+          "Young first-harvest leaves",
+          "Vivid green and fresh aroma",
+          "Sweet, umami, low bitterness",
+          "Made to be drunk with water"
+        ]
+      },
+      {
+        "name": "Culinary",
+        "sub": "Ideal for baking and cooking.",
+        "items": [
+          "Leaves from later harvests",
+          "Duller green",
+          "Stronger, more astringent taste",
+          "Made to be mixed with other ingredients"
+        ]
+      }
+    ],
+    "glossK": "Glossary",
+    "glossH": "Words to order like a local.",
+    "gloss": [
+      {
+        "term": "Chasen",
+        "jp": "茶筅",
+        "text": "A bamboo whisk with dozens of fine prongs. It turns powder and water into a silky foam."
+      },
+      {
+        "term": "Chashaku",
+        "jp": "茶杓",
+        "text": "A bamboo scoop for measuring matcha. One heaped scoop is roughly 1 gram."
+      },
+      {
+        "term": "Chawan",
+        "jp": "茶碗",
+        "text": "A wide ceramic bowl for whisking matcha. Its shape leaves room to move the chasen."
+      },
+      {
+        "term": "Usucha",
+        "jp": "薄茶",
+        "text": "Thin matcha: less powder, more water, with foam. The most common way to drink it every day."
+      },
+      {
+        "term": "Koicha",
+        "jp": "濃茶",
+        "text": "Thick matcha, almost like paint. Lots of powder and little water, stirred rather than whisked."
+      },
+      {
+        "term": "Tencha",
+        "jp": "碾茶",
+        "text": "The dried, de-veined leaves before grinding. Matcha is made from them."
+      }
+    ],
+    "ctaH": "Theory is nice. Tasting is better.",
+    "cta": "See the menu"
+  },
+  "findUs": {
+    "title": "Find Us — MŌRI address and opening hours · Malasaña, Madrid",
+    "description": "MŌRI is at Calle del Espíritu Santo 18, Malasaña (Madrid). Open every day. Tribunal and Noviciado metro stations.",
+    "eyebrow": "Location & hours",
+    "heroLines": ["Find", "us"],
+    "lede": "Right in Malasaña, between Tribunal and Noviciado. We open every day, because breaks don't follow a calendar.",
+    "mapLabel": "Schematic map of the Malasaña area showing MŌRI on Calle del Espíritu Santo",
+    "addrH": "Address",
+    "addrSmall": "Malasaña · City centre",
+    "hoursH": "Opening hours",
+    "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "howH": "Getting here",
+    "how": [
+      {
+        "mode": "Metro",
+        "text": "Tribunal (L1, L10) · 2 min walk"
+      },
+      {
+        "mode": "Metro",
+        "text": "Noviciado (L2) · 5 min walk"
+      },
+      {
+        "mode": "Bike",
+        "text": "BiciMAD at Plaza del Dos de Mayo"
+      }
+    ],
+    "maps": "Open in Google Maps",
+    "featK": "Before you come",
+    "feats": [
+      {
+        "icon": "bag",
+        "title": "To go",
+        "text": "Every drink is available to take away. Bring your own cup and get €0.30 off."
+      },
+      {
+        "icon": "cup",
+        "title": "To stay",
+        "text": "26 seats across the bar, high tables and a long bench by the window."
+      },
+      {
+        "icon": "leaf",
+        "title": "Accessible",
+        "text": "Step-free street-level entrance and accessible toilet. Dogs welcome."
+      }
+    ],
+    "slowAlt": "Matcha on the travertine bar in afternoon light",
+    "groupH": "Coming as a group?",
+    "groupP": "For groups of more than 8, events or catering, drop us a line and we'll get everything ready.",
+    "groupCta": "Contact us"
+  },
+  "contact": {
+    "title": "Contact — Get in touch · MŌRI Matcha Bar & Culture",
+    "description": "Contact MŌRI for events, catering, press, collaborations or just to say hi.",
+    "eyebrow": "Contact & socials",
+    "heroLines": ["Say", "hello"],
+    "lede": "Events, catering, press, collaborations or just to say hi. We reply within 48 working hours.",
+    "channels": "Channels",
+    "rows": ["Email", "Phone", "Instagram", "TikTok"],
+    "formH": "Send us a message",
+    "required": "Fields marked with * are required.",
+    "topic": "What's it about?",
+    "topics": ["Hello", "Events & catering", "Press", "Collaborations", "Work with us"],
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "messageHint": "At least 10 characters.",
+    "consent": "I agree that MŌRI may use my details only to reply to this message.",
+    "send": "Send message",
+    "demo": "Demo form: your message is not stored.",
+    "doneH": "Message received!",
+    "doneP": "Thanks for writing to us. While we get back to you, today calls for something green.",
+    "again": "Send another message",
+    "msgRequired": "This field is required.",
+    "msgEmail": "Enter a valid email, e.g. name@domain.com.",
+    "msgShort": "Your message needs at least 10 characters.",
+    "msgConsent": "We need your consent to reply to you.",
+    "msgSummary": "Please check {count} field(s) in the form.",
+    "msgSending": "Sending…",
+    "jobsH": "Want to join the team?",
+    "jobsP": "We're looking for people with good energy, eagerness to learn and some bar experience. Choose “Work with us” and tell us about yourself.",
+    "msgFailed": "We couldn't send your message. Please try again in a few minutes."
+  }
+}

@@ -12,16 +12,16 @@ MŌRI is a fictional urban matcha bar in Malasaña, Madrid. This project is the 
 
 ## Screenshots
 
-| Pinned horizontal collection | Visit section |
-| --- | --- |
+| Pinned horizontal collection                                                                                                     | Visit section                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | ![The Matcha Collection: drink cards that scroll sideways while the section stays pinned](docs/screenshots/home-collection.webp) | ![Forest green "Take a green break" section with opening hours and an interior photo](docs/screenshots/home-visit.webp) |
 
-| Brand personality | Menu |
-| --- | --- |
+| Brand personality                                                                                  | Menu                                                                              |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | ![List of brand personality pairs on a forest background](docs/screenshots/story-personality.webp) | ![Menu with drink photos, cup colour tags and prices](docs/screenshots/menu.webp) |
 
-| Matcha culture | Find us |
-| --- | --- |
+| Matcha culture                                                                     | Find us                                                                                    |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | ![Matcha facts in large matcha green numbers](docs/screenshots/culture-facts.webp) | ![Illustrated map of Malasaña and the weekly opening hours](docs/screenshots/find-us.webp) |
 
 ![Three phones showing the mobile home page, menu and navigation](docs/screenshots/mobile.webp)
@@ -71,41 +71,61 @@ Entrance animations that affect the first screen run in CSS, so they never delay
 
 ## Performance
 
-Lighthouse (mobile, production build):
+Lighthouse (mobile, production build, measured locally):
 
-| Page | Performance | Accessibility | Best practices | SEO |
-| --- | --- | --- | --- | --- |
-| Home | 97 | 100 | 100 | 100 |
-| Story | 98 | 100 | 100 | 100 |
-| Menu | 99 | 100 | 100 | 100 |
-| Matcha culture | 96 | 100 | 100 | 100 |
-| Find us | 99 | 100 | 100 | 100 |
-| Contact | 100 | 100 | 100 | 100 |
+| Page           | Performance | Accessibility | Best practices |
+| -------------- | ----------- | ------------- | -------------- |
+| Home           | 93          | 100           | 100            |
+| Story          | 92          | 100           | 100            |
+| Menu           | 92          | 100           | 100            |
+| Matcha culture | 91          | 100           | 100            |
+| Find us        | 96          | 100           | 100            |
+| Contact        | 94          | 100           | 100            |
 
-What keeps it fast: a fully static output, AVIF/WebP images in several sizes, self-hosted fonts with the two main files preloaded, CSS inlined in each page, and no UI framework shipped to the browser.
+What keeps it fast:
+
+- Every brand page is a statically generated Server Component.
+- The first-screen entrance animations run in CSS, so they never wait for JavaScript.
+- GSAP and Lenis are loaded when the browser is idle.
+- CSS is inlined in each page.
+- `next/image` serves AVIF and WebP, and `next/font` self-hosts and preloads the fonts.
 
 ## Architecture
 
+The code follows clean architecture: dependencies only point inwards, and ESLint (`eslint-plugin-boundaries`) fails the build if a layer imports one it shouldn't.
+
 ```
 src/
-├─ pages/          Routes: Spanish at the root, English under /en (thin wrappers)
-├─ views/          One view per page, rendered for both languages
-├─ components/     Header, Footer, PageHero, Marquee, Wave, OpenNow, logo symbols…
-├─ layouts/        Base layout: SEO, hreflang, Open Graph, JSON-LD, scripts
-├─ i18n/ui.ts      Languages, localised routes and shared interface strings
-├─ data/menu.ts    Drinks: prices, cup colours and texts in both languages
-├─ scripts/        ui.ts (header, menu, form, opening hours) and motion.ts (GSAP + Lenis)
-├─ styles/         Tailwind 4 theme with the brand tokens
-└─ assets/         Photography and brand source files
+├─ core/
+│  ├─ domain/          Pure rules: money, opening hours, contact message validation, products
+│  └─ application/     Use cases (GetMenu, GetStoreInfo, SubmitContactMessage) and their ports
+├─ infrastructure/     Adapters for the ports (in-memory today, Supabase and Stripe later)
+├─ composition/        Builds the use cases with their adapters (server only)
+├─ app/[locale]/       Next.js routes, metadata and Server Actions
+├─ ui/                 Components: brand, motion (GSAP + Lenis), primitives, SEO
+├─ i18n/               next-intl routing with localised paths
+└─ styles/             Tailwind 4 theme with the brand tokens
+messages/              ES and EN copy
+e2e/                   Playwright and axe tests
 ```
 
-- **Static site generation:** Astro renders every page to HTML at build time. There is no server and no client-side framework.
-- **Progressive enhancement:** all content is in the HTML. JavaScript only adds behaviour (menu, form validation, opening hours) and motion. If a script fails, content that was waiting for its animation is shown anyway.
-- **Content and presentation are separated:** page text lives in each view, keyed by language. Shared strings and routes live in `i18n/`, and product data lives in `data/`.
+- **Server first:** pages and data loading are React Server Components rendered at build time. Only the parts that need interaction or motion run on the client.
+- **Mutations through use cases:** the contact form posts to a Server Action. The action validates the input with zod and calls the `SubmitContactMessage` use case, which reuses the same domain validation that the form uses in the browser.
+- **Progressive enhancement:** all content is in the HTML. If JavaScript fails or the visitor asks to reduce motion, everything stays readable and usable.
+
+## Testing
+
+| Level                | Tool              | Covers                                                                                                                    |
+| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Domain and use cases | Vitest            | Money, opening hours in Madrid time, contact validation, menu and store use cases (100 % coverage required on the domain) |
+| End to end           | Playwright        | Every page in ES and EN, language switch, client navigation, mobile menu, contact form, 404, prefetching                  |
+| Accessibility        | axe in Playwright | WCAG 2.2 AA on every page in both languages                                                                               |
+
+CI runs formatting, lint, type checks, unit tests with coverage and the end-to-end suite on every push and pull request.
 
 ## Stack
 
-[Astro 7](https://astro.build) · [Tailwind CSS 4](https://tailwindcss.com) · [GSAP](https://gsap.com) (ScrollTrigger, SplitText) · [Lenis](https://lenis.darkroom.engineering) · TypeScript · Fontsource · Vercel
+[Next.js 16](https://nextjs.org) (App Router, React 19) · TypeScript · [Tailwind CSS 4](https://tailwindcss.com) · [next-intl](https://next-intl.dev) · [GSAP](https://gsap.com) (ScrollTrigger, SplitText) · [Lenis](https://lenis.darkroom.engineering) · zod · Vitest · Playwright · axe · Vercel
 
 ## Running it locally
 
@@ -114,12 +134,15 @@ npm install
 npm run dev
 ```
 
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | Development server at `localhost:4321` |
-| `npm run build` | Production build in `dist/` |
-| `npm run preview` | Serves the production build |
-| `npm run check` | Type and template checks |
+| Script              | What it does                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `npm run dev`       | Development server at `localhost:3000`                                              |
+| `npm run build`     | Production build                                                                    |
+| `npm run start`     | Serves the production build                                                         |
+| `npm run lint`      | ESLint, including the architecture rules                                            |
+| `npm run typecheck` | TypeScript checks                                                                   |
+| `npm run test`      | Unit tests (`test:coverage` for coverage)                                           |
+| `npm run e2e`       | End-to-end and accessibility tests (run `npm run e2e:install` once, after building) |
 
 Node 22 or newer is required.
 
