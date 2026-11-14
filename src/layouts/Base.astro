@@ -17,7 +17,7 @@ interface Props {
 }
 const { lang, page, title, description } = Astro.props;
 const t = useT(lang);
-const site = Astro.site ?? new URL("https://mori-matcha.vercel.app");
+const site = Astro.site ?? new URL("https://mori-matcha-bar.vercel.app");
 const canonical = new URL(href(lang, page), site).href;
 const altEs = new URL(href("es", page), site).href;
 const altEn = new URL(href("en", page), site).href;

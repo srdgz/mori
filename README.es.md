@@ -6,7 +6,7 @@
 
 MŌRI es un matcha bar urbano ficticio en Malasaña, Madrid. Este proyecto es la web de la marca, diseñada y desarrollada desde cero como caso de estudio de diseño de interfaz, de marca y de motion: identidad, dirección de arte editorial, narrativa con scroll y accesibilidad, todo en una web estática que carga rápido.
 
-**Web:** [mori-matcha.vercel.app](https://mori-matcha.vercel.app)
+**Web:** [mori-matcha-bar.vercel.app](https://mori-matcha-bar.vercel.app)
 
 ![Portada de MŌRI: titular «Good matcha. Good mood.» sobre un iced matcha latte](docs/screenshots/home-hero.webp)
 

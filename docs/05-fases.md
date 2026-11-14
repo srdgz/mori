@@ -4,7 +4,7 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
 
 ## Fase 0 · Publicar la web de marca
 - Primer commit con la web actual en Astro, subida a `main` y desplegada en Vercel.
-- **Criterio de hecho:** la web está en `mori-matcha.vercel.app` con las puntuaciones de Lighthouse del README.
+- **Criterio de hecho:** la web está en `mori-matcha-bar.vercel.app` con las puntuaciones de Lighthouse del README.
 
 ## Fase 1 · Migración a Next.js 16 (`feat/nextjs-migration`)
 - **Proyecto:** Next.js 16, React 19, TypeScript estricto, Tailwind 4 con los mismos tokens, `next-intl` con las rutas traducidas actuales, `next/font` y `next/image`.
