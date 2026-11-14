@@ -1,0 +1,65 @@
+---
+import Icon from "./Icon.astro";
+import Mark from "./Mark.astro";
+import Wordmark from "./Wordmark.astro";
+import { routes, href, useT, brand, type Lang } from "../i18n/ui";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+const year = new Date().getFullYear();
+---
+<footer class="on-dark overflow-hidden bg-forest pt-[clamp(60px,9vw,120px)] pb-7 text-cream">
+  <div class="wrap">
+    <div class="grid gap-10 pb-[clamp(48px,7vw,90px)] sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div>
+        <a href={href(lang, "home")} class="mb-8 inline-flex flex-col items-start gap-4 text-cream" aria-label={t("home")}>
+          <Mark class="size-16" />
+          <Wordmark class="h-6 w-auto" />
+        </a>
+        <p class="mb-6 max-w-[14ch] font-display text-[clamp(1.6rem,2.8vw,2.4rem)] leading-[1.05] font-semibold tracking-tight" set:html={t("footClaim")} />
+        <ul class="flex gap-2.5" aria-label={t("footFollow")}>
+          <li><a class="social" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><Icon name="ig" size={18} /><span class="sr-only">Instagram</span></a></li>
+          <li><a class="social" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer"><Icon name="tt" size={18} /><span class="sr-only">TikTok</span></a></li>
+          <li><a class="social" href={`mailto:${brand.email}`}><Icon name="mail" size={18} /><span class="sr-only">Email</span></a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="foot-h">{t("footVisit")}</h2>
+        <address class="grid gap-2 not-italic"><span>{brand.address}</span><span>{brand.city}</span><span>{t("metro")}</span></address>
+      </div>
+      <div>
+        <h2 class="foot-h">{t("footHours")}</h2>
+        <ul class="grid gap-2">
+          <li>{t("weekdaysShort")} · {brand.hours.weekday.join("–")}</li>
+          <li>{t("weekendShort")} · {brand.hours.weekend.join("–")}</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="foot-h">{t("footExplore")}</h2>
+        <ul class="grid gap-2">
+          {routes.filter((r) => r.key !== "home").map((r) => <li><a class="transition-colors hover:text-matcha" href={href(lang, r.key)}>{r.label[lang]}</a></li>)}
+        </ul>
+      </div>
+    </div>
+    <div class="footer-word mb-[clamp(24px,3vw,40px)]" aria-hidden="true" data-footer-word></div>
+    <div class="flex flex-wrap justify-between gap-4 border-t border-line-light pt-5 text-[.82rem] text-sage">
+      <span>© {year} MŌRI Matcha Bar &amp; Culture</span>
+      <span>{t("note")}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot-h { font-family: var(--font-sans); font-size: .75rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--color-sage); margin-bottom: 18px; }
+  .social { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--color-line-light); transition: background-color .3s, color .3s; }
+  .social:hover { background: var(--color-matcha); color: var(--color-forest); }
+  .footer-word {
+    width: 100%;
+    aspect-ratio: 2432 / 740;
+    background:
+      linear-gradient(var(--color-matcha), var(--color-matcha)) 0 100% / 100% var(--fill, 0%) no-repeat,
+      rgb(232 225 212 / 0.12);
+    -webkit-mask: url("/brand/wordmark.svg") center / contain no-repeat;
+    mask: url("/brand/wordmark.svg") center / contain no-repeat;
+  }
+</style>

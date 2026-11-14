@@ -1,0 +1,211 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHero from "../components/PageHero.astro";
+import Icon from "../components/Icon.astro";
+import Mark from "../components/Mark.astro";
+import { useT, brand, type Lang } from "../i18n/ui";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const c = {
+  es: {
+    title: "Contacto — Escríbenos · MŌRI Matcha Bar & Culture",
+    description: "Contacta con MŌRI para eventos, catering, prensa, colaboraciones o simplemente para saludar.",
+    eyebrow: "Contacto y redes",
+    heroLines: ["Hablemos", ""],
+    lede: "Eventos, catering, prensa, colaboraciones o simplemente para decir hola. Respondemos en menos de 48 horas laborables.",
+    channels: "Canales",
+    rows: [
+      ["Correo electrónico", brand.email, `mailto:${brand.email}`, "mail"],
+      ["Teléfono", brand.phone, `tel:${brand.phone.replace(/\s/g, "")}`, "phone"],
+      ["Instagram", brand.instagram, "https://www.instagram.com/", "ig"],
+      ["TikTok", brand.instagram, "https://www.tiktok.com/", "tt"],
+    ],
+    formH: "Envíanos un mensaje",
+    required: "Los campos marcados con * son obligatorios.",
+    topic: "¿Sobre qué nos escribes?",
+    topics: ["Hola", "Eventos y catering", "Prensa", "Colaboraciones", "Trabaja con nosotros"],
+    name: "Nombre",
+    email: "Email",
+    message: "Mensaje",
+    messageHint: "Mínimo 10 caracteres.",
+    consent: "Acepto que MŌRI use mis datos solo para responder a este mensaje.",
+    send: "Enviar mensaje",
+    demo: "Formulario de demostración: no se envía ningún dato.",
+    doneH: "¡Mensaje recibido!",
+    doneP: "Gracias por escribirnos. Mientras te respondemos, hoy el día pide algo verde.",
+    again: "Enviar otro mensaje",
+    msgRequired: "Este campo es obligatorio.",
+    msgEmail: "Introduce un email válido, por ejemplo nombre@dominio.com.",
+    msgShort: "El mensaje debe tener al menos 10 caracteres.",
+    msgConsent: "Necesitamos tu consentimiento para responderte.",
+    msgSummary: "Revisa {n} campo(s) del formulario.",
+    msgSending: "Enviando…",
+    jobsH: "¿Quieres formar parte del equipo?",
+    jobsP: "Buscamos gente con buena energía, ganas de aprender y algo de experiencia en barra. Elige “Trabaja con nosotros” y cuéntanos.",
+  },
+  en: {
+    title: "Contact — Get in touch · MŌRI Matcha Bar & Culture",
+    description: "Contact MŌRI for events, catering, press, collaborations or just to say hi.",
+    eyebrow: "Contact & socials",
+    heroLines: ["Say", "hello"],
+    lede: "Events, catering, press, collaborations or just to say hi. We reply within 48 working hours.",
+    channels: "Channels",
+    rows: [
+      ["Email", brand.email, `mailto:${brand.email}`, "mail"],
+      ["Phone", brand.phone, `tel:${brand.phone.replace(/\s/g, "")}`, "phone"],
+      ["Instagram", brand.instagram, "https://www.instagram.com/", "ig"],
+      ["TikTok", brand.instagram, "https://www.tiktok.com/", "tt"],
+    ],
+    formH: "Send us a message",
+    required: "Fields marked with * are required.",
+    topic: "What's it about?",
+    topics: ["Hello", "Events & catering", "Press", "Collaborations", "Work with us"],
+    name: "Name",
+    email: "Email",
+    message: "Message",
+    messageHint: "At least 10 characters.",
+    consent: "I agree that MŌRI may use my details only to reply to this message.",
+    send: "Send message",
+    demo: "Demo form: no data is sent.",
+    doneH: "Message received!",
+    doneP: "Thanks for writing to us. While we get back to you, today calls for something green.",
+    again: "Send another message",
+    msgRequired: "This field is required.",
+    msgEmail: "Enter a valid email, e.g. name@domain.com.",
+    msgShort: "Your message needs at least 10 characters.",
+    msgConsent: "We need your consent to reply to you.",
+    msgSummary: "Please check {n} field(s) in the form.",
+    msgSending: "Sending…",
+    jobsH: "Want to join the team?",
+    jobsP: "We're looking for people with good energy, eagerness to learn and some bar experience. Choose “Work with us” and tell us about yourself.",
+  },
+}[lang];
+---
+<Base lang={lang} page="contact" title={c.title} description={c.description}>
+  <PageHero index="05" eyebrow={c.eyebrow} lines={c.heroLines as [string, string]} lede={c.lede} />
+
+  <section class="pb-[clamp(80px,12vw,170px)]">
+    <div class="wrap grid items-start gap-[clamp(32px,6vw,110px)] lg:grid-cols-[1fr_1.25fr]">
+      <div>
+        <h2 class="eyebrow" data-anim="fade">{c.channels}</h2>
+        <ul class="mt-7 border-t border-line" data-anim="fade">
+          {c.rows.map(([label, value, url, icon]) => {
+            const external = url.startsWith("http");
+            return (
+              <li class="border-b border-line">
+                <a class="channel flex items-center justify-between gap-3 py-5" href={url} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined}>
+                  <span>
+                    <small class="mb-1 block text-xs tracking-[.18em] text-ink-soft uppercase">{label}</small>
+                    <strong class="font-display text-[clamp(1.15rem,2vw,1.6rem)] font-semibold tracking-tight break-all">{value}</strong>
+                    {external && <span class="sr-only"> {t("newTab")}</span>}
+                  </span>
+                  <Icon name={icon as "mail" | "phone" | "ig" | "tt"} size={20} class="flex-none" />
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+        <div class="mt-12 rounded-[var(--radius-card)] bg-forest p-[clamp(22px,3vw,34px)] text-cream on-dark" data-anim="fade">
+          <Mark class="mb-5 size-10 text-matcha" />
+          <h2 class="h-md">{c.jobsH}</h2>
+          <p class="mt-3 text-sage">{c.jobsP}</p>
+        </div>
+      </div>
+
+      <form
+        class="form relative overflow-hidden rounded-[calc(var(--radius-card)+6px)] bg-cream p-[clamp(24px,4vw,52px)]"
+        novalidate
+        data-contact-form
+        aria-labelledby="form-h"
+        data-msg-required={c.msgRequired}
+        data-msg-email={c.msgEmail}
+        data-msg-short={c.msgShort}
+        data-msg-consent={c.msgConsent}
+        data-msg-summary={c.msgSummary}
+        data-msg-sending={c.msgSending}
+        data-anim="fade"
+      >
+        <h2 id="form-h" class="h-md text-forest">{c.formH}</h2>
+        <p class="mt-2 mb-7 text-sm text-ink-soft">{c.required}</p>
+
+        <div class="grid gap-5.5 sm:grid-cols-2">
+          <fieldset class="sm:col-span-2">
+            <legend class="field-label mb-2.5">{c.topic}</legend>
+            <div class="flex flex-wrap gap-2">
+              {c.topics.map((tp, i) => (
+                <label class="topic cursor-pointer">
+                  <input type="radio" name="topic" value={tp} checked={i === 0} class="peer sr-only" />
+                  <span>{tp}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="name" class="field-label">{c.name} <span aria-hidden="true">*</span></label>
+            <input id="name" name="name" type="text" autocomplete="name" required aria-required="true" aria-invalid="false" aria-describedby="name-error" />
+            <p id="name-error" class="field-err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="email" class="field-label">{c.email} <span aria-hidden="true">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required aria-required="true" aria-invalid="false" aria-describedby="email-error" />
+            <p id="email-error" class="field-err" aria-live="polite"></p>
+          </div>
+          <div class="field sm:col-span-2">
+            <label for="message" class="field-label">{c.message} <span aria-hidden="true">*</span></label>
+            <textarea id="message" name="message" rows="6" minlength="10" required aria-required="true" aria-invalid="false" aria-describedby="message-hint message-error"></textarea>
+            <p id="message-hint" class="text-xs text-ink-soft">{c.messageHint}</p>
+            <p id="message-error" class="field-err" aria-live="polite"></p>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-start gap-3 text-[.92rem] text-ink-soft">
+              <input id="consent" name="consent" type="checkbox" required aria-required="true" aria-invalid="false" aria-describedby="consent-error" class="mt-0.5 size-5 flex-none accent-forest" />
+              <label for="consent">{c.consent} <span aria-hidden="true">*</span></label>
+            </div>
+            <p id="consent-error" class="field-err mt-1" aria-live="polite"></p>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-4 sm:col-span-2">
+            <small class="max-w-[34ch] text-ink-soft">{c.demo}</small>
+            <button type="submit" class="btn">{c.send}<Icon name="arrow" /></button>
+          </div>
+          <p class="sr-only" role="status" data-form-status></p>
+        </div>
+
+        <div class="form__done on-dark absolute inset-0 grid place-content-center justify-items-center gap-4 bg-forest p-8 text-center text-cream" data-form-done hidden>
+          <Icon name="check" size={72} class="text-matcha" />
+          <h3 class="h-md outline-none" tabindex="-1" data-done-title>{c.doneH}</h3>
+          <p class="max-w-[36ch] text-sage">{c.doneP}</p>
+          <button type="button" class="btn btn--ghost mt-2" data-form-reset>{c.again}</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .channel { transition: padding .4s var(--ease-out-expo), color .3s; }
+  .channel:hover { padding-left: 10px; color: var(--color-forest); }
+  .channel :global(svg) { transition: rotate .4s var(--ease-out-expo); }
+  .channel:hover :global(svg) { rotate: -45deg; }
+  .field { display: grid; gap: 8px; align-content: start; }
+  .field-label { font-size: .78rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+  .field input, .field textarea {
+    font: inherit; color: var(--color-charcoal); width: 100%;
+    background: var(--color-paper); border: 1.5px solid rgb(37 39 37 / 0.28); border-radius: 12px;
+    padding: 13px 16px; transition: border-color .3s, background-color .3s;
+  }
+  .field textarea { min-height: 150px; resize: vertical; }
+  .field input:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--color-forest); outline-offset: 1px; border-color: var(--color-forest); background: #fff; }
+  .field [aria-invalid="true"] { border-color: #a23b24; }
+  .field-err { font-size: .82rem; color: #a23b24; min-height: 1.2em; }
+  .field-err:empty { min-height: 0; }
+  .topic span { display: inline-block; padding: 9px 16px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgb(37 39 37 / 0.28); font-size: .9rem; transition: background-color .3s, color .3s, box-shadow .3s; }
+  .topic input:checked + span { background: var(--color-forest); color: var(--color-cream); box-shadow: none; }
+  .topic input:focus-visible + span { outline: 2px solid var(--color-forest); outline-offset: 2px; }
+  .form.is-sending button[type="submit"] { opacity: .6; pointer-events: none; }
+  .form__done { clip-path: circle(0% at 50% 100%); transition: clip-path .9s var(--ease-in-out-quart); }
+  .form.is-done .form__done { clip-path: circle(150% at 50% 100%); }
+</style>

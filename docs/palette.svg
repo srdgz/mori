@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="220" viewBox="0 0 1000 220" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="220" fill="#F3EFE7"/>
+  <g>
+    <rect x="20" y="20" width="180" height="120" rx="14" fill="#183D2B"/>
+    <text x="20" y="168" font-size="17" font-weight="700" fill="#252725">Forest</text>
+    <text x="20" y="192" font-size="14" fill="#4A4E49">#183D2B · brand</text>
+  </g>
+  <g>
+    <rect x="215" y="20" width="180" height="120" rx="14" fill="#B6D66B"/>
+    <text x="215" y="168" font-size="17" font-weight="700" fill="#252725">Matcha</text>
+    <text x="215" y="192" font-size="14" fill="#4A4E49">#B6D66B · accent</text>
+  </g>
+  <g>
+    <rect x="410" y="20" width="180" height="120" rx="14" fill="#E8E1D4"/>
+    <text x="410" y="168" font-size="17" font-weight="700" fill="#252725">Cream</text>
+    <text x="410" y="192" font-size="14" fill="#4A4E49">#E8E1D4 · surfaces</text>
+  </g>
+  <g>
+    <rect x="605" y="20" width="180" height="120" rx="14" fill="#252725"/>
+    <text x="605" y="168" font-size="17" font-weight="700" fill="#252725">Charcoal</text>
+    <text x="605" y="192" font-size="14" fill="#4A4E49">#252725 · text</text>
+  </g>
+  <g>
+    <rect x="800" y="20" width="180" height="120" rx="14" fill="#A7B89A"/>
+    <text x="800" y="168" font-size="17" font-weight="700" fill="#252725">Sage</text>
+    <text x="800" y="192" font-size="14" fill="#4A4E49">#A7B89A · details</text>
+  </g>
+</svg>

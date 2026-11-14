@@ -1,0 +1,305 @@
+---
+import { Image, Picture } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import Mark from "../components/Mark.astro";
+import Wave from "../components/Wave.astro";
+import Marquee from "../components/Marquee.astro";
+import OpenNow from "../components/OpenNow.astro";
+import { drinks, formatPrice } from "../data/menu";
+import { href, useT, brand, type Lang } from "../i18n/ui";
+import hero from "../assets/photos/mori-hero.png";
+import ritual from "../assets/photos/matcha-ritual.jpg";
+import scene from "../assets/photos/matcha-scene.jpg";
+import takeaway from "../assets/photos/matcha-takeaway.jpg";
+import pour from "../assets/photos/matcha-pour.jpg";
+import slow from "../assets/photos/matcha-slow.jpg";
+import together from "../assets/photos/matcha-together.jpg";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const c = {
+  es: {
+    title: "MŌRI — Matcha Bar & Culture · Malasaña, Madrid",
+    description: "MŌRI es un matcha bar en Malasaña, Madrid. Matcha de calidad, bebidas con nombre propio y una nueva forma de hacer pausas. Not just matcha. It's a mood.",
+    heroAlt: "Iced matcha latte en un vaso alto sobre una mesa de piedra, con luz de mañana",
+    eyebrow: "Matcha Bar & Culture · Malasaña, Madrid",
+    cta2: "Ven a vernos",
+    scroll: "Desliza",
+    introEyebrow: "Qué es MŌRI",
+    statement: "No es otro café. Es tu momento MŌRI. Un matcha bien hecho, un rincón con luz y diez minutos que son solo tuyos.",
+    introP: "Mori (森) significa bosque. Nos lo tomamos al pie de la letra: verde intenso, sin solemnidad y sin postureo. Matcha de calidad para la rutina de verdad, la de antes de la oficina y la de media tarde.",
+    introLink: "Conoce nuestra historia",
+    collEyebrow: "Matcha de autor",
+    collH: "La colección",
+    findEyebrow: "Dónde estamos",
+    captions: ["Para llevar", "Recién servido", "Mañanas lentas", "Mejor en compañía"],
+    collP: "Seis bebidas, seis moods. Cada una con su propio color de vaso para que la reconozcas antes de probarla.",
+    collLabel: "Bebidas destacadas",
+    fullMenu: "Ver la carta completa",
+    ritualEyebrow: "El ritual",
+    ritualAlt: "Manos batiendo matcha con un chasen de bambú en un cuenco de cerámica",
+    steps: [
+      ["Tamizado", "Cada matcha se tamiza al momento. Sin grumos, con todo su color."],
+      ["Batido a mano", "Agua a 80 °C y chasen de bambú, en zigzag, hasta que aparece la espuma."],
+      ["A tu manera", "Frío o caliente, con leche o bebida vegetal. Tú decides el mood."],
+    ],
+    ritualLink: "Descubre la cultura del matcha",
+    visitP: "Estamos en pleno Malasaña, a dos minutos del metro de Tribunal. Barra larga, luz de mañana y sitio para quedarte (o para llevártelo).",
+    address: "Dirección",
+    directions: "Cómo llegar",
+    sceneAlt: "Interior de MŌRI con barra de travertino, plantas y un matcha sobre la barra",
+    moodP: "Para llevar por la ciudad, para compartir en la barra o para tomártelo despacio. Así se vive MŌRI.",
+    tag: "Etiquétanos en",
+    tagEnd: "y sal en nuestro muro.",
+    alts: ["Vaso de matcha para llevar en una calle de la ciudad", "Matcha vertiéndose sobre leche con hielo", "Vaso de matcha sobre la barra con luz de tarde", "Dos personas compartiendo matcha y un dulce en la barra"],
+    ctaP: "Hoy el día pide algo verde. Pásate, elige tu mood y nosotros nos ocupamos del resto.",
+  },
+  en: {
+    title: "MŌRI — Matcha Bar & Culture · Malasaña, Madrid",
+    description: "MŌRI is a matcha bar in Malasaña, Madrid. Quality matcha, signature drinks and a new way to take a break. Not just matcha. It's a mood.",
+    heroAlt: "Iced matcha latte in a tall glass on a stone table in morning light",
+    eyebrow: "Matcha Bar & Culture · Malasaña, Madrid",
+    cta2: "Come say hi",
+    scroll: "Scroll",
+    introEyebrow: "What is MŌRI",
+    statement: "It's not another coffee. It's your MŌRI moment. A well-made matcha, a sunlit corner and ten minutes that are all yours.",
+    introP: "Mori (森) means forest. We take it literally: deep green, no solemnity, no posing. Quality matcha for your real routine, the one before the office and the one mid-afternoon.",
+    introLink: "Read our story",
+    collEyebrow: "Signature matcha",
+    collH: "The Matcha Collection",
+    findEyebrow: "Find us",
+    captions: ["To go", "The pour", "Slow mornings", "Better together"],
+    collP: "Six drinks, six moods. Each one has its own cup colour, so you'll know it before the first sip.",
+    collLabel: "Featured drinks",
+    fullMenu: "See the full menu",
+    ritualEyebrow: "The ritual",
+    ritualAlt: "Hands whisking matcha with a bamboo chasen in a ceramic bowl",
+    steps: [
+      ["Sifted", "Every matcha is sifted to order. No lumps, all the colour."],
+      ["Hand-whisked", "Water at 80 °C and a bamboo chasen, zigzagging until the foam appears."],
+      ["Your way", "Iced or hot, with dairy or plant milk. You pick the mood."],
+    ],
+    ritualLink: "Discover matcha culture",
+    visitP: "Right in the heart of Malasaña, two minutes from Tribunal metro. A long bar, morning light and room to stay (or grab it to go).",
+    address: "Address",
+    directions: "Get directions",
+    sceneAlt: "Inside MŌRI: a travertine bar, plants and a matcha on the counter",
+    moodP: "To go around the city, to share at the bar or to sip slowly. This is the MŌRI way.",
+    tag: "Tag us at",
+    tagEnd: "and show up on our wall.",
+    alts: ["Takeaway matcha cup on a city street", "Matcha being poured over iced milk", "Matcha cup on the bar in afternoon light", "Two people sharing matcha and a sweet at the bar"],
+    ctaP: "Today calls for something green. Drop by, pick your mood and we'll take care of the rest.",
+  },
+}[lang];
+
+const mood = [
+  { img: takeaway, alt: c.alts[0], cap: c.captions[0], cls: "md:col-[1/6] md:row-span-4 col-span-2 row-span-2" },
+  { img: pour, alt: c.alts[1], cap: c.captions[1], cls: "md:col-[6/9] md:row-span-3 row-span-2" },
+  { img: slow, alt: c.alts[2], cap: c.captions[2], cls: "md:col-[9/13] md:row-span-3 row-span-2" },
+  { img: together, alt: c.alts[3], cap: c.captions[3], cls: "md:col-[6/13] md:row-span-2 col-span-2 row-span-2", pos: "object-[50%_62%]" },
+];
+---
+<Base lang={lang} page="home" title={c.title} description={c.description}>
+  <section class="hero relative grid min-h-svh overflow-hidden bg-[#d8d5ce] text-forest" data-hero aria-labelledby="hero-title">
+    <div class="hero-zoom absolute inset-0 overflow-hidden" data-hero-media>
+      <Picture src={hero} formats={["avif", "webp"]} widths={[640, 960, 1280, 1672]} sizes="100vw" quality={80} alt={c.heroAlt} loading="eager" fetchpriority="high" class="size-full object-cover object-[50%_58%]" pictureAttributes={{ class: "contents" }} />
+      <div class="absolute inset-0 bg-[linear-gradient(180deg,rgb(243_239_231/.6)_0%,rgb(243_239_231/0)_36%),linear-gradient(0deg,rgb(243_239_231/.75)_0%,rgb(243_239_231/0)_32%)]"></div>
+    </div>
+    <div class="wrap relative z-10 grid grid-rows-[auto_auto_1fr_auto] gap-5 pt-[calc(var(--nav-h)+clamp(24px,6vh,64px))] pb-[clamp(24px,5vh,48px)] md:grid-rows-[auto_1fr_auto]">
+      <span class="eyebrow hero-in" style="--d:.1s">{c.eyebrow}</span>
+      <h1 id="hero-title" class="display text-[clamp(2.4rem,12.4vw,5.2rem)] sm:text-[clamp(3.4rem,10.6vw,11.5rem)]">
+        <span class="line-mask block" data-hero-line><span class="line-in" style="--d:.15s">Good matcha<span class="text-matcha">.</span></span></span>
+        <span class="line-mask block sm:text-right" data-hero-line><span class="line-in" style="--d:.3s">Good mood<span class="text-matcha">.</span></span></span>
+      </h1>
+      <div class="flex flex-wrap items-end justify-between gap-6 self-end">
+        <div class="hero-in" style="--d:.55s">
+          <p class="mb-4 font-display text-[clamp(1.15rem,1.8vw,1.6rem)] leading-tight font-medium tracking-tight">Not just matcha.<br />It's a mood.</p>
+          <div class="flex flex-wrap gap-3">
+            <a class="btn grow xs:grow-0" href={href(lang, "menu")} data-magnetic>{t("discoverMenu")}<Icon name="arrow" /></a>
+            <a class="btn btn--ghost grow xs:grow-0" href={href(lang, "findus")} data-magnetic>{c.cta2}</a>
+          </div>
+        </div>
+        <span class="hidden items-center gap-3 text-xs font-medium tracking-[.2em] uppercase sm:inline-flex hero-in" style="--d:.7s" aria-hidden="true">
+          <i class="relative h-[46px] w-[1.5px] overflow-hidden bg-forest/20 after:absolute after:inset-x-0 after:-top-[40%] after:h-[40%] after:bg-forest after:[animation:drip_2.2s_cubic-bezier(.65,0,.35,1)_infinite]"></i>{c.scroll}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <Marquee lang={lang} items={["Your daily green ritual", "Good days start green", "Stay fresh. Stay green", "Take a green break", "Made for your everyday"]} />
+
+  <section class="section">
+    <div class="wrap grid items-end gap-[clamp(32px,6vw,96px)] md:grid-cols-[1fr_minmax(260px,380px)]">
+      <div>
+        <span class="eyebrow" data-anim="fade">{c.introEyebrow}</span>
+        <p class="mt-6 max-w-[18ch] font-display text-[clamp(2rem,5.2vw,5rem)] leading-[1.04] font-semibold tracking-[-.035em] text-forest" data-anim data-words>{c.statement}</p>
+      </div>
+      <div data-anim="fade">
+        <p class="mb-6 text-ink-soft">{c.introP}</p>
+        <a class="link-u text-forest" href={href(lang, "story")}>{c.introLink}<Icon name="arrow" size={16} /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="collection relative overflow-hidden bg-cream py-[clamp(72px,10vw,140px)]" data-hscroll data-rail aria-labelledby="coll-title">
+    <div class="coll-head wrap mb-[clamp(28px,4vw,56px)] grid items-end gap-x-10 gap-y-5 lg:grid-cols-[1fr_auto_auto]">
+      <div>
+        <span class="eyebrow" data-anim="fade">{c.collEyebrow}</span>
+        <h2 id="coll-title" class="h-lg mt-4 text-forest" data-anim="lines">{c.collH}</h2>
+      </div>
+      <p class="max-w-[38ch] text-ink-soft" data-anim="fade">{c.collP}</p>
+      <div class="rail-ctrl flex gap-2.5" data-anim="fade">
+        <button type="button" class="rail-btn" data-rail-btn="-1"><Icon name="left" size={18} /><span class="sr-only">{t("prev")}</span></button>
+        <button type="button" class="rail-btn" data-rail-btn="1"><Icon name="arrow" size={18} /><span class="sr-only">{t("next")}</span></button>
+      </div>
+    </div>
+    <ul class="rail-track" data-rail-track role="list" aria-label={c.collLabel} tabindex="0">
+      {drinks.map((d, i) => (
+        <li class="drink group grid gap-4">
+          <a href={`${href(lang, "menu")}#${d.id}`} class="grid gap-4">
+            <div class="media media--zoom aspect-[4/5]">
+              <Image src={d.image} widths={[320, 480, 720]} sizes="(min-width: 64rem) 25vw, 78vw" alt={d.alt[lang]} loading="lazy" />
+              <span class="absolute top-3.5 left-3.5 rounded-full bg-paper/90 px-2.5 py-1.5 text-xs font-semibold tracking-[.14em] text-forest" aria-hidden="true">0{i + 1}</span>
+              <span class="cup-tag absolute right-3.5 bottom-3.5 inline-flex items-center gap-2 rounded-full bg-paper py-1.5 pr-3 pl-1.5 text-xs font-medium"><i class="chip" style={`--c:${d.cup}`}></i>{d.cupName[lang]}</span>
+            </div>
+            <div class="flex items-baseline justify-between gap-3">
+              <h3 class="h-md text-charcoal">{d.name}</h3>
+              <span class="font-display font-medium whitespace-nowrap text-forest">{formatPrice(d.price, lang)}</span>
+            </div>
+          </a>
+          <p class="drink__desc -mt-2 text-[.95rem] text-ink-soft">{d.short[lang]}</p>
+        </li>
+      ))}
+    </ul>
+    <div class="coll-foot wrap mt-10 flex flex-wrap items-center justify-between gap-6">
+      <a class="btn" href={href(lang, "menu")} data-magnetic>{c.fullMenu}<Icon name="arrow" /></a>
+      <span class="hidden h-[2px] w-[min(40vw,320px)] origin-left bg-forest/15 lg:block" aria-hidden="true"><span class="block h-full origin-left scale-x-0 bg-forest" data-hscroll-progress></span></span>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap grid items-center gap-[clamp(32px,6vw,110px)] md:grid-cols-[1.05fr_1fr]">
+      <div class="media relative aspect-[4/4.4] md:aspect-[4/5]" data-anim="clip">
+        <div class="absolute inset-[-8%_0]" data-parallax="6">
+          <Image src={ritual} widths={[360, 480, 720, 928]} sizes="(min-width: 48rem) 50vw, 100vw" alt={c.ritualAlt} loading="lazy" class="size-full object-cover" />
+        </div>
+        <div class="absolute bottom-4 left-4 grid size-[clamp(92px,10vw,120px)] place-items-center rounded-full bg-matcha text-forest" aria-hidden="true">
+          <svg class="size-full [animation:spin_18s_linear_infinite]" viewBox="0 0 240 240"><defs><path id="circ" d="M120 120m-88 0a88 88 0 1 1 176 0a88 88 0 1 1-176 0" /></defs><text font-size="22" font-weight="600" letter-spacing="6.4" fill="currentColor" font-family="DM Sans Variable, sans-serif"><textPath href="#circ">TAKE A GREEN BREAK · TAKE A GREEN BREAK ·</textPath></text></svg>
+          <Mark class="absolute size-8" />
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow" data-anim="fade">{c.ritualEyebrow}</span>
+        <h2 class="h-lg mt-4 text-forest" data-anim="lines">Your daily green ritual.</h2>
+        <ol class="mt-9 mb-10 border-t border-line">
+          {c.steps.map(([title, text], i) => (
+            <li class="grid grid-cols-[52px_1fr] gap-4 border-b border-line py-5" data-anim="fade">
+              <span class="pt-1 font-display text-sm font-medium text-forest" aria-hidden="true">0{i + 1}</span>
+              <div><h3 class="mb-1.5 text-xl font-semibold">{title}</h3><p class="text-[.97rem] text-ink-soft">{text}</p></div>
+            </li>
+          ))}
+        </ol>
+        <a class="link-u text-forest" href={href(lang, "culture")} data-anim="fade">{c.ritualLink}<Icon name="arrow" size={16} /></a>
+      </div>
+    </div>
+  </section>
+
+  <Wave from="var(--color-paper)" to="var(--color-forest)" />
+
+  <section class="on-dark bg-forest pt-[clamp(40px,6vw,80px)] pb-[clamp(80px,12vw,170px)] text-cream" aria-labelledby="visit-title">
+    <div class="wrap grid items-center gap-[clamp(32px,6vw,100px)] md:grid-cols-[1fr_1.1fr]">
+      <div>
+        <span class="eyebrow" data-anim="fade">{c.findEyebrow}</span>
+        <h2 id="visit-title" class="h-xl mt-4" data-anim="lines">Take a <span class="text-matcha">green break.</span></h2>
+        <p class="lede mt-6" data-anim="fade">{c.visitP}</p>
+        <OpenNow lang={lang} />
+        <dl class="mt-8 mb-10 border-t border-line-light" data-anim="fade">
+          <div class="flex justify-between gap-4 border-b border-line-light py-4"><dt class="text-sage">{t("weekdays")}</dt><dd class="font-display font-medium">{brand.hours.weekday.join(" – ")}</dd></div>
+          <div class="flex justify-between gap-4 border-b border-line-light py-4"><dt class="text-sage">{t("weekend")}</dt><dd class="font-display font-medium">{brand.hours.weekend.join(" – ")}</dd></div>
+          <div class="flex justify-between gap-4 border-b border-line-light py-4"><dt class="text-sage">{c.address}</dt><dd class="font-display font-medium">{brand.address}</dd></div>
+        </dl>
+        <a class="btn btn--matcha" href={href(lang, "findus")} data-magnetic>{c.directions}<Icon name="arrow" /></a>
+      </div>
+      <div class="media aspect-[4/4.4] md:aspect-[5/6]" data-anim="clip">
+        <div class="absolute inset-[-8%_0]" data-parallax="6">
+          <Image src={scene} widths={[480, 720, 928]} sizes="(min-width: 48rem) 50vw, 100vw" alt={c.sceneAlt} loading="lazy" class="size-full object-cover" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Wave from="var(--color-forest)" to="var(--color-paper)" />
+
+  <section class="section pt-[clamp(48px,7vw,96px)]" aria-labelledby="mood-title">
+    <div class="wrap">
+      <div class="mb-[clamp(40px,6vw,80px)] flex flex-wrap items-end justify-between gap-8">
+        <div>
+          <span class="eyebrow" data-anim="fade">#MoriMood</span>
+          <h2 id="mood-title" class="h-lg mt-4 max-w-[14ch] text-forest" data-anim="lines">Green looks good on you.</h2>
+        </div>
+        <p class="lede" data-anim="fade">{c.moodP}</p>
+      </div>
+      <div class="grid auto-rows-[150px] grid-cols-2 gap-[clamp(10px,1.4vw,20px)] md:auto-rows-[clamp(90px,9vw,140px)] md:grid-cols-12">
+        {mood.map((m, i) => (
+          <figure class={`media group media--zoom ${m.cls}`} data-anim="clip" data-delay={String(i * 0.08)}>
+            <Image src={m.img} widths={[400, 700, 928]} sizes="(min-width: 48rem) 40vw, 100vw" alt={m.alt} loading="lazy" class={m.pos} />
+            <figcaption class="absolute bottom-3 left-3 rounded-full bg-paper/90 px-3 py-1.5 text-[.78rem] font-medium text-forest">{m.cap}</figcaption>
+          </figure>
+        ))}
+      </div>
+      <div class="mt-10 flex flex-wrap items-end justify-between gap-6">
+        <p class="text-ink-soft">{c.tag} <strong class="text-forest">{brand.instagram}</strong> {c.tagEnd}</p>
+        <a class="link-u text-forest" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><Icon name="ig" size={18} />Instagram<span class="sr-only"> {t("newTab")}</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="on-dark section bg-forest text-center text-cream">
+    <div class="wrap">
+      <h2 class="display text-[clamp(3rem,10vw,9.5rem)]" data-anim="lines">Less ordinary.<br /><span class="text-matcha">More matcha.</span></h2>
+      <p class="mx-auto mt-6 mb-9 max-w-[40ch] text-sage" data-anim="fade">{c.ctaP}</p>
+      <a class="btn btn--matcha" href={href(lang, "menu")} data-magnetic data-anim="fade">{t("discoverMenu")}<Icon name="arrow" /></a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .rail-btn {
+    display: grid; place-items: center; width: 52px; height: 52px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1.5px var(--color-forest); color: var(--color-forest);
+    transition: background-color .3s, color .3s;
+  }
+  .rail-btn:hover { background: var(--color-forest); color: var(--color-cream); }
+  .rail-track {
+    display: grid; grid-auto-flow: column; grid-auto-columns: min(78vw, 340px);
+    gap: clamp(14px, 2vw, 26px);
+    overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    padding: 0 var(--gutter) 24px; scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin; scrollbar-color: var(--color-forest) transparent;
+  }
+  .drink { scroll-snap-align: start; }
+  .cup-tag { transition: transform .5s var(--ease-out-expo), opacity .5s var(--ease-out-expo); }
+  @media (hover: hover) {
+    .drink:not(:hover):not(:focus-within) .cup-tag { opacity: 0; transform: translateY(8px); }
+  }
+  @media (min-width: 64rem) {
+    .rail-track { grid-auto-columns: min(25vw, 44vh); }
+    .collection.is-pinned {
+      height: 100vh; height: 100svh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding-block: calc(var(--nav-h) + 12px) 28px;
+    }
+    .collection.is-pinned .coll-head { margin-bottom: clamp(20px, 3vh, 40px); }
+    .collection.is-pinned .coll-head .h-lg { font-size: clamp(2rem, min(4.2vw, 6.5vh), 4rem); }
+    .collection.is-pinned .rail-track {
+      overflow: visible; scroll-snap-type: none; padding-bottom: 0;
+      grid-auto-columns: clamp(200px, calc((100svh - var(--nav-h) - 400px) * 0.8), 24vw);
+    }
+    .collection.is-pinned .drink__desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .collection.is-pinned .coll-foot { margin-top: clamp(16px, 2.5vh, 32px); }
+    .collection.is-pinned .rail-ctrl { display: none; }
+  }
+</style>

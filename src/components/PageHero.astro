@@ -1,0 +1,27 @@
+---
+interface Props {
+  index: string;
+  eyebrow: string;
+  lines: [string, string?];
+  lede: string;
+  kanji?: string;
+}
+const { index, eyebrow, lines, lede, kanji } = Astro.props;
+---
+<section class="relative overflow-hidden pt-[calc(var(--nav-h)+clamp(48px,9vw,120px))] pb-[clamp(48px,7vw,96px)]" data-page-hero>
+  {kanji && <span class="pointer-events-none absolute top-[calc(var(--nav-h)+12px)] right-[var(--gutter)] font-display text-[clamp(6rem,16vw,14rem)] leading-[.8] text-forest/[.07] select-none hero-fade" aria-hidden="true" data-kanji>{kanji}</span>}
+  <div class="wrap relative">
+    <div class="mb-[clamp(20px,3vw,36px)] flex items-center justify-between gap-4 text-forest hero-in" style="--d:.05s">
+      <span class="eyebrow">{eyebrow}</span>
+      <span class="font-display text-sm font-medium tracking-wider" aria-hidden="true">{index} / 06</span>
+    </div>
+    <h1 class="display text-[clamp(3rem,12.5vw,13rem)] text-forest">
+      <span class="line-mask block"><span class="line-in" style="--d:.1s">{lines[0]}</span></span>
+      {lines[1] && <span class="line-mask block md:pl-[min(14vw,240px)]"><span class="line-in" style="--d:.22s">{lines[1]}</span></span>}
+    </h1>
+    <div class="mt-[clamp(28px,4vw,56px)] grid items-end gap-8 md:grid-cols-[1fr_minmax(260px,460px)]">
+      <slot name="aside" />
+      <p class="lede hero-in m-0" style="--d:.45s">{lede}</p>
+    </div>
+  </div>
+</section>

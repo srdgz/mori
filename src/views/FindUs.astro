@@ -1,0 +1,182 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import PageHero from "../components/PageHero.astro";
+import Icon from "../components/Icon.astro";
+import OpenNow from "../components/OpenNow.astro";
+import { href, useT, brand, type Lang } from "../i18n/ui";
+import slow from "../assets/photos/matcha-slow.jpg";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const c = {
+  es: {
+    title: "Dónde estamos — Dirección y horarios de MŌRI · Malasaña, Madrid",
+    description: "MŌRI está en la calle del Espíritu Santo 18, Malasaña (Madrid). Abierto todos los días. Metro Tribunal y Noviciado.",
+    eyebrow: "Ubicación y horarios",
+    heroLines: ["Dónde", "estamos"],
+    lede: "En pleno Malasaña, entre Tribunal y Noviciado. Abrimos todos los días porque las pausas no entienden de calendario.",
+    mapLabel: "Mapa esquemático de la zona de Malasaña con la ubicación de MŌRI en la calle del Espíritu Santo",
+    addrH: "Dirección",
+    addrSmall: "Malasaña · Centro",
+    hoursH: "Horario",
+    days: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+    howH: "Cómo llegar",
+    how: [["Metro", "Tribunal (L1, L10) · 2 min a pie"], ["Metro", "Noviciado (L2) · 5 min a pie"], ["Bici", "BiciMAD en Plaza del Dos de Mayo"]],
+    maps: "Abrir en Google Maps",
+    featK: "Antes de venir",
+    feats: [
+      ["bag", "Para llevar", "Todas las bebidas se pueden pedir para llevar. Trae tu vaso y te descontamos 0,30 €."],
+      ["cup", "Para quedarse", "26 plazas entre barra, mesas altas y un banco corrido junto a la ventana."],
+      ["leaf", "Accesible", "Entrada a pie de calle sin escalones y baño adaptado. Perros bienvenidos."],
+    ],
+    slowAlt: "Matcha sobre la barra de travertino con luz de tarde",
+    groupH: "¿Venís en grupo?",
+    groupP: "Para grupos de más de 8 personas, eventos o catering, escríbenos y lo preparamos con tiempo.",
+    groupCta: "Contactar",
+  },
+  en: {
+    title: "Find Us — MŌRI address and opening hours · Malasaña, Madrid",
+    description: "MŌRI is at Calle del Espíritu Santo 18, Malasaña (Madrid). Open every day. Tribunal and Noviciado metro stations.",
+    eyebrow: "Location & hours",
+    heroLines: ["Find", "us"],
+    lede: "Right in Malasaña, between Tribunal and Noviciado. We open every day, because breaks don't follow a calendar.",
+    mapLabel: "Schematic map of the Malasaña area showing MŌRI on Calle del Espíritu Santo",
+    addrH: "Address",
+    addrSmall: "Malasaña · City centre",
+    hoursH: "Opening hours",
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    howH: "Getting here",
+    how: [["Metro", "Tribunal (L1, L10) · 2 min walk"], ["Metro", "Noviciado (L2) · 5 min walk"], ["Bike", "BiciMAD at Plaza del Dos de Mayo"]],
+    maps: "Open in Google Maps",
+    featK: "Before you come",
+    feats: [
+      ["bag", "To go", "Every drink is available to take away. Bring your own cup and get €0.30 off."],
+      ["cup", "To stay", "26 seats across the bar, high tables and a long bench by the window."],
+      ["leaf", "Accessible", "Step-free street-level entrance and accessible toilet. Dogs welcome."],
+    ],
+    slowAlt: "Matcha on the travertine bar in afternoon light",
+    groupH: "Coming as a group?",
+    groupP: "For groups of more than 8, events or catering, drop us a line and we'll get everything ready.",
+    groupCta: "Contact us",
+  },
+}[lang];
+
+const dayNums = [1, 2, 3, 4, 5, 6, 0];
+const mapsUrl = "https://www.google.com/maps/search/?api=1&query=Calle+del+Esp%C3%ADritu+Santo+18+Madrid";
+---
+<Base lang={lang} page="findus" title={c.title} description={c.description}>
+  <PageHero index="04" eyebrow={c.eyebrow} lines={c.heroLines as [string, string]} lede={c.lede} />
+
+  <section class="pb-[clamp(80px,12vw,170px)]">
+    <div class="wrap grid items-start gap-[clamp(28px,5vw,80px)] lg:grid-cols-[1.2fr_1fr]">
+      <figure class="map relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-forest" data-anim="clip">
+        <svg viewBox="0 0 600 600" class="block size-full" role="img" aria-label={c.mapLabel}>
+          <g class="blocks">
+            <rect x="40" y="40" width="150" height="120" rx="8" /><rect x="230" y="40" width="120" height="120" rx="8" /><rect x="390" y="40" width="170" height="90" rx="8" />
+            <rect x="40" y="200" width="150" height="130" rx="8" /><rect x="390" y="170" width="170" height="160" rx="8" />
+            <rect x="40" y="370" width="110" height="190" rx="8" /><rect x="190" y="370" width="160" height="80" rx="8" /><rect x="190" y="490" width="160" height="70" rx="8" /><rect x="390" y="370" width="170" height="190" rx="8" />
+          </g>
+          <rect class="park" x="230" y="200" width="120" height="130" rx="10" />
+          <g class="streets">
+            <path class="main" d="M210 0V600" />
+            <path d="M0 180H600" />
+            <path class="main" d="M0 350H600" />
+            <path d="M370 0V600" />
+            <path d="M170 360V600" />
+            <path d="M0 470H380" />
+          </g>
+          <text x="250" y="270">Dos de Mayo</text>
+          <text x="420" y="345">C/ Espíritu Santo</text>
+          <text x="222" y="590" transform="rotate(-90 222 590)">C/ San Bernardo</text>
+          <text x="20" y="172">C/ Velarde</text>
+          <g class="metro">
+            <circle cx="210" cy="455" r="16" /><text x="203" y="460">M</text>
+            <circle cx="530" cy="560" r="16" /><text x="523" y="565">M</text>
+          </g>
+          <text x="232" y="520">Noviciado</text>
+          <text x="470" y="535">Tribunal</text>
+        </svg>
+        <div class="pin pointer-events-none absolute top-[59%] left-[62%] grid -translate-x-1/2 -translate-y-full justify-items-center" aria-hidden="true">
+          <span class="rounded-full bg-matcha py-2.5 pr-4 pl-[18px] font-display text-sm font-bold tracking-[.2em] whitespace-nowrap text-forest shadow-[0_10px_30px_rgb(0_0_0/.25)]">MŌRI</span>
+          <span class="h-[30px] w-0.5 bg-matcha"></span>
+          <span class="pin__dot relative size-3.5 rounded-full bg-matcha"></span>
+        </div>
+      </figure>
+
+      <div>
+        <div class="info-block" data-anim="fade">
+          <h2 class="info-h">{c.addrH}</h2>
+          <address class="font-display text-[clamp(1.25rem,2vw,1.6rem)] leading-tight tracking-tight text-forest not-italic">{brand.address}<br />{brand.city}</address>
+          <p class="mt-2 text-[.95rem] text-ink-soft">{c.addrSmall}</p>
+          <a class="link-u mt-4 text-forest" href={mapsUrl} target="_blank" rel="noopener noreferrer"><Icon name="pin" size={16} />{c.maps}<span class="sr-only"> {t("newTab")}</span></a>
+        </div>
+        <div class="info-block" data-anim="fade">
+          <h2 class="info-h">{c.hoursH}</h2>
+          <ul class="week" data-week>
+            {c.days.map((d, i) => {
+              const weekend = dayNums[i] === 0 || dayNums[i] === 6;
+              return <li data-day={String(dayNums[i])}><span>{d}</span><span>{(weekend ? brand.hours.weekend : brand.hours.weekday).join(" – ")}</span></li>;
+            })}
+          </ul>
+          <OpenNow lang={lang} tone="light" />
+        </div>
+        <div class="info-block" data-anim="fade">
+          <h2 class="info-h">{c.howH}</h2>
+          <ul class="grid gap-2">
+            {c.how.map(([k, v]) => <li class="flex gap-3 text-ink-soft"><span class="w-12 flex-none font-medium text-forest">{k}</span><span>{v}</span></li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-cream" aria-labelledby="feat-h">
+    <div class="wrap">
+      <h2 id="feat-h" class="h-lg mb-[clamp(32px,5vw,56px)] text-forest" data-anim="lines">{c.featK}</h2>
+      <ul class="grid gap-[clamp(14px,2vw,24px)] md:grid-cols-3">
+        {c.feats.map(([icon, title, text]) => (
+          <li class="rounded-[var(--radius-card)] bg-paper p-[clamp(22px,3vw,34px)]" data-anim="fade">
+            <Icon name={icon as "bag" | "cup" | "leaf"} size={40} class="mb-6 text-forest" />
+            <h3 class="mb-2 text-[1.35rem] font-semibold text-forest">{title}</h3>
+            <p class="text-[.96rem] text-ink-soft">{text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap grid items-center gap-[clamp(32px,6vw,100px)] md:grid-cols-2">
+      <div class="media aspect-[4/4.4]" data-anim="clip">
+        <div class="absolute inset-[-8%_0]" data-parallax="6">
+          <Image src={slow} widths={[480, 720, 928]} sizes="(min-width: 48rem) 50vw, 100vw" alt={c.slowAlt} class="size-full object-cover" loading="lazy" />
+        </div>
+      </div>
+      <div>
+        <h2 class="h-lg text-forest" data-anim="lines">{c.groupH}</h2>
+        <p class="lede mt-5 mb-9" data-anim="fade">{c.groupP}</p>
+        <a class="btn" href={href(lang, "contact")} data-magnetic data-anim="fade">{c.groupCta}<Icon name="arrow" /></a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .map .blocks rect { fill: rgb(167 184 154 / 0.1); }
+  .map .park { fill: rgb(182 214 107 / 0.2); }
+  .map .streets path { fill: none; stroke: rgb(232 225 212 / 0.16); stroke-width: 10; stroke-linecap: round; }
+  .map .streets path.main { stroke: rgb(232 225 212 / 0.28); stroke-width: 16; }
+  .map text { font-family: var(--font-sans); font-size: 13px; fill: var(--color-sage); letter-spacing: .08em; text-transform: uppercase; }
+  .map .metro circle { fill: var(--color-cream); }
+  .map .metro text { fill: var(--color-forest); font-weight: 700; font-size: 14px; letter-spacing: 0; }
+  .pin__dot::after { content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 2px solid var(--color-matcha); animation: ripple 2.4s var(--ease-out-expo) infinite; }
+  .info-block { padding-block: 26px; border-top: 1px solid var(--color-line); }
+  .info-block:last-child { border-bottom: 1px solid var(--color-line); }
+  .info-h { font-family: var(--font-sans); font-size: .75rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--color-ink-soft); margin-bottom: 12px; }
+  .week li { display: flex; justify-content: space-between; gap: 12px; padding-block: 7px; color: var(--color-ink-soft); }
+  .week li.is-today { color: var(--color-forest); font-weight: 600; }
+  .week li.is-today span:first-child::after { content: " ●"; color: var(--color-forest); font-size: .7em; }
+</style>

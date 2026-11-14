@@ -1,0 +1,35 @@
+---
+import Mark from "./Mark.astro";
+import Icon from "./Icon.astro";
+import { useT, type Lang } from "../i18n/ui";
+interface Props { lang: Lang; items: string[] }
+const { lang, items } = Astro.props;
+const t = useT(lang);
+---
+<div class="marquee relative overflow-hidden bg-forest py-[22px] text-cream" data-marquee>
+  <p class="sr-only">{items.join(". ")}.</p>
+  <div class="marquee__track flex w-max" aria-hidden="true">
+    {[0, 1].map(() => (
+      <div class="flex items-center gap-9 pr-9">
+        {items.map((item, i) => (
+          <>
+            <span class:list={["font-display text-[clamp(1.4rem,2.6vw,2.3rem)] font-semibold tracking-tight whitespace-nowrap", i % 2 === 0 && "text-matcha"]}>{item}</span>
+            <Mark class="size-[26px] flex-none text-sage" />
+          </>
+        ))}
+      </div>
+    ))}
+  </div>
+  <button type="button" class="absolute top-1/2 right-[var(--gutter)] grid size-10 -translate-y-1/2 place-items-center rounded-full bg-forest-deep text-cream shadow-[inset_0_0_0_1px_var(--color-line-light)] transition-colors hover:bg-matcha hover:text-forest" aria-pressed="false" data-marquee-toggle data-pause-label={t("pauseMarquee")} data-play-label={t("playMarquee")}>
+    <Icon name="pause" size={16} class="icon-pause" />
+    <Icon name="play" size={16} class="icon-play hidden" />
+    <span class="sr-only" data-marquee-label>{t("pauseMarquee")}</span>
+  </button>
+</div>
+
+<style>
+  .marquee__track { animation: marquee 38s linear infinite; }
+  .marquee.is-paused .marquee__track { animation-play-state: paused; }
+  .marquee.is-paused .icon-pause { display: none; }
+  .marquee.is-paused .icon-play { display: block; }
+</style>

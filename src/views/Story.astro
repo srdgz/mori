@@ -1,0 +1,191 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import PageHero from "../components/PageHero.astro";
+import Icon from "../components/Icon.astro";
+import Mark from "../components/Mark.astro";
+import Wave from "../components/Wave.astro";
+import { drinks } from "../data/menu";
+import { href, type Lang } from "../i18n/ui";
+import scene from "../assets/photos/matcha-scene.jpg";
+import together from "../assets/photos/matcha-together.jpg";
+import takeaway from "../assets/photos/matcha-takeaway.jpg";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+const c = {
+  es: {
+    title: "Nuestra historia — MŌRI Matcha Bar & Culture",
+    description: "Mori significa bosque. La historia y la filosofía de MŌRI: un matcha bar urbano que convierte el matcha en un pequeño ritual diario.",
+    eyebrow: "Historia y filosofía",
+    heroLines: ["Nuestra", "historia"],
+    lede: "Mori (森) significa bosque en japonés. Un nombre corto, verde y fácil de recordar para un sitio que quiere hacer del matcha algo cotidiano.",
+    bannerAlt: "Barra de travertino de MŌRI con luz natural entrando por los ventanales",
+    nameK: "El nombre",
+    nameH: "Cuatro letras y un bosque entero.",
+    name: [
+      "Buscábamos un nombre que funcionara igual en un vaso, en una fachada y en una camiseta. Mori, bosque en japonés, habla del origen vegetal del matcha y del verde que lo llena todo.",
+      "La macron sobre la O es nuestro pequeño detalle: le da carácter al nombre escrito, aunque se pronuncia como siempre. MO-ri.",
+      "No queríamos una casa de té solemne ni una cafetería romántica. Queríamos un sitio urbano, fresco y con personalidad, que podría estar en Madrid, en Barcelona o en cualquier ciudad europea.",
+    ],
+    ideaK: "La idea",
+    ideaH: "El matcha como pausa, no como ceremonia.",
+    idea: "La ceremonia del té japonesa es preciosa, pero no es lo que pasa un martes a las nueve. MŌRI coge lo mejor de la cultura del matcha y lo lleva a la rutina: un buen producto, bien preparado y servido sin prisas, aunque solo tengas diez minutos.",
+    togetherAlt: "Dos personas compartiendo matcha en la barra",
+    takeawayAlt: "Matcha para llevar por la ciudad",
+    personaK: "Personalidad",
+    personaH: "Así somos (y así no).",
+    pairs: [
+      ["Urbana", "pero no fría"],
+      ["Moderna", "pero no pasajera"],
+      ["Natural", "pero no excesivamente orgánica"],
+      ["Joven", "pero no infantil"],
+      ["Premium", "pero accesible"],
+    ],
+    cupsK: "Un vaso para cada mood",
+    cupsH: "Reconoce tu bebida antes de leer la etiqueta.",
+    cupsP: "Cada bebida de la colección tiene su propio color de vaso. El logotipo es siempre el mismo; el color cambia contigo.",
+    quoteCite: "La idea detrás de MŌRI",
+    cta: "Ahora, a probarlo",
+  },
+  en: {
+    title: "Our Story — MŌRI Matcha Bar & Culture",
+    description: "Mori means forest. The story and philosophy behind MŌRI: an urban matcha bar that turns matcha into a small daily ritual.",
+    eyebrow: "Story & philosophy",
+    heroLines: ["Our", "Story"],
+    lede: "Mori (森) means forest in Japanese. A short, green, easy-to-remember name for a place that wants to make matcha part of everyday life.",
+    bannerAlt: "MŌRI's travertine bar with daylight coming through the windows",
+    nameK: "The name",
+    nameH: "Four letters and a whole forest.",
+    name: [
+      "We wanted a name that works just as well on a cup, a shopfront and a T-shirt. Mori, Japanese for forest, speaks of matcha's plant origin and the green that fills everything.",
+      "The macron over the O is our small detail: it gives the written name character, even though it's pronounced as usual. MO-ri.",
+      "We didn't want a solemn tea house or a romantic café. We wanted an urban, fresh place with personality, one that could live in Madrid, Barcelona or any European city.",
+    ],
+    ideaK: "The idea",
+    ideaH: "Matcha as a break, not a ceremony.",
+    idea: "The Japanese tea ceremony is beautiful, but it isn't what happens on a Tuesday at nine. MŌRI takes the best of matcha culture and brings it into your routine: a great product, carefully prepared and served without rush, even if you only have ten minutes.",
+    togetherAlt: "Two people sharing matcha at the bar",
+    takeawayAlt: "Takeaway matcha around the city",
+    personaK: "Personality",
+    personaH: "Who we are (and who we're not).",
+    pairs: [
+      ["Urban", "but never cold"],
+      ["Modern", "but not a fad"],
+      ["Natural", "but not overly organic"],
+      ["Young", "but not childish"],
+      ["Premium", "but accessible"],
+    ],
+    cupsK: "A cup for every mood",
+    cupsH: "Spot your drink before you read the label.",
+    cupsP: "Every drink in the collection has its own cup colour. The logo always stays the same; the colour changes with you.",
+    quoteCite: "The idea behind MŌRI",
+    cta: "Now, go and taste it",
+  },
+}[lang];
+---
+<Base lang={lang} page="story" title={c.title} description={c.description}>
+  <PageHero index="01" eyebrow={c.eyebrow} lines={c.heroLines as [string, string]} lede={c.lede} kanji="森" />
+
+  <div class="wrap">
+    <div class="media aspect-[4/3] md:aspect-[21/9]" data-anim="clip">
+      <div class="absolute inset-[-9%_0]" data-parallax="7">
+        <Image src={scene} widths={[640, 928]} sizes="100vw" alt={c.bannerAlt} class="size-full object-cover" loading="eager" />
+      </div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="wrap grid gap-[clamp(32px,7vw,120px)] md:grid-cols-[minmax(200px,320px)_1fr]">
+      <div class="md:sticky md:top-[calc(var(--nav-h)+24px)] md:self-start">
+        <span class="eyebrow" data-anim="fade">{c.nameK}</span>
+        <h2 class="h-md mt-4 text-forest" data-anim="lines">{c.nameH}</h2>
+        <span data-draw class="mt-8 hidden size-24 text-forest md:block"><Mark class="size-full" /></span>
+      </div>
+      <div class="prose-mori">
+        {c.name.map((p) => <p data-anim="fade">{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-cream">
+    <div class="wrap grid items-center gap-[clamp(32px,6vw,100px)] md:grid-cols-2">
+      <div>
+        <span class="eyebrow" data-anim="fade">{c.ideaK}</span>
+        <h2 class="h-lg mt-4 text-forest" data-anim="lines">{c.ideaH}</h2>
+        <p class="lede mt-6" data-anim="fade">{c.idea}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="media aspect-[4/5]" data-anim="clip"><Image src={together} widths={[400, 700]} sizes="(min-width: 48rem) 25vw, 50vw" alt={c.togetherAlt} loading="lazy" /></div>
+        <div class="media mt-16 aspect-[4/5]" data-anim="clip" data-delay="0.12"><Image src={takeaway} widths={[400, 700]} sizes="(min-width: 48rem) 25vw, 50vw" alt={c.takeawayAlt} loading="lazy" /></div>
+      </div>
+    </div>
+  </section>
+
+  <Wave from="var(--color-cream)" to="var(--color-forest)" />
+
+  <section class="on-dark bg-forest pt-[clamp(40px,6vw,80px)] pb-[clamp(80px,12vw,170px)] text-cream">
+    <div class="wrap">
+      <span class="eyebrow" data-anim="fade">{c.personaK}</span>
+      <h2 class="h-lg mt-4 mb-[clamp(36px,5vw,64px)]" data-anim="lines">{c.personaH}</h2>
+      <ul class="pairs border-t border-line-light">
+        {c.pairs.map(([yes, no], i) => (
+          <li class="pair" data-anim="fade">
+            <span class="pair__idx" aria-hidden="true">0{i + 1}</span>
+            <span class="pair__yes">{yes},</span>
+            <span class="pair__no">{no}.</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <Wave from="var(--color-forest)" to="var(--color-paper)" />
+
+  <section class="section pt-[clamp(48px,7vw,96px)]">
+    <div class="wrap">
+      <div class="max-w-2xl">
+        <span class="eyebrow" data-anim="fade">{c.cupsK}</span>
+        <h2 class="h-lg mt-4 text-forest" data-anim="lines">{c.cupsH}</h2>
+        <p class="lede mt-5" data-anim="fade">{c.cupsP}</p>
+      </div>
+      <ul class="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
+        {drinks.map((d) => (
+          <li class="cup grid justify-items-center gap-3.5 text-center text-sm font-medium" data-anim="fade">
+            <svg class="w-full max-w-[120px]" viewBox="0 0 100 130" aria-hidden="true">
+              <path d="M14 22h72l-8 100H22z" fill={d.cup} stroke="rgb(0 0 0 / .08)" />
+              <rect x="10" y="10" width="80" height="14" rx="6" fill="#252725" />
+              <svg x="32" y="50" width="36" height="35" viewBox="0 0 1232 1204" style={`color:${d.id === "dirty" ? "#E8E1D4" : "#183D2B"}`}><use href="#mori-emblem" /></svg>
+            </svg>
+            <span>{d.name}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section bg-cream text-center">
+    <div class="wrap">
+      <blockquote class="mx-auto max-w-[18ch] font-display text-[clamp(2.2rem,6vw,5.6rem)] leading-none font-semibold tracking-[-.04em] text-forest" data-anim="lines">Not just matcha. It's a mood.</blockquote>
+      <p class="mt-6 text-sm tracking-[.14em] text-ink-soft uppercase" data-anim="fade">{c.quoteCite}</p>
+      <a class="btn mt-10" href={href(lang, "menu")} data-magnetic data-anim="fade">{c.cta}<Icon name="arrow" /></a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose-mori p { font-size: clamp(1.1rem, 1.4vw, 1.3rem); line-height: 1.65; margin: 0 0 1.2em; max-width: 58ch; }
+  .prose-mori p:first-child::first-letter { font-family: var(--font-display); font-weight: 700; float: left; font-size: 4.4em; line-height: .82; margin: .06em .12em 0 0; color: var(--color-forest); }
+  .pair { position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: 40px 1fr; gap: 4px 16px; align-items: baseline; padding: clamp(18px, 2.4vw, 30px) 0; border-bottom: 1px solid var(--color-line-light); transition: color .3s; }
+  @media (min-width: 48rem) { .pair { grid-template-columns: 70px 1fr 1fr; } }
+  .pair::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--color-matcha); transform: scaleY(0); transform-origin: bottom; transition: transform .5s var(--ease-out-expo); }
+  .pair:hover::before { transform: scaleY(1); }
+  .pair:hover, .pair:hover .pair__no, .pair:hover .pair__idx { color: var(--color-forest); }
+  .pair__idx { font-size: .8rem; letter-spacing: .14em; color: var(--color-sage); padding-left: 4px; transition: color .3s; }
+  .pair__yes { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.6rem, 3.6vw, 3.2rem); letter-spacing: -.03em; line-height: 1; }
+  .pair__no { grid-column: 2; font-family: var(--font-display); font-size: clamp(1rem, 1.6vw, 1.4rem); color: var(--color-sage); transition: color .3s; }
+  @media (min-width: 48rem) { .pair__no { grid-column: auto; } }
+  .cup svg { transition: transform .6s var(--ease-out-expo); }
+  .cup:hover svg { transform: translateY(-10px) rotate(-4deg); }
+</style>

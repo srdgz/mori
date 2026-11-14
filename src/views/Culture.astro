@@ -1,0 +1,236 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import PageHero from "../components/PageHero.astro";
+import Icon from "../components/Icon.astro";
+import Wave from "../components/Wave.astro";
+import { href, type Lang } from "../i18n/ui";
+import ingredients from "../assets/photos/matcha-ingredients.jpg";
+import powder from "../assets/photos/matcha-powder.jpg";
+import preparation from "../assets/photos/matcha-preparation.jpg";
+import ritual from "../assets/photos/matcha-ritual.jpg";
+import pour from "../assets/photos/matcha-pour.jpg";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+const c = {
+  es: {
+    title: "Cultura matcha — Qué es el matcha y cómo se prepara · MŌRI",
+    description: "Todo sobre el matcha: de dónde viene, cómo se prepara paso a paso, la diferencia entre grado ceremonial y culinario y un pequeño glosario.",
+    eyebrow: "El mundo del matcha",
+    heroLines: ["Cultura", "matcha"],
+    lede: "No hace falta ser experto para disfrutarlo, pero saber un poco lo hace todavía mejor. Esto es lo esencial, sin solemnidad.",
+    whatK: "Qué es",
+    whatH: "Té verde, pero entero.",
+    what: [
+      "El matcha es té verde japonés molido en polvo. Las plantas se cubren con sombra unas semanas antes de la cosecha: así producen más clorofila y más L-teanina, de ahí su verde intenso y su sabor dulce y umami.",
+      "Después, las hojas se secan, se les quitan tallos y nervios y se muelen despacio en molinos de piedra. A diferencia de un té normal, no se infusiona y se tira la hoja: te bebes la hoja entera.",
+    ],
+    ingredientsAlt: "Utensilios para preparar matcha: lata de matcha, chashaku, chasen, cuenco y paño",
+    factsK: "En cifras",
+    facts: [
+      ["2", "g", "de matcha por bebida, unas dos cucharillas de bambú."],
+      ["80", "°C", "como máximo. El agua hirviendo amarga el matcha."],
+      ["70", "ml", "de agua para un usucha, el matcha ligero de cada día."],
+      ["20", "s", "de batido en zigzag para conseguir una espuma fina."],
+    ],
+    howK: "Paso a paso",
+    howH: "Cómo preparamos tu matcha.",
+    steps: [
+      [powder, "Elige el polvo", "Matcha ceremonial de primera cosecha, de color verde brillante y textura fina como el talco.", "Cuenco con matcha en polvo"],
+      [preparation, "Tamiza", "Pasar el matcha por un colador fino evita grumos y ayuda a que se disuelva de forma homogénea.", "Matcha batiéndose con un chasen en un cuenco"],
+      [ritual, "Bate", "Agua a unos 80 °C y chasen de bambú en movimiento de zigzag, de muñeca, hasta que aparezca la espuma.", "Manos batiendo matcha en un cuenco de cerámica"],
+      [pour, "Sirve", "Sobre leche fría con hielo o en taza caliente. Así nacen todas las bebidas de nuestra carta.", "Matcha vertiéndose sobre leche con hielo"],
+    ],
+    gradesK: "Grados",
+    gradesH: "Ceremonial vs. culinario.",
+    grades: [
+      ["Ceremonial", "El que usamos para todas nuestras bebidas.", ["Hojas jóvenes de primera cosecha", "Verde vivo y aroma fresco", "Sabor dulce, umami, poco amargor", "Pensado para tomar con agua"]],
+      ["Culinario", "Ideal para repostería y cocina.", ["Hojas de cosechas posteriores", "Verde más apagado", "Sabor más intenso y astringente", "Pensado para mezclar con otros ingredientes"]],
+    ],
+    glossK: "Glosario",
+    glossH: "Palabras para pedir como un local.",
+    gloss: [
+      ["Chasen", "茶筅", "Batidor de bambú con decenas de varillas finas. Es lo que convierte el polvo y el agua en una espuma sedosa."],
+      ["Chashaku", "茶杓", "Cucharilla de bambú para medir el matcha. Una cucharada colmada son, más o menos, 1 gramo."],
+      ["Chawan", "茶碗", "Cuenco ancho de cerámica donde se bate el matcha. Su forma deja espacio para mover el chasen."],
+      ["Usucha", "薄茶", "Matcha ligero: menos polvo y más agua, con espuma. Es el más habitual en el día a día."],
+      ["Koicha", "濃茶", "Matcha espeso, casi como una pintura. Mucho polvo y poca agua, se remueve en lugar de batirse."],
+      ["Tencha", "碾茶", "Las hojas ya secas y sin nervios, antes de molerse. De ellas sale el matcha."],
+    ],
+    ctaH: "La teoría está bien. Probarlo, mejor.",
+    cta: "Ver la carta",
+  },
+  en: {
+    title: "Matcha Culture — What matcha is and how it's made · MŌRI",
+    description: "Everything about matcha: where it comes from, how it's prepared step by step, ceremonial vs culinary grade and a short glossary.",
+    eyebrow: "The world of matcha",
+    heroLines: ["Matcha", "Culture"],
+    lede: "You don't need to be an expert to enjoy it, but knowing a little makes it even better. Here are the essentials, no solemnity required.",
+    whatK: "What it is",
+    whatH: "Green tea, but the whole leaf.",
+    what: [
+      "Matcha is Japanese green tea ground into a powder. The plants are shaded for a few weeks before harvest, so they produce more chlorophyll and more L-theanine: that's where the deep green and the sweet, umami taste come from.",
+      "The leaves are then dried, stripped of stems and veins and slowly ground in stone mills. Unlike regular tea, you don't steep it and throw the leaf away: you drink the whole leaf.",
+    ],
+    ingredientsAlt: "Matcha tools: matcha tin, chashaku, chasen, bowl and cloth",
+    factsK: "By the numbers",
+    facts: [
+      ["2", "g", "of matcha per drink, roughly two bamboo scoops."],
+      ["80", "°C", "at most. Boiling water makes matcha bitter."],
+      ["70", "ml", "of water for usucha, the light everyday matcha."],
+      ["20", "s", "of zigzag whisking for a fine foam."],
+    ],
+    howK: "Step by step",
+    howH: "How we make your matcha.",
+    steps: [
+      [powder, "Pick the powder", "First-harvest ceremonial matcha, bright green and as fine as talc.", "Bowl of matcha powder"],
+      [preparation, "Sift", "Passing matcha through a fine sieve prevents lumps and helps it dissolve evenly.", "Matcha being whisked with a chasen in a bowl"],
+      [ritual, "Whisk", "Water at around 80 °C and a bamboo chasen in a quick zigzag from the wrist until the foam appears.", "Hands whisking matcha in a ceramic bowl"],
+      [pour, "Serve", "Over iced milk or in a hot cup. That's how every drink on our menu begins.", "Matcha being poured over iced milk"],
+    ],
+    gradesK: "Grades",
+    gradesH: "Ceremonial vs culinary.",
+    grades: [
+      ["Ceremonial", "The one we use in every drink.", ["Young first-harvest leaves", "Vivid green and fresh aroma", "Sweet, umami, low bitterness", "Made to be drunk with water"]],
+      ["Culinary", "Ideal for baking and cooking.", ["Leaves from later harvests", "Duller green", "Stronger, more astringent taste", "Made to be mixed with other ingredients"]],
+    ],
+    glossK: "Glossary",
+    glossH: "Words to order like a local.",
+    gloss: [
+      ["Chasen", "茶筅", "A bamboo whisk with dozens of fine prongs. It turns powder and water into a silky foam."],
+      ["Chashaku", "茶杓", "A bamboo scoop for measuring matcha. One heaped scoop is roughly 1 gram."],
+      ["Chawan", "茶碗", "A wide ceramic bowl for whisking matcha. Its shape leaves room to move the chasen."],
+      ["Usucha", "薄茶", "Thin matcha: less powder, more water, with foam. The most common way to drink it every day."],
+      ["Koicha", "濃茶", "Thick matcha, almost like paint. Lots of powder and little water, stirred rather than whisked."],
+      ["Tencha", "碾茶", "The dried, de-veined leaves before grinding. Matcha is made from them."],
+    ],
+    ctaH: "Theory is nice. Tasting is better.",
+    cta: "See the menu",
+  },
+}[lang];
+---
+<Base lang={lang} page="culture" title={c.title} description={c.description}>
+  <PageHero index="03" eyebrow={c.eyebrow} lines={c.heroLines as [string, string]} lede={c.lede} kanji="抹茶" />
+
+  <section class="pb-[clamp(80px,12vw,170px)]">
+    <div class="wrap grid items-center gap-[clamp(32px,6vw,100px)] md:grid-cols-[1fr_1.1fr]">
+      <div>
+        <span class="eyebrow" data-anim="fade">{c.whatK}</span>
+        <h2 class="h-lg mt-4 text-forest" data-anim="lines">{c.whatH}</h2>
+        {c.what.map((p) => <p class="lede mt-6" data-anim="fade">{p}</p>)}
+      </div>
+      <div class="media aspect-[4/4.4] md:aspect-[5/6]" data-anim="clip">
+        <div class="absolute inset-[-8%_0]" data-parallax="6">
+          <Image src={ingredients} widths={[480, 720, 928]} sizes="(min-width: 48rem) 50vw, 100vw" alt={c.ingredientsAlt} class="size-full object-cover" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Wave from="var(--color-paper)" to="var(--color-forest)" />
+
+  <section class="on-dark bg-forest pt-[clamp(40px,6vw,80px)] pb-[clamp(80px,12vw,170px)] text-cream" aria-labelledby="facts-h">
+    <div class="wrap">
+      <h2 id="facts-h" class="eyebrow mb-10" data-anim="fade">{c.factsK}</h2>
+      <dl class="grid border-t border-line-light sm:grid-cols-2 lg:grid-cols-4">
+        {c.facts.map(([n, unit, text]) => (
+          <div class="fact" data-anim="fade">
+            <dt class="font-display text-[clamp(3rem,6.5vw,6rem)] leading-none font-semibold tracking-[-.05em] text-matcha">
+              <span data-count={n}>{n}</span><span class="ml-1 text-[.38em] tracking-normal">{unit}</span>
+            </dt>
+            <dd class="mt-3.5 max-w-[24ch] text-[.95rem] text-sage">{text}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <Wave from="var(--color-forest)" to="var(--color-paper)" />
+
+  <section class="section pt-[clamp(48px,7vw,96px)]" aria-labelledby="how-h">
+    <div class="wrap">
+      <span class="eyebrow" data-anim="fade">{c.howK}</span>
+      <h2 id="how-h" class="h-lg mt-4 mb-[clamp(36px,5vw,64px)] text-forest" data-anim="lines">{c.howH}</h2>
+      <ol class="grid gap-x-[clamp(14px,2vw,24px)] gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        {c.steps.map(([img, title, text, alt], i) => (
+          <li class="group" data-anim="fade">
+            <div class="media media--zoom mb-4.5 aspect-[4/5]">
+              <Image src={img as ImageMetadata} widths={[360, 600]} sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw" alt={alt as string} loading="lazy" />
+              <span class="absolute top-3 left-3 rounded-full bg-matcha px-2.5 py-1.5 font-display text-sm font-semibold text-forest" aria-hidden="true">0{i + 1}</span>
+            </div>
+            <h3 class="mb-2 text-[1.35rem] font-semibold text-forest">{title as string}</h3>
+            <p class="text-[.96rem] text-ink-soft">{text as string}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section bg-cream" aria-labelledby="grades-h">
+    <div class="wrap">
+      <span class="eyebrow" data-anim="fade">{c.gradesK}</span>
+      <h2 id="grades-h" class="h-lg mt-4 mb-[clamp(36px,5vw,64px)] text-forest" data-anim="lines">{c.gradesH}</h2>
+      <div class="grid gap-[clamp(14px,2vw,24px)] md:grid-cols-2">
+        {c.grades.map(([name, sub, items], i) => (
+          <article class:list={["rounded-[var(--radius-card)] p-[clamp(24px,3.4vw,44px)]", i === 0 ? "on-dark bg-forest text-cream" : "bg-paper"]} data-anim="fade">
+            {i === 0 && <span class="inline-flex items-center gap-2 rounded-full bg-matcha px-3 py-1 text-xs font-semibold text-forest"><Icon name="check" size={14} />MŌRI</span>}
+            <h3 class="mt-3.5 mb-2 font-display text-[clamp(1.6rem,2.6vw,2.3rem)] font-semibold">{name as string}</h3>
+            <p class={i === 0 ? "text-sage" : "text-ink-soft"}>{sub as string}</p>
+            <ul class="mt-5">
+              {(items as string[]).map((it) => <li class:list={["border-t py-2.5 text-[.96rem]", i === 0 ? "border-line-light text-sage" : "border-line text-ink-soft"]}>{it}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="gloss-h">
+    <div class="wrap">
+      <span class="eyebrow" data-anim="fade">{c.glossK}</span>
+      <h2 id="gloss-h" class="h-lg mt-4 mb-[clamp(36px,5vw,64px)] max-w-[16ch] text-forest" data-anim="lines">{c.glossH}</h2>
+      <div class="grid gap-x-[clamp(24px,5vw,80px)] md:grid-cols-2">
+        {c.gloss.map(([term, jp, text]) => (
+          <details class="term border-t border-line" data-anim="fade">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5.5 font-display text-[clamp(1.3rem,2vw,1.8rem)] font-semibold tracking-tight text-forest">
+              <span>{term} <span lang="ja" class="ml-2.5 font-sans text-[.9rem] font-normal tracking-normal text-ink-soft">{jp}</span></span>
+              <i class="term__icon" aria-hidden="true"></i>
+            </summary>
+            <p class="mb-6 max-w-[52ch] text-ink-soft">{text}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="on-dark section bg-forest text-center text-cream">
+    <div class="wrap">
+      <h2 class="h-xl mx-auto max-w-[16ch]" data-anim="lines">{c.ctaH}</h2>
+      <a class="btn btn--matcha mt-10" href={href(lang, "menu")} data-magnetic data-anim="fade">{c.cta}<Icon name="arrow" /></a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .fact { padding: clamp(24px, 3vw, 40px) 0 24px; border-bottom: 1px solid var(--color-line-light); }
+  @media (min-width: 40rem) {
+    .fact { padding-inline: clamp(14px, 2vw, 28px); border-right: 1px solid var(--color-line-light); }
+    .fact:nth-child(2n) { border-right: 0; }
+  }
+  @media (min-width: 64rem) {
+    .fact { border-bottom: 0; border-right: 1px solid var(--color-line-light); }
+    .fact:nth-child(2n) { border-right: 1px solid var(--color-line-light); }
+    .fact:first-child { padding-left: 0; }
+    .fact:last-child { border-right: 0; }
+  }
+  .term summary::-webkit-details-marker { display: none; }
+  .term:last-child, .term:nth-last-child(2) { border-bottom: 1px solid var(--color-line); }
+  @media (width < 48rem) { .term:nth-last-child(2) { border-bottom: 0; } }
+  .term__icon { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--color-forest); transition: background-color .3s; }
+  .term__icon::before, .term__icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.5px; background: var(--color-forest); translate: -50% -50%; }
+  .term__icon::after { rotate: 90deg; transition: rotate .4s var(--ease-out-expo); }
+  .term[open] .term__icon { background: var(--color-matcha); }
+  .term[open] .term__icon::after { rotate: 0deg; }
+</style>
