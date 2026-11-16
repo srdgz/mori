@@ -19,7 +19,7 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
 
 ## Fase 2 · Base de la tienda (`feat/shop-foundations`)
 - **Neon en Vercel:** integración añadida desde el Marketplace, con una rama de base de datos por vista previa.
-- **Drizzle:** esquema del modelo completo, migraciones generadas, funciones SQL escritas a mano, `db/seed.ts` y `db:migrate` dentro del build de Vercel.
+- **Drizzle:** esquema del modelo completo, migraciones generadas, funciones SQL escritas a mano, seed y `db:migrate` + `db:seed` dentro del build de Vercel.
 - **Tests de base de datos:**
   - Vitest sobre PGlite en local y en CI.
   - Prueba de concurrencia de franjas contra el servicio Postgres de GitHub Actions.

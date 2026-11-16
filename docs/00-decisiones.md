@@ -189,7 +189,7 @@ Sustituye a la antigua «D-20 · Supabase».
 - **Drizzle ORM:**
   - El esquema se define en TypeScript y `drizzle-kit` genera migraciones SQL versionadas en el repositorio.
   - Las funciones y triggers van en migraciones SQL escritas a mano.
-  - Se usa el driver HTTP de Neon, pensado para funciones serverless.
+  - Se usa `pg` con un pool de conexiones, el driver que Neon recomienda para Vercel con Fluid compute. Funciona igual con el Postgres de CI y con PGlite en local.
 - **Better Auth:**
   - Email y contraseña con confirmación, Google y recuperación de contraseña.
   - Sesiones en cookie `httpOnly` guardadas en la base de datos, y límites de frecuencia integrados.
@@ -198,7 +198,7 @@ Sustituye a la antigua «D-20 · Supabase».
   - **Primera capa:** las políticas de dominio, comprobadas en cada caso de uso y cubiertas al 100 % por tests.
   - **Segunda capa:** las operaciones críticas (crear pedido, confirmar pago, cambiar estado) son funciones SQL que validan por sí mismas la transición y la capacidad.
   - En la Fase 7 se valora conectar la app con un rol de Postgres de permisos mínimos.
-- **Funciones SQL** para las operaciones que deben ser atómicas: reservar franja, crear pedido, confirmar pago y sumar sellos. Cada llamada es una sola sentencia, así que es atómica también por HTTP.
+- **Funciones SQL** para las operaciones que deben ser atómicas: reservar franja, crear pedido, confirmar pago y sumar sellos. Cada llamada es una sola sentencia, así que es atómica sin transacciones abiertas desde la app.
 - **Vercel Blob:** fotos subidas desde el panel. El navegador sube directo a Blob con un permiso de un solo uso que firma el servidor tras comprobar que el usuario es admin.
 - **Secretos:** solo en el servidor (variables de entorno de Vercel), nunca en el navegador.
 
