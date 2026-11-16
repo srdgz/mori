@@ -18,27 +18,34 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - E2E de navegación y axe en verde.
 
 ## Fase 2 · Base de la tienda (`feat/shop-foundations`)
-- **Supabase:** proyecto conectado, migraciones del modelo completo, RLS, funciones y `seed.sql`.
-- **Tests de base de datos:** pgTAP sobre PGlite en CI.
-- **Dominio y casos de uso del catálogo y de los precios**, con adaptadores de Supabase y en memoria y tests de contrato.
+- **Neon en Vercel:** integración añadida desde el Marketplace, con una rama de base de datos por vista previa.
+- **Drizzle:** esquema del modelo completo, migraciones generadas, funciones SQL escritas a mano, `db/seed.ts` y `db:migrate` dentro del build de Vercel.
+- **Tests de base de datos:**
+  - Vitest sobre PGlite en local y en CI.
+  - Prueba de concurrencia de franjas contra el servicio Postgres de GitHub Actions.
+- **Dominio y casos de uso del catálogo y de los precios**, con adaptadores de Drizzle y en memoria y tests de contrato.
+- **Políticas de acceso** del dominio (`Actor`, roles y `authorize`) con sus tests, aunque las cuentas lleguen en la Fase 3.
 - **La carta lee de la base de datos**, con páginas de producto (`/carta/[producto]`) y configurador de opciones.
 - **Criterio de hecho:**
-  - La carta y las fichas se generan estáticas desde Supabase.
+  - La carta y las fichas se generan estáticas desde Postgres, en producción y en la vista previa con su propia rama.
   - El configurador calcula bien todos los precios (tests).
-  - Los tests de RLS pasan.
+  - Los tests de contratos, funciones y políticas pasan.
 
 ## Fase 3 · Cuentas (`feat/auth`)
-- **Acceso:** registro, inicio de sesión con email y Google, confirmación y recuperación, `proxy.ts` con la sesión y layouts protegidos.
+- **Acceso con Better Auth:**
+  - Registro e inicio de sesión con email o con Google.
+  - Confirmación de email y recuperación de contraseña.
+  - `proxy.ts` con la redirección temprana y layouts protegidos.
 - **Área de cliente:** perfil, direcciones, favoritos, seguridad y eliminar cuenta.
-- **Emails de autenticación** con la marca, vía SMTP de Resend.
+- **Emails de autenticación** con la marca, a través del `Mailer` de Resend.
 - **Criterio de hecho:**
   - E2E de registro, inicio de sesión, edición de perfil y direcciones.
-  - Un usuario no accede a datos de otro (tests de RLS y E2E).
+  - Un usuario no accede a datos de otro: tests de casos de uso por rol y E2E que lo intenta cambiando la URL.
 
 ## Fase 4 · Carrito y checkout (`feat/checkout`)
 - **Carrito:** panel lateral y página, persistencia y fusión al iniciar sesión.
 - **Checkout:** recogida con franjas y capacidad, reparto con zona, mínimo y envío, cupones e IVA desglosado.
-- **Pago:** Payment Element con Appearance de MŌRI, `PlaceOrder`, webhook, `ConfirmPayment` y caducidad de los pedidos sin pagar.
+- **Pago:** Payment Element con Appearance de MŌRI, `PlaceOrder`, webhook y `ConfirmPayment`. Los pedidos sin pagar dejan libre su franja a los 30 minutos.
 - **Confirmación:** página de confirmación y email.
 - **Criterio de hecho:**
   - E2E paga con `4242 4242 4242 4242` en las dos modalidades.
@@ -46,16 +53,17 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - El webhook es idempotente (test).
 
 ## Fase 5 · Pedidos del cliente (`feat/orders`)
-- Seguimiento en directo con Realtime, para usuarios con sesión y para invitados con enlace.
+- Seguimiento en directo por sondeo con `ETag`, para usuarios con sesión y para invitados con enlace.
 - Historial, detalle y «Repetir pedido».
 - Emails «listo para recoger» y «en reparto».
 - **Criterio de hecho:** E2E en el que el staff avanza un pedido y el cliente lo ve cambiar sin recargar.
 
 ## Fase 6 · Panel de tienda (`feat/admin`)
 - Tablero en directo con aviso sonoro, detalle, ticket imprimible, cancelación y reembolso.
-- Productos con subida de foto y regeneración de la carta.
+- Productos con subida de foto a Vercel Blob y regeneración de la carta.
 - Cupones, ajustes, clientes y panel de datos con gráficos.
-- Modo demo con la cuenta `staff` restringida y el cron de pedidos de ejemplo.
+- Modo demo con la cuenta `staff` restringida.
+- Workflow programado de GitHub Actions que caduca pedidos sin pagar y genera los pedidos de ejemplo.
 - **Criterio de hecho:**
   - E2E de flujo completo: cliente paga → staff prepara → listo → completado.
   - Un cambio de disponibilidad se refleja en la carta.
@@ -66,6 +74,7 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
 - **Calidad:**
   - Revisión completa de accesibilidad (teclado, lector de pantalla, axe) y de rendimiento (presupuestos de JS por ruta, Lighthouse CI).
   - Cabeceras de seguridad y límites de frecuencia.
+  - Valorar un rol de Postgres con permisos mínimos para la app (D-20).
 - **README** reescrito como caso de estudio fullstack: arquitectura, decisiones, tests, capturas del panel y del checkout, y cuentas de demo.
 - **Despliegue final en Vercel** con todas las variables de entorno.
 - **Criterio de hecho:** todo el CI en verde, Lighthouse dentro de presupuesto y la demo navegable por alguien que no conoce el proyecto.

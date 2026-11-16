@@ -101,7 +101,7 @@ src/
 ├─ core/
 │  ├─ domain/          Reglas puras: dinero, horario, validación del mensaje de contacto, productos
 │  └─ application/     Casos de uso (GetMenu, GetStoreInfo, SubmitContactMessage) y sus puertos
-├─ infrastructure/     Adaptadores de los puertos (en memoria por ahora, después Supabase y Stripe)
+├─ infrastructure/     Adaptadores de los puertos (en memoria por ahora, después Postgres y Stripe)
 ├─ composition/        Construye los casos de uso con sus adaptadores (solo servidor)
 ├─ app/[locale]/       Rutas de Next.js, metadatos y Server Actions
 ├─ ui/                 Componentes: marca, motion (GSAP + Lenis), primitivas, SEO

@@ -62,20 +62,20 @@ Español sin prefijo e inglés bajo `/en`, con rutas traducidas.
 | | `/carta/[producto]` | `/en/menu/[product]` | Público | Estático, revalidado al cambiar el catálogo |
 | | `/carrito` | `/en/cart` | Público | Cliente |
 | | `/checkout` | `/en/checkout` | Público | Dinámico |
-| | `/pedido/[codigo]` | `/en/order/[code]` | Dueño del pedido o enlace firmado | Dinámico + Realtime |
+| | `/pedido/[codigo]` | `/en/order/[code]` | Dueño del pedido o enlace con `tracking_token` | Dinámico + sondeo |
 | Cuenta | `/cuenta/entrar` | `/en/account/sign-in` | Invitado | Dinámico |
 | | `/cuenta/registro` | `/en/account/sign-up` | Invitado | Dinámico |
 | | `/cuenta/recuperar` | `/en/account/forgot-password` | Invitado | Dinámico |
 | | `/cuenta/nueva-contrasena` | `/en/account/reset-password` | Enlace del email | Dinámico |
 | | `/cuenta` | `/en/account` | Cliente | Dinámico |
 | | `/cuenta/pedidos` | `/en/account/orders` | Cliente | Dinámico |
-| | `/cuenta/pedidos/[codigo]` | `/en/account/orders/[code]` | Cliente | Dinámico + Realtime |
+| | `/cuenta/pedidos/[codigo]` | `/en/account/orders/[code]` | Cliente | Dinámico + sondeo |
 | | `/cuenta/perfil` | `/en/account/profile` | Cliente | Dinámico |
 | | `/cuenta/direcciones` | `/en/account/addresses` | Cliente | Dinámico |
 | | `/cuenta/favoritos` | `/en/account/favourites` | Cliente | Dinámico |
 | | `/cuenta/seguridad` | `/en/account/security` | Cliente | Dinámico |
 | Panel | `/admin` | `/en/admin` | Staff | Dinámico |
-| | `/admin/pedidos` | `/en/admin/orders` | Staff | Dinámico + Realtime |
+| | `/admin/pedidos` | `/en/admin/orders` | Staff | Dinámico + sondeo |
 | | `/admin/pedidos/[codigo]` | `/en/admin/orders/[code]` | Staff | Dinámico |
 | | `/admin/productos` | `/en/admin/products` | Admin | Dinámico |
 | | `/admin/productos/[id]` | `/en/admin/products/[id]` | Admin | Dinámico |
@@ -86,9 +86,12 @@ Español sin prefijo e inglés bajo `/en`, con rutas traducidas.
 | | `/privacidad` | `/en/privacy` | Público | Estático |
 | | `/cookies` | `/en/cookies` | Público | Estático |
 | | `/condiciones-de-venta` | `/en/terms-of-sale` | Público | Estático |
-| Técnico | `/auth/callback` | | | Route Handler |
+| Técnico | `/api/auth/[...all]` | | | Route Handler (Better Auth) |
 | | `/api/stripe/webhook` | | | Route Handler |
-| | `/api/cron/demo-orders` | | | Route Handler (Vercel Cron) |
+| | `/api/uploads` | | Admin | Route Handler (permiso de subida a Vercel Blob) |
+| | `/api/orders/[code]` | | Dueño del pedido o `tracking_token` | Route Handler (sondeo del seguimiento) |
+| | `/api/admin/board` | | Staff | Route Handler (sondeo del tablero) |
+| | `/api/cron/expire-orders`, `/api/cron/demo-orders` | | `CRON_SECRET` | Route Handler (GitHub Actions cada 15 min) |
 
 El staff de demostración ve `/admin` y `/admin/pedidos`. Las secciones de admin aparecen en el menú, pero deshabilitadas y con una explicación.
 

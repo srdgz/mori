@@ -6,28 +6,30 @@
 Navegador ──▶ Next.js 16 en Vercel
                ├─ Server Components (páginas, lectura de datos)
                ├─ Server Actions (mutaciones validadas con zod)
-               ├─ Route Handlers (webhook de Stripe, cron de la demo, callback de auth)
-               └─ proxy.ts (refresca la sesión de Supabase y resuelve el idioma)
+               ├─ Route Handlers (Stripe, Better Auth, subida a Blob, sondeo, trabajos programados)
+               └─ proxy.ts (idioma y redirección temprana si no hay cookie de sesión)
                      │
                      ▼
-               Casos de uso (src/core/application)
+               Casos de uso (src/core/application) ── políticas de acceso del dominio
                      │ puertos
-          ┌──────────┼───────────┬─────────────┐
-          ▼          ▼           ▼             ▼
-       Supabase    Stripe      Resend     Reloj / IDs
-   (Postgres+RLS,  (PaymentIntents,  (emails)
-   Auth, Realtime,  webhooks,
-   Storage)         reembolsos)
+     ┌───────────┬───┴────────┬───────────┬───────────┬─────────────┐
+     ▼           ▼            ▼           ▼           ▼             ▼
+  Postgres    Better Auth   Stripe      Resend     Vercel Blob   Reloj / IDs
+  en Neon     (sesiones,    (PaymentIntents, (emails)  (fotos de
+  (Drizzle)   Google)       webhooks,               producto)
+                            reembolsos)
+
+GitHub Actions (cada 15 min) ──▶ /api/cron/* (caducidad y pedidos de la demo)
 ```
 
 ## Capas
 
 | Capa | Carpeta | Puede depender de | Contiene |
 | --- | --- | --- | --- |
-| Dominio | `src/core/domain` | Nada | Entidades, objetos de valor (`Money`, `Slot`, `PostalCode`), reglas y errores de dominio |
+| Dominio | `src/core/domain` | Nada | Entidades, objetos de valor (`Money`, `Slot`, `PostalCode`), reglas, políticas de acceso y errores de dominio |
 | Aplicación | `src/core/application` | Dominio | Casos de uso y puertos (interfaces) |
-| Infraestructura | `src/infrastructure` | Dominio, aplicación | Adaptadores: Supabase, Stripe, Resend, memoria |
-| Composición | `src/composition` | Todas | Construye los casos de uso con sus adaptadores (servidor) |
+| Infraestructura | `src/infrastructure` | Dominio, aplicación | Adaptadores: Drizzle, Better Auth, Stripe, Resend, Vercel Blob, memoria |
+| Composición | `src/composition` | Todas | Construye los casos de uso con sus adaptadores y el `Actor` de la sesión (servidor) |
 | Presentación | `src/app`, `src/ui` | Aplicación (tipos), composición | Páginas, layouts, componentes, Server Actions, hooks de cliente |
 
 Reglas, comprobadas con `eslint-plugin-boundaries` en CI:
@@ -35,6 +37,7 @@ Reglas, comprobadas con `eslint-plugin-boundaries` en CI:
 - La presentación nunca importa `src/infrastructure`: pide los casos de uso a `src/composition`.
 - El código de cliente (`"use client"`) nunca importa `src/composition` ni nada con secretos. Las mutaciones van por Server Actions.
 - `server-only` protege los módulos de servidor.
+- Solo `src/infrastructure/db` importa Drizzle, y solo `src/infrastructure/auth` importa Better Auth.
 
 ## Estructura de carpetas
 
@@ -46,11 +49,16 @@ src/
 │  │  ├─ (shop)/             Carta, producto, carrito, checkout, pedido
 │  │  ├─ (account)/          Área de cliente (layout protegido)
 │  │  └─ (admin)/            Panel (layout protegido por rol)
-│  ├─ api/stripe/webhook/route.ts
-│  ├─ api/cron/demo-orders/route.ts
-│  └─ auth/callback/route.ts
+│  └─ api/
+│     ├─ auth/[...all]/      Better Auth (sesión, Google, verificación)
+│     ├─ stripe/webhook/
+│     ├─ uploads/            Permiso de subida a Vercel Blob (solo admin)
+│     ├─ orders/[code]/      Estado del pedido para el seguimiento (sondeo)
+│     ├─ admin/board/        Tablero del día para el panel (sondeo)
+│     └─ cron/               expire-orders, demo-orders
 ├─ core/
 │  ├─ domain/
+│  │  ├─ access/             Actor, roles y políticas (quién puede hacer qué)
 │  │  ├─ catalog/            Product, OptionGroup, Option, precio configurado
 │  │  ├─ cart/               CartLine, Cart, totales
 │  │  ├─ fulfilment/         Horario, franjas, capacidad, zonas, envío
@@ -59,18 +67,21 @@ src/
 │  │  └─ shared/             Money, Locale, errores de dominio
 │  └─ application/
 │     ├─ ports/              CatalogRepository, OrderRepository, SettingsRepository,
-│     │                      CustomerRepository, PaymentGateway, Mailer, Clock, IdGenerator
+│     │                      CustomerRepository, PaymentGateway, Mailer, FileStorage,
+│     │                      RateLimiter, Clock, IdGenerator
 │     ├─ catalog/            GetMenu, GetProduct, UpsertProduct, SetAvailability
 │     ├─ checkout/           QuoteCart, GetPickupSlots, CheckDeliveryZone, ApplyCoupon,
 │     │                      PlaceOrder, ConfirmPayment
 │     ├─ orders/             GetOrder, ListCustomerOrders, AdvanceOrderStatus,
-│     │                      CancelOrder, RefundOrder, Reorder
+│     │                      CancelOrder, RefundOrder, Reorder, ExpireUnpaidOrders
 │     ├─ account/            UpdateProfile, Manage addresses, ToggleFavourite, DeleteAccount
-│     └─ admin/              GetDashboardStats, UpdateSettings, ManageCoupons
+│     └─ admin/              GetBoard, GetDashboardStats, UpdateSettings, ManageCoupons
 ├─ infrastructure/
-│  ├─ supabase/              Clientes (servidor, navegador, servicio) y repositorios
+│  ├─ db/                    Cliente de Neon, esquema de Drizzle y repositorios
+│  ├─ auth/                  Configuración de Better Auth y lectura de la sesión
 │  ├─ stripe/                StripePaymentGateway, verificación del webhook
 │  ├─ resend/                ResendMailer y plantillas React Email
+│  ├─ blob/                  VercelBlobStorage
 │  └─ memory/                Repositorios y pasarela en memoria (tests y demo)
 ├─ composition/              container.ts (servidor)
 ├─ ui/
@@ -82,16 +93,23 @@ src/
 │  └─ primitives/            Button, Field, Dialog, Sheet, Tabs, Toast, Badge…
 ├─ i18n/                     next-intl: rutas traducidas, mensajes es.json / en.json
 └─ styles/                   Tailwind 4 con los tokens de marca actuales
-supabase/
-├─ migrations/               SQL versionado
-├─ seed.sql                  Catálogo, ajustes, cupones y usuarios de demo
-└─ tests/                    pgTAP
+db/
+├─ migrations/               SQL versionado (generado por drizzle-kit y funciones a mano)
+└─ seed.ts                   Catálogo, ajustes, cupones y usuarios de demo
+tests/db/                    Tests de funciones SQL y contratos de repositorios
 e2e/                         Playwright
+.github/workflows/           ci.yml y scheduled.yml (trabajos programados)
 ```
 
 ## Puertos principales
 
 ```ts
+type Actor =
+  | { kind: "guest" }
+  | { kind: "customer"; id: UserId }
+  | { kind: "staff"; id: UserId; demo: boolean }
+  | { kind: "admin"; id: UserId };
+
 interface CatalogRepository {
   menu(locale: Locale): Promise<Product[]>;
   bySlug(slug: string, locale: Locale): Promise<Product | null>;
@@ -105,9 +123,9 @@ interface OrderRepository {
   byId(id: OrderId): Promise<Order | null>;
   byCode(code: PickupCode): Promise<Order | null>;
   byPaymentIntent(id: string): Promise<Order | null>;
-  forCustomer(customerId: CustomerId, page: Page): Promise<Paginated<OrderSummary>>;
-  board(day: LocalDate): Promise<OrderSummary[]>;
-  transition(id: OrderId, to: OrderStatus, by: ActorId | null): Promise<Order>;
+  forCustomer(customerId: UserId, page: Page): Promise<Paginated<OrderSummary>>;
+  board(day: LocalDate): Promise<{ orders: OrderSummary[]; version: string }>;
+  transition(id: OrderId, to: OrderStatus, by: UserId | null): Promise<Order>;
   slotLoad(day: LocalDate): Promise<Map<SlotStart, number>>;
 }
 
@@ -115,6 +133,11 @@ interface PaymentGateway {
   createIntent(input: { orderId: OrderId; amount: Money; customer?: StripeCustomerRef; email: string }): Promise<{ id: string; clientSecret: string }>;
   refund(paymentIntentId: string, amount?: Money): Promise<void>;
   parseWebhook(rawBody: string, signature: string): PaymentEvent;
+}
+
+interface FileStorage {
+  uploadPermission(input: { pathname: string; contentTypes: string[]; maxBytes: number }): Promise<UploadPermission>;
+  remove(url: string): Promise<void>;
 }
 
 interface Mailer {
@@ -128,28 +151,36 @@ interface Clock {
 
 ## Caso de uso de ejemplo: `PlaceOrder`
 
-1. Recibe líneas `{productId, optionIds, quantity}`, modalidad, contacto, cupón y sellos a canjear.
-2. Carga los productos con `CatalogRepository.byIds` y **recalcula el precio** con el dominio; ignora cualquier precio que venga del cliente.
-3. Valida la modalidad con el dominio y los ajustes:
+1. Recibe el `Actor` y las líneas `{productId, optionIds, quantity}`, modalidad, contacto, cupón y sellos a canjear.
+2. Comprueba la política: los pedidos online no están en pausa, y solo un cliente con sesión puede canjear sellos.
+3. Carga los productos con `CatalogRepository.byIds` y **recalcula el precio** con el dominio; ignora cualquier precio que venga del cliente.
+4. Valida la modalidad con el dominio y los ajustes:
    - **Recogida:** franja dentro de horario, con antelación suficiente y con capacidad libre (`slotLoad`).
    - **Reparto:** código postal en zona, pedido mínimo y hora de cierre.
-4. Aplica el cupón y los sellos, y calcula envío, total e IVA desglosado.
-5. Crea el pedido en `pending_payment` con `OrderRepository.create`, en una función SQL que bloquea la franja para evitar sobreventa.
-6. Crea el PaymentIntent con `PaymentGateway.createIntent` y guarda su id en el pedido.
-7. Devuelve `clientSecret`, código y total para el Payment Element.
+5. Aplica el cupón y los sellos, y calcula envío, total e IVA desglosado.
+6. Crea el pedido en `pending_payment` con `OrderRepository.create`, que llama a la función SQL `create_order`. Esa función bloquea la franja para evitar sobreventa.
+7. Crea el PaymentIntent con `PaymentGateway.createIntent` y guarda su id en el pedido.
+8. Devuelve `clientSecret`, código y total para el Payment Element.
 
 Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo. Cubren, por ejemplo:
 - Que el precio enviado por el cliente se ignore.
 - Que una franja llena se rechace.
 - Que un pedido de 11,90 € a domicilio se rechace.
 - Que el envío gratis se aplique a partir de 25 € exactos.
+- Que un invitado no pueda canjear sellos.
 
 ## Sesión y autorización
 
-- `@supabase/ssr` con cookies. `proxy.ts` refresca el token en cada petición.
-- Los layouts de `(account)` y `(admin)` leen el usuario en el servidor y redirigen si no hay sesión o rol suficiente.
-- El rol vive en `profiles.role` y se replica en el JWT (`app_metadata.role`) mediante un *custom access token hook* de Supabase, para que la RLS lo lea sin consultas extra.
-- **Toda la seguridad real está en la RLS:** aunque se saltara la interfaz, un cliente solo puede leer sus pedidos y el staff solo puede cambiar estados.
+- **Better Auth** guarda la sesión en la tabla `sessions` y la identifica con una cookie `httpOnly`, `secure` y `sameSite=lax`. El plugin `nextCookies` permite iniciar y cerrar sesión desde Server Actions.
+- **`proxy.ts`** solo comprueba si existe la cookie, sin consultar la base de datos, para redirigir pronto a `/cuenta/entrar`. No decide nada de seguridad.
+- **Composición:** `container.ts` lee la sesión en el servidor (`auth.api.getSession`) y la convierte en un `Actor`. Los layouts de `(account)` y `(admin)` redirigen si el `Actor` no tiene el rol necesario.
+- **Políticas de dominio:** cada caso de uso llama a `authorize(actor, action, resource)` antes de actuar. Así se cubren casos como:
+  - Un cliente solo ve sus pedidos.
+  - El staff cambia estados, pero no productos ni ajustes.
+  - El staff de demo además tiene bloqueadas las acciones de admin.
+  - Un invitado necesita el `tracking_token` del enlace para ver su pedido.
+- **Consultas:** los repositorios filtran siempre por el usuario de la sesión, nunca por un id que llegue del navegador.
+- **Rol:** campo `role` del usuario, declarado en Better Auth como no editable por el cliente. Solo lo cambia el seed o un admin.
 
 ## Pagos
 
@@ -157,18 +188,31 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 - **Confirmación:** al confirmar, Stripe redirige a `/pedido/[codigo]?payment_intent=…`, y la página muestra «procesando» hasta que llega el webhook.
 - **Webhook:** se ejecuta en Node (`runtime = "nodejs"`) y lee el cuerpo sin procesar para verificar la firma. Llama a `ConfirmPayment`, que es idempotente: si el pedido ya está `received`, no hace nada.
 - **`payment_intent.payment_failed`:** deja el pedido en `pending_payment` para reintentar.
-- **Caducidad:** los pedidos sin pagar caducan a los 30 minutos (trabajo programado) y liberan su franja.
+- **Caducidad:** un pedido sin pagar deja de ocupar su franja a los 30 minutos, porque `slotLoad` lo ignora. El trabajo programado lo pasa después a `expired`.
 
-## Tiempo real
+## Actualización en directo (sondeo)
 
-- **Panel:** el tablero se suscribe a `orders` filtrado por día, con políticas de Realtime que solo dejan pasar al staff.
-- **Seguimiento:**
-  - El cliente con sesión se suscribe a su pedido por `id`.
-  - El invitado usa un canal *broadcast* por código, que alimenta un trigger tras cada cambio de estado, para no exponer la tabla.
+| Pantalla | Endpoint | Intervalo | Se para |
+| --- | --- | --- | --- |
+| Tablero del panel | `GET /api/admin/board?day=…` | 5 s | Con la pestaña en segundo plano |
+| Seguimiento con sesión | `GET /api/orders/[code]` | 10 s | Al llegar a `completed`, `cancelled`, `refunded` o `expired` |
+| Seguimiento de invitado | `GET /api/orders/[code]?t=<tracking_token>` | 10 s | Igual |
+
+- **Sin cambios, sin datos:** cada respuesta lleva un `ETag` calculado con el `updated_at` más reciente. Si nada ha cambiado, el servidor contesta `304` sin cuerpo.
+- **Panel:** el aviso sonoro y la animación de tarjeta nueva se disparan al comparar la respuesta nueva con la anterior.
+- **Consumo:** la base de datos solo está despierta mientras alguien mira el tablero o un pedido en curso. Eso cabe de sobra en las horas de cómputo del plan gratuito de Neon.
+
+## Base de datos y despliegue
+
+- **Driver:** `@neondatabase/serverless` por HTTP en las funciones de Vercel. En tests, PGlite con las mismas migraciones.
+- **Migraciones:** `drizzle-kit generate` crea el SQL a partir del esquema, y las funciones y triggers se escriben como migraciones SQL a mano. `npm run db:migrate` las aplica con la conexión directa (`DATABASE_URL_UNPOOLED`).
+- **En Vercel:** el comando de build ejecuta `db:migrate` antes de `next build`. Con la integración de Neon, cada vista previa recibe su propia rama de base de datos, así que la migración de una pull request nunca toca producción. Las ramas de vistas previas antiguas se borran para no superar el límite del plan gratuito.
+- **Seed:** `npm run db:seed` carga el catálogo, los ajustes, los cupones y las cuentas de demo. Es idempotente.
 
 ## Rendimiento
 
-- **Páginas de marca y carta:** Server Components estáticos. Solo son cliente las animaciones (GSAP y Lenis cargados con `dynamic` cuando el usuario no ha pedido reducir el movimiento) y el botón «Añadir».
+- **Páginas de marca y carta:** Server Components estáticos. Solo son cliente las animaciones (GSAP y Lenis cargados cuando el navegador está libre y el usuario no ha pedido reducir el movimiento) y el botón «Añadir».
+- **Sin consultas en las páginas estáticas:** la carta se genera al compilar y se regenera con `revalidateTag` cuando el panel cambia el catálogo. Por eso la pausa de Neon tras un rato sin uso no afecta a la web pública.
 - **Recursos:** `next/font` para Space Grotesk y DM Sans (autoalojadas, con `preload`). `next/image` con AVIF y WebP y `priority` en el hero.
 - **Stripe.js:** se carga solo en `/checkout`.
 - **Presupuesto de JS por ruta:** comprobado en CI.
@@ -178,14 +222,18 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 | Variable | Dónde | Uso |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Ambos | URL canónica |
-| `NEXT_PUBLIC_SUPABASE_URL` | Ambos | Proyecto Supabase |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Ambos | Clave publicable |
-| `SUPABASE_SECRET_KEY` | Servidor | Webhook, cron, eliminar cuenta |
+| `DATABASE_URL` | Servidor | Conexión a Neon con pooling (la crea la integración de Vercel) |
+| `DATABASE_URL_UNPOOLED` | Servidor | Conexión directa para las migraciones |
+| `BETTER_AUTH_SECRET` | Servidor | Firma de las sesiones |
+| `BETTER_AUTH_URL` | Servidor | URL base de la autenticación |
+| `GOOGLE_CLIENT_ID` | Servidor | Inicio de sesión con Google |
+| `GOOGLE_CLIENT_SECRET` | Servidor | Inicio de sesión con Google |
+| `BLOB_READ_WRITE_TOKEN` | Servidor | Vercel Blob (lo crea Vercel) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Ambos | Payment Element (`pk_test_…`) |
 | `STRIPE_SECRET_KEY` | Servidor | PaymentIntents y reembolsos (`sk_test_…`) |
 | `STRIPE_WEBHOOK_SECRET` | Servidor | Firma del webhook (`whsec_…`) |
 | `RESEND_API_KEY` | Servidor | Emails |
 | `MAIL_FROM` | Servidor | Remitente |
-| `CRON_SECRET` | Servidor | Protege el cron de la demo |
+| `CRON_SECRET` | Servidor y GitHub | Protege `/api/cron/*` |
 
 El repo incluye `.env.example` con estos nombres y sin valores.
