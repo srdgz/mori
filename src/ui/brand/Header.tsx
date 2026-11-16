@@ -1,7 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { navItems, routing } from "@/i18n/routing";
 import { cx } from "@/ui/primitives/cx";
@@ -16,6 +17,8 @@ export function Header({ address, instagram }: Props) {
   const nav = useTranslations("nav");
   const locale = useLocale();
   const pathname = usePathname();
+  const params = useParams();
+  const here = (pathname.includes("[") ? { pathname, params } : pathname) as ComponentProps<typeof Link>["href"];
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
@@ -154,7 +157,7 @@ export function Header({ address, instagram }: Props) {
               {routing.locales.map((l) => (
                 <Link
                   key={l}
-                  href={pathname}
+                  href={here}
                   locale={l}
                   hrefLang={l}
                   lang={l}

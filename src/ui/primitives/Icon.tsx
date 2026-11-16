@@ -27,6 +27,8 @@ const paths = {
   pause: <path d="M9 6v12M15 6v12" />,
   play: <path d="M8 5.5v13l10-6.5-10-6.5Z" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  minus: <path d="M5 12h14" />,
+  plus: <path d="M12 5v14M5 12h14" />,
   leaf: (
     <>
       <path d="M20 4C9 4 4 10 4 20c10 0 16-5 16-16Z" />

@@ -57,7 +57,10 @@ export default async function MenuPage({ params }: Props) {
                 </div>
                 <div className="menu-item__body">
                   <h3 className="font-display text-[clamp(1.6rem,3.4vw,3rem)] leading-none font-semibold tracking-tight text-forest">
-                    {drink.name}
+                    <Link href={{ pathname: "/menu/[slug]", params: { slug: drink.slug } }} className="menu-item__link">
+                      {drink.name}
+                      <Icon name="arrow" size={22} className="menu-item__arrow" />
+                    </Link>
                   </h3>
                   <p className="mt-2.5 mb-3.5 max-w-[48ch] text-ink-soft">{localize(drink.description, locale)}</p>
                   <ul className="flex flex-wrap gap-2">

@@ -1,15 +1,21 @@
 import type { MetadataRoute } from "next";
-import { routing, type AppPathname } from "@/i18n/routing";
-import { localizedUrl } from "@/ui/seo/metadata";
+import { container } from "@/composition/container";
+import { routing, staticPathnames } from "@/i18n/routing";
+import { alternateLanguages, localizedUrl, type Href } from "@/ui/seo/metadata";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const pathnames = Object.keys(routing.pathnames) as AppPathname[];
-  return pathnames.flatMap((href) =>
-    routing.locales.map((locale) => ({
-      url: localizedUrl(locale, href),
-      changeFrequency: "monthly" as const,
-      priority: href === "/" ? 1 : 0.7,
-      alternates: { languages: Object.fromEntries(routing.locales.map((l) => [l, localizedUrl(l, href)])) },
-    })),
-  );
+function entries(href: Href, priority: number, changeFrequency: "weekly" | "monthly"): MetadataRoute.Sitemap {
+  return routing.locales.map((locale) => ({
+    url: localizedUrl(locale, href),
+    changeFrequency,
+    priority,
+    alternates: { languages: alternateLanguages(href) },
+  }));
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const drinks = await container().getMenu();
+  return [
+    ...staticPathnames.flatMap((href) => entries(href, href === "/" ? 1 : 0.7, "monthly")),
+    ...drinks.flatMap((drink) => entries({ pathname: "/menu/[slug]", params: { slug: drink.slug } }, 0.8, "weekly")),
+  ];
 }
