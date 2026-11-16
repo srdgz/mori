@@ -1,4 +1,8 @@
+import { backWave, frontWave, WAVE_HEIGHT, WAVE_WIDTH } from "./wave-paths";
+
 type Props = { from: string; to: string; accent?: string };
+
+const viewBox = `0 0 ${WAVE_WIDTH} ${WAVE_HEIGHT}`;
 
 export function Wave({ from, to, accent = "var(--color-sage)" }: Props) {
   return (
@@ -6,18 +10,18 @@ export function Wave({ from, to, accent = "var(--color-sage)" }: Props) {
       <svg
         className="absolute bottom-0 left-0 h-full w-[200%] [animation:wave_26s_linear_infinite_reverse] opacity-60"
         style={{ color: accent }}
-        viewBox="0 0 2880 120"
+        viewBox={viewBox}
         preserveAspectRatio="none"
       >
-        <path fill="currentColor" d="M0 70C240 20 480 20 720 70s480 50 720 0 480-50 720 0 480 50 720 0V120H0Z" />
+        <path fill="currentColor" d={backWave} />
       </svg>
       <svg
         className="absolute bottom-0 left-0 h-full w-[200%] [animation:wave_17s_linear_infinite]"
         style={{ color: to }}
-        viewBox="0 0 2880 120"
+        viewBox={viewBox}
         preserveAspectRatio="none"
       >
-        <path fill="currentColor" d="M0 80C240 40 480 120 720 80s480-80 720 0 480 40 720 0 480-80 720 0V120H0Z" />
+        <path fill="currentColor" d={frontWave} />
       </svg>
     </div>
   );
