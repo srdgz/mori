@@ -4,7 +4,7 @@ import type { Mailer } from "@/core/application/ports/mailer";
 import { createAuth, type Auth } from "@/infrastructure/auth/better-auth";
 import { BetterAuthIdentity } from "@/infrastructure/auth/better-auth-identity";
 import { getDatabase } from "@/infrastructure/db/client";
-import { ConsoleMailer, OutboxMailer, ResendMailer } from "@/infrastructure/mail/mailers";
+import { ConsoleMailer, OutboxMailer, ResendMailer, SmtpMailer } from "@/infrastructure/mail/mailers";
 
 const LOCAL_SECRET = "mori-local-development-secret-not-for-production";
 
@@ -30,11 +30,25 @@ function secret(): string {
 
 let mailer: Mailer | undefined;
 
+function smtp() {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD } = process.env;
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) return null;
+  return {
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT ?? 465),
+    user: SMTP_USER,
+    password: SMTP_PASSWORD,
+    from: process.env.MAIL_FROM ?? `MŌRI <${SMTP_USER}>`,
+  };
+}
+
 export function getMailer(): Mailer {
   if (mailer) return mailer;
-  if (process.env.RESEND_API_KEY)
+  const smtpConfig = smtp();
+  if (process.env.MAIL_OUTBOX) mailer = new OutboxMailer(process.env.MAIL_OUTBOX);
+  else if (smtpConfig) mailer = new SmtpMailer(smtpConfig);
+  else if (process.env.RESEND_API_KEY)
     mailer = new ResendMailer(process.env.RESEND_API_KEY, process.env.MAIL_FROM ?? "MŌRI <onboarding@resend.dev>");
-  else if (process.env.MAIL_OUTBOX) mailer = new OutboxMailer(process.env.MAIL_OUTBOX);
   else mailer = new ConsoleMailer();
   return mailer;
 }

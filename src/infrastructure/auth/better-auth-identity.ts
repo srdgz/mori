@@ -42,6 +42,7 @@ export class BetterAuthIdentity implements Identity {
       name: row.name,
       email: row.email,
       emailVerified: row.emailVerified,
+      image: row.image,
       role: row.role as Role,
       isDemo: row.isDemo,
       locale: isLocale(row.locale) ? row.locale : "es",
@@ -51,7 +52,9 @@ export class BetterAuthIdentity implements Identity {
     };
   }
 
-  async signUp(input: SignUp, callbackPath: string): Promise<"pending_verification" | "rate_limited"> {
+  async signUp(input: SignUp): Promise<"created" | "already_exists" | "rate_limited"> {
+    const [existing] = await this.db.select({ id: users.id }).from(users).where(eq(users.email, input.email));
+    if (existing) return "already_exists";
     try {
       await this.auth.api.signUpEmail({
         body: {
@@ -60,15 +63,15 @@ export class BetterAuthIdentity implements Identity {
           password: input.password,
           locale: input.locale,
           marketingOptIn: input.marketingOptIn,
-          callbackURL: callbackPath,
         },
         headers: await this.headers(),
       });
     } catch (error) {
       if (statusOf(error) === 429) return "rate_limited";
-      if (codeOf(error) !== "USER_ALREADY_EXISTS" && codeOf(error) !== "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") throw error;
+      if (codeOf(error) === "USER_ALREADY_EXISTS" || codeOf(error) === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") return "already_exists";
+      throw error;
     }
-    return "pending_verification";
+    return "created";
   }
 
   async signIn(email: string, password: string, callbackPath: string): Promise<SignInOutcome> {
@@ -76,7 +79,6 @@ export class BetterAuthIdentity implements Identity {
       await this.auth.api.signInEmail({ body: { email, password, callbackURL: callbackPath }, headers: await this.headers() });
       return "signed_in";
     } catch (error) {
-      if (codeOf(error) === "EMAIL_NOT_VERIFIED") return "email_not_verified";
       if (statusOf(error) === 429) return "rate_limited";
       if (error instanceof APIError) return "invalid_credentials";
       throw error;
@@ -140,6 +142,11 @@ export class BetterAuthIdentity implements Identity {
         updatedAt: new Date(),
       })
       .where(eq(users.id, user.id));
+  }
+
+  async avatar(): Promise<{ name: string; image: string | null } | null> {
+    const session = await this.auth.api.getSession({ headers: await this.headers() });
+    return session ? { name: session.user.name, image: session.user.image ?? null } : null;
   }
 
   async deleteAccount(password: string | null): Promise<"deleted" | "invalid_password"> {

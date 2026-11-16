@@ -486,8 +486,11 @@
       "submit": "Entrar",
       "noAccount": "¿Primera vez?",
       "create": "Crea tu cuenta",
-      "verified": "Email confirmado. Ya puedes entrar.",
-      "googleFailed": "No hemos podido entrar con Google. Inténtalo de nuevo o usa tu email."
+      "googleFailed": "No hemos podido entrar con Google. Inténtalo de nuevo o usa tu email.",
+      "demoTitle": "¿Solo quieres echar un vistazo?",
+      "demo": "Entrar en modo demo",
+      "demoFailed": "No hemos podido entrar con la cuenta demo. Inténtalo en un momento.",
+      "demoLede": "Entra en una cuenta de demostración con dirección y favoritos de ejemplo."
     },
     "signUp": {
       "title": "Crea tu cuenta",
@@ -503,8 +506,10 @@
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
       "signIn": "Entra",
-      "doneTitle": "Revisa tu email",
-      "doneText": "Si {email} no tenía cuenta, te hemos enviado un enlace para confirmarla. Caduca en una hora."
+      "forgot": "Recuperar contraseña",
+      "doneTitle": "Cuenta creada",
+      "doneText": "Ya puedes iniciar sesión con tu email y tu contraseña.",
+      "doneCta": "Iniciar sesión"
     },
     "forgot": {
       "title": "Recupera tu contraseña",
@@ -540,7 +545,9 @@
       "seeMenu": "Ver la carta",
       "addressesTitle": "Direcciones",
       "addressesCount": "{count, plural, =0 {Sin direcciones guardadas} one {# dirección guardada} other {# direcciones guardadas}}",
-      "manage": "Gestionar"
+      "manage": "Gestionar",
+      "demoTitle": "Cuenta de demostración",
+      "demoText": "Es una cuenta compartida: puedes probar el perfil, las direcciones y los favoritos, pero no cambiar su contraseña ni eliminarla."
     },
     "profile": {
       "title": "Perfil",
@@ -622,7 +629,6 @@
       "mismatch": "No coincide.",
       "wrong": "No es correcta.",
       "invalid_credentials": "Email o contraseña incorrectos.",
-      "email_not_verified": "Aún no has confirmado tu email. Te hemos enviado otro enlace.",
       "rate_limited": "Demasiados intentos. Espera unos minutos y vuelve a probar.",
       "limit": "Has llegado al máximo de 10 direcciones.",
       "not_found": "No hemos encontrado esa dirección.",
@@ -655,7 +661,12 @@
         "word": {
           "mismatch": "Escribe la palabra exactamente como aparece, en mayúsculas."
         }
-      }
+      },
+      "already_exists": "Ya hay una cuenta con este email. Entra con tu contraseña o con Google, o recupera tu contraseña."
+    },
+    "password": {
+      "show": "Mostrar contraseña",
+      "hide": "Ocultar contraseña"
     }
   }
 }

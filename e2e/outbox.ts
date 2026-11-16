@@ -14,6 +14,10 @@ async function emails(): Promise<Email[]> {
     .map((line) => JSON.parse(line) as Email);
 }
 
+export async function sentTo(to: string): Promise<Email[]> {
+  return (await emails()).filter((e) => e.to === to);
+}
+
 export async function lastEmail(to: string, kind: string): Promise<Email> {
   let found: Email | undefined;
   await expect
@@ -37,7 +41,7 @@ export async function asNewClient(page: Page): Promise<void> {
   await page.setExtraHTTPHeaders({ "x-forwarded-for": `10.${octet()}.${octet()}.${octet()}` });
 }
 
-export async function signUpAndVerify(page: Page, email: string, password = "matcha-mood-2026", name = "Ana López"): Promise<void> {
+export async function signUpNew(page: Page, email: string, password = "matcha-mood-2026", name = "Ana López"): Promise<void> {
   await asNewClient(page);
   await page.goto("/cuenta/registro");
   await page.getByLabel("Nombre").fill(name);
@@ -45,8 +49,11 @@ export async function signUpAndVerify(page: Page, email: string, password = "mat
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByLabel(/acepto la política de privacidad/i).check();
   await page.getByRole("button", { name: "Crear cuenta" }).click();
-  await expect(page.getByRole("heading", { name: "Revisa tu email" })).toBeVisible();
-  const verification = await lastEmail(email, "verify_email");
-  await page.goto(verification.url!);
+  await expect(page.getByRole("heading", { name: "Cuenta creada" })).toBeVisible();
+  await page.getByRole("main").getByRole("link", { name: "Iniciar sesión" }).click();
+  await expect(page).toHaveURL(/\/cuenta\/entrar$/);
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/cuenta$/);
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useRef, type InputHTMLAttributes, type ReactNode } from "react";
+import { useActionState, useEffect, useRef, useState, type InputHTMLAttributes, type ReactNode } from "react";
 import { cx } from "@/ui/primitives/cx";
+import { Icon } from "@/ui/primitives/Icon";
 import { IDLE, type FormAction, type FormState } from "./form-state";
 
 type LooseTranslator = { (key: string, values?: Record<string, string | number>): string; has(key: string): boolean };
@@ -38,25 +39,48 @@ type FieldProps = {
   defaultValue?: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "name" | "defaultValue">;
 
-export function Field({ name, label, state, hint, optional, defaultValue = "", className, ...input }: FieldProps) {
+function PasswordToggle({ target, visible, onToggle }: { target: string; visible: boolean; onToggle: () => void }) {
+  const t = useTranslations("account.password");
+  return (
+    <button type="button" className="password-toggle" aria-controls={target} aria-pressed={visible} onClick={onToggle}>
+      <Icon name={visible ? "eyeOff" : "eye"} size={18} />
+      <span className="sr-only">{visible ? t("hide") : t("show")}</span>
+    </button>
+  );
+}
+
+export function Field({ name, label, state, hint, optional, defaultValue = "", className, type, ...input }: FieldProps) {
   const errorText = useErrorText();
+  const [visible, setVisible] = useState(false);
   const error = errorText(name, state.fields?.[name]);
   const hintId = hint ? `${name}-hint` : undefined;
+  const isPassword = type === "password";
+  const control = (
+    <input
+      key={state.at ?? 0}
+      id={name}
+      name={name}
+      type={isPassword && visible ? "text" : type}
+      defaultValue={state.values?.[name] ?? defaultValue}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={[hintId, `${name}-error`].filter(Boolean).join(" ")}
+      {...input}
+    />
+  );
   return (
     <div className={cx("field", className)}>
       <label htmlFor={name} className="field-label">
         {label}
         {optional && <span className="font-normal tracking-normal normal-case"> ({optional})</span>}
       </label>
-      <input
-        key={state.at ?? 0}
-        id={name}
-        name={name}
-        defaultValue={state.values?.[name] ?? defaultValue}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={[hintId, `${name}-error`].filter(Boolean).join(" ")}
-        {...input}
-      />
+      {isPassword ? (
+        <div className="password-field">
+          {control}
+          <PasswordToggle target={name} visible={visible} onToggle={() => setVisible((v) => !v)} />
+        </div>
+      ) : (
+        control
+      )}
       {hint && (
         <p id={hintId} className="text-xs text-ink-soft">
           {hint}

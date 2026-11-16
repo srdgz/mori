@@ -55,6 +55,8 @@ function buildAccount() {
   };
 }
 
+export { demoCustomer } from "@/infrastructure/seed/demo";
+
 export type Container = ReturnType<typeof build>;
 
 export const container = cache(build);

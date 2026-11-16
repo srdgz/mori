@@ -97,9 +97,9 @@ Roles `customer`, `staff` y `admin`.
 - **Cupones (admin):** código, porcentaje o importe, mínimo, caducidad y usos.
 - **Reembolsos (admin).**
 
-### D-09 · Cuenta de cliente — Aprobada
+### D-09 · Cuenta de cliente — Aprobada (revisada el 16/11/2026)
 - **Acceso:**
-  - Registro con email y contraseña, con confirmación por email.
+  - Registro con email y contraseña: la cuenta se crea al momento, la pantalla confirma que se ha creado y ofrece iniciar sesión. No se envía ningún email de confirmación. Así quien revise el portfolio no depende de recibir un email, igual que un invitado puede comprar dando cualquier email. Si el email ya tiene cuenta, el registro lo dice en pantalla y ofrece entrar, recuperar la contraseña o usar Google.
   - Inicio de sesión con email y contraseña o con **Google**.
   - Recuperar contraseña.
 - **Perfil:** nombre, teléfono, idioma preferido y consentimiento de comunicaciones.
@@ -119,11 +119,12 @@ Es una pieza muy visual para el portfolio (tarjeta con sellos animados) y típic
 - Cupones de demostración: `BIENVENIDA10` (10 % en el primer pedido) y `MATCHAMIGO` (2 € desde 15 €).
 
 ### D-12 · Emails transaccionales — Aprobada (revisada el 16/11/2026)
-- **Mensajes:** confirmación de pedido, pedido listo para recoger, pedido en reparto y reembolso. Se escriben como plantillas HTML propias en la estética de MŌRI, sin dependencias extra, y se envían con **Resend**. Sin clave de Resend, en local salen por consola y en los E2E se guardan en un archivo.
-- **Emails de autenticación** (confirmar cuenta y recuperar contraseña): Better Auth los pide a través del mismo puerto `Mailer`, así que comparten diseño, idiomas y proveedor con el resto.
+- **Mensajes:** confirmación de pedido, pedido listo para recoger, pedido en reparto y reembolso. Se escriben como plantillas HTML propias en la estética de MŌRI, sin dependencias extra, y se envían por **SMTP con una cuenta de Gmail** (contraseña de aplicación), que llega a cualquier dirección sin necesidad de dominio propio. Resend queda como alternativa si algún día hay dominio. En los E2E se guardan en un archivo y, sin configuración, en local salen por consola.
+- **Emails de autenticación** (recuperar contraseña y aviso de contraseña cambiada; no hay email de confirmación de cuenta): Better Auth los pide a través del mismo puerto `Mailer`, así que comparten diseño, idiomas y proveedor con el resto.
 - **Limitación sin dominio propio:** Resend solo entrega al email de la cuenta, lo que basta para la demo. Con un dominio verificado llegan a cualquiera.
 
 ### D-13 · Modo demo para quien revise el portfolio — Aprobada
+- **Cliente de demostración (desde la Fase 3):** la pantalla de entrar ofrece el botón **«Entrar en modo demo»**, que entra con un clic en la cuenta `cliente@demo.mori` sin escribir nada. Tiene dirección y favoritos de ejemplo y puede usar todo el área de cliente, pero no cambiar su contraseña ni eliminarse. Se crea con el seed.
 - **Panel de tienda:** la portada y el README ofrecen **«Ver el panel de tienda (demo)»**. Entra con una cuenta `staff` de demostración que ve pedidos reales de prueba, pero no puede cambiar ajustes ni productos. Las acciones de admin se muestran deshabilitadas con una explicación.
 - **Pedidos de ejemplo:** un trabajo programado genera algunos cada día para que el tablero nunca esté vacío.
 - **Pagos:** cualquiera puede pagar con la tarjeta de prueba `4242 4242 4242 4242`. Un aviso fijo en el checkout lo explica.

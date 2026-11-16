@@ -1,12 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { asNewClient, lastEmail, signUpAndVerify, uniqueEmail } from "./outbox";
+import { asNewClient, lastEmail, sentTo, signUpNew, uniqueEmail } from "./outbox";
 
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/cuenta/entrar");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Contraseña").fill(password);
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
 }
 
 async function signOut(page: Page) {
@@ -44,7 +44,7 @@ test("sign-up explains what is missing", async ({ page }) => {
 
 test("a new customer signs up, confirms the email and manages the account", async ({ page }) => {
   const email = uniqueEmail("ana");
-  await signUpAndVerify(page, email);
+  await signUpNew(page, email);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/, Ana$/);
 
   await page.goto("/cuenta/perfil");
@@ -81,7 +81,7 @@ test("a new customer signs up, confirms the email and manages the account", asyn
 
 test("sign-in rejects wrong details and returns to the requested page", async ({ page }) => {
   const email = uniqueEmail("eva");
-  await signUpAndVerify(page, email, "matcha-mood-2026", "Eva");
+  await signUpNew(page, email, "matcha-mood-2026", "Eva");
   await signOut(page);
 
   await signIn(page, email, "wrong-password");
@@ -89,28 +89,48 @@ test("sign-in rejects wrong details and returns to the requested page", async ({
 
   await page.goto("/cuenta/direcciones");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Contraseña").fill("matcha-mood-2026");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByLabel("Contraseña", { exact: true }).fill("matcha-mood-2026");
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page).toHaveURL(/\/cuenta\/direcciones$/);
 });
 
-test("an unconfirmed account is asked to confirm the email", async ({ page }) => {
+test("sign-up confirms the account and the customer signs in, with no email to confirm", async ({ page }) => {
   const email = uniqueEmail("leo");
+  await signUpNew(page, email, "matcha-mood-2026", "Leo");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/, Leo$/);
+  await expect(page.getByText(/confirma tu email/i)).toHaveCount(0);
+  expect(await sentTo(email)).toEqual([]);
+});
+
+test("sign-up reports an email that already has an account", async ({ page }) => {
+  const email = uniqueEmail("ivo");
+  await signUpNew(page, email, "matcha-mood-2026", "Ivo");
+  await signOut(page);
   await page.goto("/cuenta/registro");
-  await page.getByLabel("Nombre").fill("Leo");
+  await page.getByLabel("Nombre").fill("Ivo");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill("matcha-mood-2026");
+  await page.getByLabel("Contraseña", { exact: true }).fill("another-matcha-26");
   await page.getByLabel(/acepto la política de privacidad/i).check();
   await page.getByRole("button", { name: "Crear cuenta" }).click();
-  await expect(page.getByRole("heading", { name: "Revisa tu email" })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "Ya hay una cuenta con este email" })).toBeVisible();
+  await page.getByRole("main").getByRole("link", { name: "Recuperar contraseña" }).click();
+  await expect(page).toHaveURL(/\/cuenta\/recuperar$/);
+});
 
-  await signIn(page, email, "matcha-mood-2026");
-  await expect(page.getByRole("alert").filter({ hasText: /aún no has confirmado tu email/i })).toBeVisible();
+test("the demo account opens in one click and keeps its credentials", async ({ page }) => {
+  await page.goto("/cuenta/entrar");
+  await page.getByRole("button", { name: "Entrar en modo demo" }).click();
+  await expect(page).toHaveURL(/\/cuenta$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/, Alex$/);
+  await expect(page.getByRole("region", { name: "Cuenta de demostración" })).toBeVisible();
+  await page.goto("/cuenta/seguridad");
+  await expect(page.getByLabel("Contraseña actual")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Eliminar mi cuenta" })).toHaveCount(0);
 });
 
 test("a forgotten password is reset from the emailed link", async ({ page }) => {
   const email = uniqueEmail("mia");
-  await signUpAndVerify(page, email, "matcha-mood-2026", "Mía");
+  await signUpNew(page, email, "matcha-mood-2026", "Mía");
   await signOut(page);
 
   await page.goto("/cuenta/recuperar");
@@ -132,7 +152,7 @@ test("a forgotten password is reset from the emailed link", async ({ page }) => 
 
 test("a customer deletes the account", async ({ page }) => {
   const email = uniqueEmail("noa");
-  await signUpAndVerify(page, email, "matcha-mood-2026", "Noa");
+  await signUpNew(page, email, "matcha-mood-2026", "Noa");
 
   await page.goto("/cuenta/seguridad");
   await page.getByLabel("Escribe ELIMINAR para confirmar").fill("BORRAR");
@@ -163,9 +183,47 @@ for (const path of ["/cuenta/entrar", "/cuenta/registro", "/cuenta/recuperar", "
 }
 
 test("account pages have no WCAG 2.2 AA violations", async ({ page }) => {
-  await signUpAndVerify(page, uniqueEmail("axe"), "matcha-mood-2026", "Axe");
+  await signUpNew(page, uniqueEmail("axe"), "matcha-mood-2026", "Axe");
   for (const path of ["/cuenta", "/cuenta/perfil", "/cuenta/direcciones", "/cuenta/favoritos", "/cuenta/seguridad"]) {
     await page.goto(path);
     await expectNoAxeViolations(page);
+  }
+});
+
+test("passwords can be shown and hidden", async ({ page }) => {
+  await page.goto("/cuenta/entrar");
+  const password = page.getByLabel("Contraseña", { exact: true });
+  await password.fill("matcha-mood-2026");
+  await expect(password).toHaveAttribute("type", "password");
+  await page.getByRole("button", { name: "Mostrar contraseña" }).click();
+  await expect(password).toHaveAttribute("type", "text");
+  await expect(page.getByRole("button", { name: "Ocultar contraseña" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Ocultar contraseña" }).click();
+  await expect(password).toHaveAttribute("type", "password");
+  await expect(password).toHaveValue("matcha-mood-2026");
+});
+
+test("the header shows the customer's initials once signed in", async ({ page }) => {
+  const account = page.getByRole("banner").getByRole("link", { name: /tu cuenta/i });
+  await page.goto("/");
+  await expect(account).toHaveAccessibleName("Tu cuenta");
+  await signUpNew(page, uniqueEmail("sara"), "matcha-mood-2026", "Sara Reyes Ruiz");
+  await page.goto("/");
+  await expect(account).toHaveAccessibleName("Tu cuenta: Sara Reyes Ruiz");
+  await expect(account).toContainText("SR");
+  await page.goto("/cuenta");
+  await expect(page.getByRole("complementary")).toContainText("SR");
+});
+
+test("the auth API only exposes what the browser needs", async ({ request }) => {
+  expect((await request.get("/api/auth/get-session")).status()).toBe(200);
+  for (const path of [
+    "/api/auth/sign-up/email",
+    "/api/auth/change-password",
+    "/api/auth/delete-user",
+    "/api/auth/update-user",
+    "/api/auth/sign-in/email",
+  ]) {
+    expect((await request.post(path, { data: {} })).status(), path).toBe(404);
   }
 });

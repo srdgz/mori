@@ -17,7 +17,7 @@ export function makeUpdateProfile(identity: Identity) {
 
 export function makeChangePassword(identity: Identity, mailer: Mailer) {
   return async (current: string, next: string, confirmation: string): Promise<FormResult<"current" | "password" | "confirmation">> => {
-    const user = await requireUser(identity, "account.manage");
+    const user = await requireUser(identity, "account.credentials");
     const result = validateNewPassword(next, confirmation);
     if (!result.ok) return { status: "invalid", errors: result.errors };
     const outcome = await identity.changePassword(current, result.value);
@@ -29,7 +29,7 @@ export function makeChangePassword(identity: Identity, mailer: Mailer) {
 
 export function makeDeleteAccount(identity: Identity) {
   return async (confirmation: string, password: string): Promise<FormResult<"confirmation" | "password">> => {
-    const user = await requireUser(identity, "account.manage");
+    const user = await requireUser(identity, "account.credentials");
     const words: readonly string[] = Object.values(DELETE_CONFIRMATION);
     if (!words.includes(confirmation.trim())) return { status: "invalid", errors: { confirmation: "mismatch" } };
     const outcome = await identity.deleteAccount(user.hasPassword ? password : null);

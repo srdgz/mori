@@ -258,7 +258,8 @@ Se usa cuando no hay `NEON_REALTIME_URL` (CI, PGlite en local, una vista previa 
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Ambos | Payment Element (`pk_test_…`) |
 | `STRIPE_SECRET_KEY` | Servidor | PaymentIntents y reembolsos (`sk_test_…`) |
 | `STRIPE_WEBHOOK_SECRET` | Servidor | Firma del webhook (`whsec_…`) |
-| `RESEND_API_KEY` | Servidor | Emails |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | Servidor | Envío por SMTP (Gmail con contraseña de aplicación). Tiene prioridad sobre Resend |
+| `RESEND_API_KEY` | Servidor | Alternativa a SMTP, útil con dominio propio |
 | `MAIL_FROM` | Servidor | Remitente |
 | `CRON_SECRET` | Servidor y GitHub | Protege `/api/cron/*` |
 

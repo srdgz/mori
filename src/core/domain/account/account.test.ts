@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isValidEmail, passwordStrength, validateNewPassword, validateProfile, validateSignUp } from "./account";
+import { initials, isValidEmail, passwordStrength, validateNewPassword, validateProfile, validateSignUp } from "./account";
 
 const signUp = {
   name: "  Ana   López ",
@@ -87,5 +87,19 @@ describe("isValidEmail", () => {
   it("checks the shape of an email", () => {
     expect(isValidEmail(" ana@example.com ")).toBe(true);
     expect(isValidEmail("ana@example")).toBe(false);
+  });
+});
+
+describe("initials", () => {
+  it.each([
+    ["Sandra Reyes", "SR"],
+    ["  ana  maría   lópez ", "AL"],
+    ["Ana", "A"],
+    ["Ñandú Ébano", "ÑÉ"],
+    ["Ana (MŌRI)", "AM"],
+    ["", ""],
+    ["123", ""],
+  ])("turns %j into %j", (name, expected) => {
+    expect(initials(name)).toBe(expected);
   });
 });

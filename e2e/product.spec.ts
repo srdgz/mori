@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+});
+
 test("each drink on the menu opens its own page", async ({ page }) => {
   await page.goto("/carta");
   await page.getByRole("link", { name: "Dirty Matcha" }).click();

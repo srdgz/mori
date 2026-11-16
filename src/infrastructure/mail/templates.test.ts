@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 import { renderEmail } from "./templates";
 
 describe("renderEmail", () => {
-  it("renders the verification email in the user's language with the link", () => {
+  it("renders the reset email in the user's language with the link", () => {
     const email = renderEmail({
-      kind: "verify_email",
+      kind: "reset_password",
       to: "ana@example.com",
       name: "Ana",
       locale: "es",
-      url: "https://x.test/v?token=1&a=2",
+      url: "https://x.test/r?token=1&a=2",
     });
-    expect(email.subject).toBe("Confirma tu email · MŌRI");
-    expect(email.html).toContain('href="https://x.test/v?token=1&amp;a=2"');
-    expect(email.text).toContain("Confirmar email: https://x.test/v?token=1&a=2");
+    expect(email.subject).toBe("Cambia tu contraseña · MŌRI");
+    expect(email.html).toContain('href="https://x.test/r?token=1&amp;a=2"');
+    expect(email.text).toContain("Elegir contraseña nueva: https://x.test/r?token=1&a=2");
   });
 
   it("escapes the name", () => {

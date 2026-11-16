@@ -20,16 +20,12 @@ export async function requireUser(identity: Identity, permission: Permission): P
 }
 
 export function makeSignUp(identity: Identity, limiter: RateLimiter) {
-  return async (
-    input: SignUpInput,
-    callbackPath: string,
-    clientKey: string,
-  ): Promise<FormResult<"name" | "email" | "password" | "privacy">> => {
+  return async (input: SignUpInput, clientKey: string): Promise<FormResult<"name" | "email" | "password" | "privacy">> => {
     const result = validateSignUp(input);
     if (!result.ok) return { status: "invalid", errors: result.errors };
     if (!(await limiter.hit(`sign-up:${clientKey}`, RATE_RULES.signUp))) return { status: "failed", reason: "rate_limited" };
-    const outcome = await identity.signUp(result.value, callbackPath);
-    return outcome === "pending_verification" ? { status: "ok" } : { status: "failed", reason: outcome };
+    const outcome = await identity.signUp(result.value);
+    return outcome === "created" ? { status: "ok" } : { status: "failed", reason: outcome };
   };
 }
 

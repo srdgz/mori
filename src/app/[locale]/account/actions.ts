@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect as nextRedirect } from "next/navigation";
 import { z } from "zod";
-import { account } from "@/composition/container";
+import { account, demoCustomer } from "@/composition/container";
 import type { FormResult } from "@/core/application/account/session";
 import type { AddressId } from "@/core/domain/account/address";
 import { DomainError } from "@/core/domain/shared/domain-error";
@@ -79,10 +79,16 @@ export async function signUpAction(_state: FormState, formData: FormData): Promi
   if (!parsed.success) return { status: "error", code: "generic", values: kept, at: Date.now() };
   const result = await account().signUp(
     { ...parsed.data, locale, privacy: parsed.data.privacy === "on", marketing: parsed.data.marketing === "on" },
-    getPathname({ locale, href: "/account" }),
     await clientKey(),
   );
   return { ...fromResult(result, kept), values: kept };
+}
+
+export async function demoSignInAction(formData: FormData): Promise<void> {
+  const locale = localeOf(formData);
+  const next = getPathname({ locale, href: "/account" });
+  const outcome = await account().signIn(demoCustomer.email, demoCustomer.password, next, await clientKey());
+  nextRedirect(outcome === "signed_in" ? next : `${getPathname({ locale, href: "/account/sign-in" })}?error=demo`);
 }
 
 export async function forgotPasswordAction(_state: FormState, formData: FormData): Promise<FormState> {

@@ -6,7 +6,7 @@ export type Role = "customer" | "staff" | "admin";
 
 export type Actor =
   | Readonly<{ kind: "guest" }>
-  | Readonly<{ kind: "customer"; id: UserId }>
+  | Readonly<{ kind: "customer"; id: UserId; demo: boolean }>
   | Readonly<{ kind: "staff"; id: UserId; demo: boolean }>
   | Readonly<{ kind: "admin"; id: UserId }>;
 
@@ -16,11 +16,12 @@ export function actorFor(user: { id: string; role: Role; isDemo: boolean }): Act
   const id = user.id as UserId;
   if (user.role === "admin") return { kind: "admin", id };
   if (user.role === "staff") return { kind: "staff", id, demo: user.isDemo };
-  return { kind: "customer", id };
+  return { kind: "customer", id, demo: user.isDemo };
 }
 
 export type Permission =
   | "account.manage"
+  | "account.credentials"
   | "loyalty.redeem"
   | "orders.board"
   | "orders.advance"
@@ -31,19 +32,24 @@ export type Permission =
   | "customers.view"
   | "dashboard.view";
 
-const staffPermissions: readonly Permission[] = ["account.manage", "orders.board", "orders.advance"];
+const ownAccount: readonly Permission[] = ["account.manage", "account.credentials"];
+const staffPermissions: readonly Permission[] = [...ownAccount, "orders.board", "orders.advance"];
 
 const grants: Record<Actor["kind"], readonly Permission[]> = {
   guest: [],
-  customer: ["account.manage", "loyalty.redeem"],
+  customer: [...ownAccount, "loyalty.redeem"],
   staff: staffPermissions,
   admin: [...staffPermissions, "orders.refund", "catalog.manage", "settings.manage", "coupons.manage", "customers.view", "dashboard.view"],
 };
 
-const sharedDemoAccountLocks: readonly Permission[] = ["account.manage"];
+const sharedDemoAccountLocks: readonly Permission[] = ["account.credentials"];
+
+export function isDemo(actor: Actor): boolean {
+  return (actor.kind === "customer" || actor.kind === "staff") && actor.demo;
+}
 
 export function can(actor: Actor, permission: Permission): boolean {
-  if (actor.kind === "staff" && actor.demo && sharedDemoAccountLocks.includes(permission)) return false;
+  if (isDemo(actor) && sharedDemoAccountLocks.includes(permission)) return false;
   return grants[actor.kind].includes(permission);
 }
 

@@ -7,6 +7,7 @@ export type SessionUser = Readonly<{
   name: string;
   email: string;
   emailVerified: boolean;
+  image: string | null;
   role: Role;
   isDemo: boolean;
   locale: Locale;
@@ -15,11 +16,11 @@ export type SessionUser = Readonly<{
   hasPassword: boolean;
 }>;
 
-export type SignInOutcome = "signed_in" | "invalid_credentials" | "email_not_verified" | "rate_limited";
+export type SignInOutcome = "signed_in" | "invalid_credentials" | "rate_limited";
 
 export interface Identity {
   currentUser(): Promise<SessionUser | null>;
-  signUp(input: SignUp, callbackPath: string): Promise<"pending_verification" | "rate_limited">;
+  signUp(input: SignUp): Promise<"created" | "already_exists" | "rate_limited">;
   signIn(email: string, password: string, callbackPath: string): Promise<SignInOutcome>;
   socialSignInUrl(provider: "google", callbackPath: string): Promise<string>;
   socialProviders(): readonly "google"[];

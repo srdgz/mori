@@ -44,27 +44,31 @@ describe("session", () => {
 
   it("validates sign-up before creating the account", async () => {
     const signUp = makeSignUp(identity, limiter);
-    expect(
-      await signUp({ name: "", email: "x", password: "1", locale: "es", privacy: false, marketing: false }, "/cuenta", "ip"),
-    ).toMatchObject({
+    expect(await signUp({ name: "", email: "x", password: "1", locale: "es", privacy: false, marketing: false }, "ip")).toMatchObject({
       status: "invalid",
     });
     expect(identity.users.size).toBe(0);
     expect(
       await signUp(
         { name: "Ana", email: "Ana@Example.com", password: "matcha-mood-2026", locale: "es", privacy: true, marketing: false },
-        "/cuenta",
         "ip",
       ),
     ).toEqual({ status: "ok" });
     expect(identity.users.get("ana@example.com")?.emailVerified).toBe(false);
   });
 
-  it("answers the same for a new and an existing email", async () => {
+  it("creates the account without signing the customer in", async () => {
+    const input = { name: "Ana", email: "ana@example.com", password: "matcha-mood-2026", locale: "es", privacy: true, marketing: false };
+    expect(await makeSignUp(identity, limiter)(input, "ip")).toEqual({ status: "ok" });
+    expect(await identity.currentUser()).toBeNull();
+    expect(await makeSignIn(identity, limiter)("ana@example.com", "matcha-mood-2026", "/cuenta", "ip")).toBe("signed_in");
+  });
+
+  it("tells a visitor when the email already has an account", async () => {
     identity.addUser({ email: "ana@example.com" });
     const signUp = makeSignUp(identity, limiter);
     const input = { name: "Ana", email: "ana@example.com", password: "matcha-mood-2026", locale: "es", privacy: true, marketing: false };
-    expect(await signUp(input, "/cuenta", "ip")).toEqual({ status: "ok" });
+    expect(await signUp(input, "ip")).toEqual({ status: "failed", reason: "already_exists" });
   });
 
   it("rejects malformed credentials without asking the provider", async () => {
@@ -89,8 +93,8 @@ describe("session", () => {
   it("rate limits sign-ups and reset requests", async () => {
     const signUp = makeSignUp(identity, limiter);
     const input = { name: "Ana", email: "ana@example.com", password: "matcha-mood-2026", locale: "es", privacy: true, marketing: false };
-    for (let i = 0; i < 5; i++) await signUp(input, "/cuenta", "ip");
-    expect(await signUp(input, "/cuenta", "ip")).toEqual({ status: "failed", reason: "rate_limited" });
+    for (let i = 0; i < 5; i++) await signUp(input, "ip");
+    expect(await signUp(input, "ip")).toEqual({ status: "failed", reason: "rate_limited" });
     const request = makeRequestPasswordReset(identity, limiter);
     for (let i = 0; i < 3; i++) await request("ana@example.com", "/x", "ip");
     expect(await request("ana@example.com", "/x", "ip")).toEqual({ status: "failed", reason: "rate_limited" });

@@ -105,7 +105,10 @@ export function SignUpForm({ action }: { action: FormAction }) {
   if (state.status === "ok") {
     return (
       <Done title={t("doneTitle")}>
-        <p className="mt-3 text-ink-soft">{t("doneText", { email: state.values?.email ?? "" })}</p>
+        <p className="mt-3 text-ink-soft">{t("doneText")}</p>
+        <Link href="/account/sign-in" className="btn mt-6">
+          {t("doneCta")}
+        </Link>
       </Done>
     );
   }
@@ -135,6 +138,16 @@ export function SignUpForm({ action }: { action: FormAction }) {
           <Check name="marketing" label={t("marketing")} state={state} />
         </div>
         <FormMessage state={state} />
+        {state.code === "already_exists" && (
+          <p className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            <Link href="/account/sign-in" className="link-u text-forest">
+              {t("signIn")}
+            </Link>
+            <Link href="/account/forgot-password" className="link-u text-forest">
+              {t("forgot")}
+            </Link>
+          </p>
+        )}
         <Submit pending={pending} className="w-full">
           {t("submit")}
         </Submit>

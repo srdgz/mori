@@ -82,3 +82,14 @@ export function validateNewPassword(password: string, confirmation: string): Val
 export function isValidEmail(email: string): boolean {
   return EMAIL.test(email.trim());
 }
+
+export function initials(name: string): string {
+  const words = clean(name)
+    .split(" ")
+    .filter((w) => /\p{L}/u.test(w));
+  const first = words[0];
+  if (!first) return "";
+  const last = words.length > 1 ? words[words.length - 1] : undefined;
+  const letter = (word: string) => [...word.normalize("NFC")].find((c) => /\p{L}/u.test(c))!;
+  return (letter(first) + (last ? letter(last) : "")).toLocaleUpperCase("es");
+}

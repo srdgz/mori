@@ -49,20 +49,13 @@ export function createAuth({ db, mailer, secret, baseURL, trustedOrigins, google
     },
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: true,
+      requireEmailVerification: false,
+      autoSignIn: false,
       minPasswordLength: 8,
       maxPasswordLength: 128,
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: async ({ user, url }) => {
         await mailer.send({ kind: "reset_password", to: user.email, name: user.name, locale: localeOf(user), url });
-      },
-    },
-    emailVerification: {
-      sendOnSignUp: true,
-      sendOnSignIn: true,
-      autoSignInAfterVerification: true,
-      sendVerificationEmail: async ({ user, url }) => {
-        await mailer.send({ kind: "verify_email", to: user.email, name: user.name, locale: localeOf(user), url });
       },
     },
     socialProviders: google ? { google: { clientId: google.clientId, clientSecret: google.clientSecret, prompt: "select_account" } } : {},

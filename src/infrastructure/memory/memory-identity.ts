@@ -18,6 +18,7 @@ export class MemoryIdentity implements Identity {
       id: `user-${this.counter}` as UserId,
       name: "Ana",
       emailVerified: true,
+      image: null,
       role,
       isDemo: false,
       locale: "es",
@@ -43,6 +44,7 @@ export class MemoryIdentity implements Identity {
       name: user.name,
       email: user.email,
       emailVerified: user.emailVerified,
+      image: user.image,
       role: user.role,
       isDemo: user.isDemo,
       locale: user.locale,
@@ -52,8 +54,9 @@ export class MemoryIdentity implements Identity {
     };
   }
 
-  async signUp(input: SignUp): Promise<"pending_verification"> {
-    if (!this.users.has(input.email)) {
+  async signUp(input: SignUp): Promise<"created" | "already_exists"> {
+    if (this.users.has(input.email)) return "already_exists";
+    {
       this.addUser({
         email: input.email,
         name: input.name,
@@ -63,13 +66,12 @@ export class MemoryIdentity implements Identity {
         emailVerified: false,
       });
     }
-    return "pending_verification";
+    return "created";
   }
 
   async signIn(email: string, password: string): Promise<SignInOutcome> {
     const user = this.users.get(email);
     if (!user || user.password !== password) return "invalid_credentials";
-    if (!user.emailVerified) return "email_not_verified";
     this.current = email;
     return "signed_in";
   }

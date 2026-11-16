@@ -5,22 +5,6 @@ export type RenderedEmail = { subject: string; html: string; text: string };
 type Copy = { subject: string; heading: string; body: string; cta?: string; footer: string };
 
 const copy: Record<TransactionalEmail["kind"], Record<"es" | "en", Copy>> = {
-  verify_email: {
-    es: {
-      subject: "Confirma tu email · MŌRI",
-      heading: "Ya casi está, {name}",
-      body: "Confirma tu email para activar tu cuenta de MŌRI. El enlace caduca en una hora.",
-      cta: "Confirmar email",
-      footer: "Si no has creado una cuenta en MŌRI, ignora este mensaje.",
-    },
-    en: {
-      subject: "Confirm your email · MŌRI",
-      heading: "Almost there, {name}",
-      body: "Confirm your email to activate your MŌRI account. The link expires in one hour.",
-      cta: "Confirm email",
-      footer: "If you didn’t create a MŌRI account, you can ignore this email.",
-    },
-  },
   reset_password: {
     es: {
       subject: "Cambia tu contraseña · MŌRI",

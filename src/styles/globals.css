@@ -179,7 +179,7 @@
     height: 1em;
     transition: transform 0.45s var(--ease-out-expo);
   }
-  .btn:hover svg {
+  .btn:hover svg[data-icon="arrow"] {
     transform: translateX(3px) rotate(-45deg);
   }
   .btn--matcha {
@@ -1360,4 +1360,59 @@ a.account-card:hover {
 .menu-open .account-link {
   color: var(--color-cream);
   box-shadow: inset 0 0 0 1px var(--color-line-light);
+}
+
+.password-field {
+  position: relative;
+}
+.password-field input {
+  padding-right: 52px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--color-forest);
+}
+.password-toggle:hover {
+  background: var(--color-cream);
+}
+.password-toggle:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 0;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-forest);
+  color: var(--color-cream);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.menu-open .account-link .avatar {
+  background: var(--color-matcha);
+  color: var(--color-forest);
+}
+.account-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.account-card--notice {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--color-matcha);
 }

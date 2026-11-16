@@ -42,6 +42,15 @@ export default async function AccountOverviewPage({ params }: Props) {
         <p className="lede mt-4">{t("lede")}</p>
       </header>
 
+      {user?.isDemo && (
+        <section className="account-card account-card--notice" aria-labelledby="demo-h">
+          <h2 id="demo-h" className="font-semibold text-forest">
+            {t("demoTitle")}
+          </h2>
+          <p className="mt-2 max-w-[60ch] text-ink-soft">{t("demoText")}</p>
+        </section>
+      )}
+
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="account-card bg-matcha" aria-labelledby="orders-h">
           <h2 id="orders-h" className="font-semibold text-forest">

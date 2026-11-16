@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ComponentProps } from "r
 import { Link, usePathname } from "@/i18n/navigation";
 import { navItems, routing } from "@/i18n/routing";
 import { cx } from "@/ui/primitives/cx";
-import { Icon } from "@/ui/primitives/Icon";
+import { AccountLink } from "@/ui/account/AccountLink";
 import { Mark, Wordmark } from "./Mark";
 
 const HIDE_THRESHOLD = 64;
@@ -170,10 +170,7 @@ export function Header({ address, instagram }: Props) {
                 </Link>
               ))}
             </div>
-            <Link href="/account" className="account-link relative z-10 grid size-11 place-items-center rounded-full">
-              <Icon name="user" size={20} />
-              <span className="sr-only">{t("account")}</span>
-            </Link>
+            <AccountLink label={t("account")} />
             <button
               ref={burgerRef}
               type="button"

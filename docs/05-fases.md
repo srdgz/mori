@@ -37,7 +37,7 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - Confirmación de email y recuperación de contraseña.
   - `proxy.ts` con la redirección temprana y layouts protegidos.
 - **Área de cliente:** perfil, direcciones, favoritos, seguridad y eliminar cuenta.
-- **Emails de autenticación** con la marca, a través del `Mailer` de Resend.
+- **Emails de cuenta** con la marca (recuperar contraseña y aviso de cambio), a través del `Mailer` de Resend. El registro no pide confirmar el email.
 - **Criterio de hecho:**
   - E2E de registro, inicio de sesión, edición de perfil y direcciones.
   - Un usuario no accede a datos de otro: tests de casos de uso por rol y E2E que lo intenta cambiando la URL.

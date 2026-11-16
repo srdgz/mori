@@ -486,8 +486,11 @@
       "submit": "Sign in",
       "noAccount": "First time here?",
       "create": "Create your account",
-      "verified": "Email confirmed. You can sign in now.",
-      "googleFailed": "We couldn’t sign you in with Google. Try again or use your email."
+      "googleFailed": "We couldn’t sign you in with Google. Try again or use your email.",
+      "demoTitle": "Just having a look?",
+      "demo": "Try the demo",
+      "demoFailed": "We couldn’t sign in with the demo account. Try again in a moment.",
+      "demoLede": "Step into a demo account with a sample address and favourites."
     },
     "signUp": {
       "title": "Create your account",
@@ -503,8 +506,10 @@
       "submit": "Create account",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
-      "doneTitle": "Check your email",
-      "doneText": "If {email} didn’t have an account, we’ve sent a link to confirm it. It expires in one hour."
+      "forgot": "Reset password",
+      "doneTitle": "Account created",
+      "doneText": "You can now sign in with your email and password.",
+      "doneCta": "Sign in"
     },
     "forgot": {
       "title": "Reset your password",
@@ -540,7 +545,9 @@
       "seeMenu": "See the menu",
       "addressesTitle": "Addresses",
       "addressesCount": "{count, plural, =0 {No saved addresses} one {# saved address} other {# saved addresses}}",
-      "manage": "Manage"
+      "manage": "Manage",
+      "demoTitle": "Demo account",
+      "demoText": "It’s a shared account: try the profile, addresses and favourites, but its password can’t be changed and it can’t be deleted."
     },
     "profile": {
       "title": "Profile",
@@ -622,7 +629,6 @@
       "mismatch": "It doesn’t match.",
       "wrong": "That’s not right.",
       "invalid_credentials": "Wrong email or password.",
-      "email_not_verified": "You haven’t confirmed your email yet. We’ve sent you another link.",
       "rate_limited": "Too many attempts. Wait a few minutes and try again.",
       "limit": "You’ve reached the limit of 10 addresses.",
       "not_found": "We couldn’t find that address.",
@@ -655,7 +661,12 @@
         "word": {
           "mismatch": "Type the word exactly as shown, in capitals."
         }
-      }
+      },
+      "already_exists": "There’s already an account with this email. Sign in with your password or Google, or reset your password."
+    },
+    "password": {
+      "show": "Show password",
+      "hide": "Hide password"
     }
   }
 }

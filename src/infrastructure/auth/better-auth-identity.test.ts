@@ -14,8 +14,8 @@ const mailer = new MemoryMailer();
 
 const ana = { name: "Ana López", email: "ana@example.com", password: "matcha-mood-2026", locale: "en" as const, marketingOptIn: true };
 
-function lastUrl(kind: "verify_email" | "reset_password"): string {
-  const email = mailer.sent.filter((e) => e.kind === kind).at(-1);
+function lastUrl(kind: "reset_password"): string {
+  const email = mailer.sent.filter((e) => e.kind === kind && e.to === ana.email).at(-1);
   if (!email || !("url" in email)) throw new Error(`No ${kind} email`);
   return email.url;
 }
@@ -49,15 +49,15 @@ afterAll(async () => {
 });
 
 describe("BetterAuthIdentity", () => {
-  it("signs up with the profile fields and sends a verification email in the user's language", async () => {
-    expect(await identity.signUp(ana, "/en/account")).toBe("pending_verification");
+  it("signs up with the profile fields and sends no confirmation email", async () => {
+    expect(await identity.signUp(ana)).toBe("created");
     const [row] = await test.db.select().from(users).where(eq(users.email, ana.email));
     expect(row).toMatchObject({ name: "Ana López", locale: "en", marketingOptIn: true, role: "customer", emailVerified: false });
-    expect(mailer.sent[0]).toMatchObject({ kind: "verify_email", to: ana.email, locale: "en" });
+    expect(mailer.sent).toEqual([]);
   });
 
-  it("answers the same when the email already exists", async () => {
-    expect(await identity.signUp({ ...ana, password: "another-password-1" }, "/en/account")).toBe("pending_verification");
+  it("reports an email that already has an account", async () => {
+    expect(await identity.signUp({ ...ana, password: "another-password-1" })).toBe("already_exists");
   });
 
   it("does not let a visitor choose their own role", async () => {
@@ -68,15 +68,8 @@ describe("BetterAuthIdentity", () => {
     expect(rows).toEqual([{ role: "customer", isDemo: false }]);
   });
 
-  it("refuses to sign in before the email is verified", async () => {
-    expect(await identity.signIn(ana.email, ana.password, "/en/account")).toBe("email_not_verified");
-  });
-
-  it("verifies the email from the link", async () => {
-    const response = await auth.handler(new Request(lastUrl("verify_email")));
-    expect(response.status).toBeLessThan(400);
-    const [row] = await test.db.select({ verified: users.emailVerified }).from(users).where(eq(users.email, ana.email));
-    expect(row?.verified).toBe(true);
+  it("lets the customer sign in before confirming the email", async () => {
+    expect(await identity.signIn(ana.email, ana.password, "/en/account")).toBe("signed_in");
   });
 
   it("rejects a wrong password without saying which part was wrong", async () => {
