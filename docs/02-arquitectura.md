@@ -95,8 +95,8 @@ src/
 └─ styles/                   Tailwind 4 con los tokens de marca actuales
 db/
 ├─ migrations/               SQL versionado (generado por drizzle-kit y funciones a mano)
-└─ seed.ts                   Catálogo, ajustes, cupones y usuarios de demo
-tests/db/                    Tests de funciones SQL y contratos de repositorios
+├─ migrate.ts / seed.ts      Scripts que aplican las migraciones y cargan los datos iniciales
+src/infrastructure/db/       Esquema, repositorios, seed y sus tests (contratos, funciones SQL, concurrencia)
 e2e/                         Playwright
 .github/workflows/           ci.yml y scheduled.yml (trabajos programados)
 ```
@@ -177,7 +177,7 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 - **Políticas de dominio:** cada caso de uso llama a `authorize(actor, action, resource)` antes de actuar. Así se cubren casos como:
   - Un cliente solo ve sus pedidos.
   - El staff cambia estados, pero no productos ni ajustes.
-  - El staff de demo además tiene bloqueadas las acciones de admin.
+  - La cuenta compartida de staff de demo no puede cambiar su email ni su contraseña.
   - Un invitado necesita el `tracking_token` del enlace para ver su pedido.
 - **Consultas:** los repositorios filtran siempre por el usuario de la sesión, nunca por un id que llegue del navegador.
 - **Rol:** campo `role` del usuario, declarado en Better Auth como no editable por el cliente. Solo lo cambia el seed o un admin.
@@ -204,10 +204,10 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 
 ## Base de datos y despliegue
 
-- **Driver:** `@neondatabase/serverless` por HTTP en las funciones de Vercel. En tests, PGlite con las mismas migraciones.
+- **Driver:** `pg` con un pool por función (`attachDatabasePool` de Vercel). En tests, PGlite con las mismas migraciones, y `npm run db:local` levanta un servidor PGlite para la build y los E2E en local sin Neon.
 - **Migraciones:** `drizzle-kit generate` crea el SQL a partir del esquema, y las funciones y triggers se escriben como migraciones SQL a mano. `npm run db:migrate` las aplica con la conexión directa (`DATABASE_URL_UNPOOLED`).
-- **En Vercel:** el comando de build ejecuta `db:migrate` antes de `next build`. Con la integración de Neon, cada vista previa recibe su propia rama de base de datos, así que la migración de una pull request nunca toca producción. Las ramas de vistas previas antiguas se borran para no superar el límite del plan gratuito.
-- **Seed:** `npm run db:seed` carga el catálogo, los ajustes, los cupones y las cuentas de demo. Es idempotente.
+- **En Vercel:** el comando de build ejecuta `db:migrate` y `db:seed` antes de `next build` (`npm run vercel-build`). Con la integración de Neon, cada vista previa recibe su propia rama de base de datos, así que la migración de una pull request nunca toca producción. Las ramas de vistas previas antiguas se borran para no superar el límite del plan gratuito.
+- **Seed:** `npm run db:seed` carga el catálogo, los ajustes, las zonas y los cupones (las cuentas de demo llegan en la Fase 3). Solo inserta lo que falta, así que se puede ejecutar en cada build sin pisar los cambios hechos desde el panel.
 
 ## Rendimiento
 

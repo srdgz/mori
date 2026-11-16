@@ -45,6 +45,7 @@ export default defineConfig([
             allowFrom("i18n", ["i18n"]),
             allowFrom("ui", ["domain", "application", "i18n", "ui", "assets"]),
             allowFrom("app", ["domain", "application", "composition", "i18n", "ui", "styles", "app"]),
+            allowFrom("test", ["domain", "application", "infrastructure", "test"]),
           ],
         },
       ],

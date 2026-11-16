@@ -440,5 +440,25 @@
     "jobsH": "¿Quieres formar parte del equipo?",
     "jobsP": "Buscamos gente con buena energía, ganas de aprender y algo de experiencia en barra. Elige “Trabaja con nosotros” y cuéntanos.",
     "msgFailed": "No hemos podido enviar el mensaje. Inténtalo de nuevo en unos minutos."
+  },
+  "product": {
+    "breadcrumb": "Estás aquí",
+    "menu": "La carta",
+    "configure": "Personaliza tu bebida",
+    "optional": "Opcional",
+    "soldOutOption": "agotado",
+    "quantity": "Cantidad",
+    "less": "Quitar una",
+    "more": "Añadir una",
+    "unitPrice": "{price} la unidad",
+    "add": "Añadir · {price}",
+    "soon": "Los pedidos online llegan muy pronto. Mientras tanto, te esperamos en Malasaña.",
+    "soldOut": "Agotada hoy",
+    "soldOutText": "Hoy no podemos prepararla. Mañana vuelve a la carta.",
+    "vegan": "Vegana",
+    "related": "También te puede gustar",
+    "allergens": "¿Alergias o intolerancias? Pregúntanos antes de pedir.",
+    "customize": "Personalizar",
+    "title": "{name} — MŌRI Matcha Bar & Culture"
   }
 }

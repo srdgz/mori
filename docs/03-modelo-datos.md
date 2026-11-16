@@ -158,7 +158,8 @@ create table products (
   short_description jsonb not null,
   description jsonb not null,
   alt jsonb not null,
-  image_url text,
+  image text not null,
+  tags jsonb not null default '[]',
   cup_color text not null check (cup_color ~ '^#[0-9a-fA-F]{6}$'),
   cup_name jsonb not null,
   base_price_cents integer not null check (base_price_cents > 0),
@@ -199,7 +200,7 @@ create table product_option_groups (
 ```
 
 - `allowed_option_ids` permite, por ejemplo, que Strawberry Matcha solo ofrezca la temperatura «Frío».
-- `image_url` apunta a una foto del repositorio (las seis actuales) o a una subida a Vercel Blob desde el panel.
+- `image` es la clave de una foto del repositorio (las seis actuales) o la URL de una subida a Vercel Blob desde el panel. `tags` son las etiquetas traducidas de la carta («Solo frío», «Vegano»…).
 
 ## Tienda
 
@@ -328,7 +329,7 @@ create table coupon_redemptions (
 
 ## Funciones y triggers
 
-Todas se llaman con una sola sentencia, así que son atómicas también con el driver HTTP de Neon.
+Todas se llaman con una sola sentencia, así que son atómicas sin abrir transacciones desde la app.
 
 | Función | Quién la llama | Qué hace |
 | --- | --- | --- |
@@ -355,9 +356,9 @@ No hay RLS porque el navegador nunca se conecta a la base de datos: todas las co
 | Pedidos | Propios, invitado con `tracking_token`, staff todos | Crear: cualquiera por `PlaceOrder`. Cambiar estado: staff. Reembolsar: admin |
 | Clientes y panel de datos | Admin | — |
 
-El staff de demo (`is_demo = true`) tiene los mismos permisos de lectura que el staff y además puede avanzar pedidos de demostración, pero ninguna acción de admin.
+El staff de demo (`is_demo = true`) tiene los mismos permisos que el staff, salvo cambiar su propio email o contraseña, porque es una cuenta compartida. No tiene ninguna acción de admin.
 
-## Datos de demostración (`db/seed.ts`)
+## Datos de demostración (`src/infrastructure/db/seed.ts`)
 
 - Las 6 bebidas actuales, los grupos de opciones del D-03, horario, zonas de reparto y cupones `BIENVENIDA10` y `MATCHAMIGO`.
 - Cuentas de demostración `staff@demo.mori` (rol staff, `is_demo`) y `cliente@demo.mori` (con historial y 5 sellos), creadas con la API de Better Auth para que las contraseñas lleven el mismo hash. Las contraseñas se documentan en el README.
@@ -373,4 +374,4 @@ Se ejecutan con Vitest sobre PGlite, con las migraciones reales aplicadas:
 - Un pedido sin pagar de hace 31 minutos ya no ocupa su franja.
 - `anonymize_customer` deja los pedidos sin datos personales y conserva los importes.
 
-La prueba de concurrencia necesita dos conexiones reales: dos `create_order` a la vez sobre la última plaza de una franja, de los que solo uno debe entrar. Por eso se ejecuta en CI contra un servicio Postgres de GitHub Actions.
+La prueba de concurrencia necesita conexiones reales: diez `create_order` a la vez sobre la última plaza de una franja, de los que solo uno debe entrar. Se ejecuta cuando existe `TEST_DATABASE_URL`, es decir, en CI contra un servicio Postgres de GitHub Actions o en local contra `npm run db:local`.

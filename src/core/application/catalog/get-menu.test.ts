@@ -1,29 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { Product, ProductId } from "@/core/domain/catalog/product";
-import { money } from "@/core/domain/shared/money";
 import { MemoryCatalogRepository } from "@/infrastructure/memory/memory-catalog-repository";
-import { catalogSeed } from "@/infrastructure/memory/catalog-seed";
+import { catalogSeed } from "@/infrastructure/seed/catalog";
+import { product } from "@/test/catalog";
 import { makeGetMenu } from "./get-menu";
-
-const text = { es: "x", en: "x" };
-
-function product(overrides: Partial<Product> & Pick<Product, "slug" | "sort">): Product {
-  return {
-    id: overrides.slug as ProductId,
-    name: overrides.slug,
-    imageKey: overrides.slug,
-    price: money(500),
-    cupColor: "#b6d66b",
-    cupName: text,
-    shortDescription: text,
-    description: text,
-    alt: text,
-    tags: [],
-    isAvailable: true,
-    isFeatured: false,
-    ...overrides,
-  };
-}
 
 describe("GetMenu", () => {
   it("returns available products ordered by their sort position", async () => {

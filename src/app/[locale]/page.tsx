@@ -176,7 +176,7 @@ export default async function HomePage({ params }: Props) {
       >
         {drinks.map((drink, i) => (
           <li key={drink.id} className="drink group grid gap-4">
-            <Link href={{ pathname: "/menu", hash: drink.slug }} className="grid gap-4">
+            <Link href={{ pathname: "/menu/[slug]", params: { slug: drink.slug } }} className="grid gap-4">
               <div className="media media--zoom aspect-[4/5]">
                 <Image
                   src={productPhoto(drink.imageKey)}

@@ -12,6 +12,7 @@ export const routing = defineRouting({
     "/": "/",
     "/story": { es: "/historia", en: "/story" },
     "/menu": { es: "/carta", en: "/menu" },
+    "/menu/[slug]": { es: "/carta/[slug]", en: "/menu/[slug]" },
     "/culture": { es: "/cultura-matcha", en: "/matcha-culture" },
     "/find-us": { es: "/donde-estamos", en: "/find-us" },
     "/contact": { es: "/contacto", en: "/contact" },
@@ -19,6 +20,10 @@ export const routing = defineRouting({
 });
 
 export type AppPathname = keyof typeof routing.pathnames;
+
+export type StaticPathname = Exclude<AppPathname, `${string}[${string}`>;
+
+export const staticPathnames = Object.keys(routing.pathnames).filter((p) => !p.includes("[")) as StaticPathname[];
 
 export const navItems = [
   { href: "/story", key: "story" },
