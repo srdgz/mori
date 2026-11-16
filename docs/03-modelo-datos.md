@@ -1,22 +1,25 @@
 # 03 · Modelo de datos
 
-Supabase Postgres. Los importes se guardan en **céntimos** (`integer`) y los textos traducibles en `jsonb` con las claves `es` y `en`. Todas las tablas tienen RLS activada.
+Postgres en Neon. El esquema se define con Drizzle en `src/infrastructure/db/schema` y estas son las tablas que genera. Los importes se guardan en **céntimos** (`integer`) y los textos traducibles en `jsonb` con las claves `es` y `en`.
 
 ## Diagrama
 
 ```
-auth.users 1─1 profiles 1─n addresses
-                  │ 1─n favourites n─1 products
-                  │ 1─1 carts
-                  │ 1─n loyalty_ledger
-                  │ 1─n orders 1─n order_items n─1 products
-                  │           1─n order_events
-                  │           n─1 coupons 1─n coupon_redemptions
+users 1─n sessions
+  │   1─n accounts (email y contraseña, Google)
+  │ 1─n addresses
+  │ 1─n favourites n─1 products
+  │ 1─1 carts
+  │ 1─n loyalty_ledger
+  │ 1─n orders 1─n order_items n─1 products
+  │           1─n order_events
+  │           n─1 coupons 1─n coupon_redemptions
 categories 1─n products n─n option_groups (product_option_groups) 1─n options
 store_settings (fila única) · opening_hours · closures · delivery_zones
+verifications · rate_limits (uso interno de Better Auth y de los cupones)
 ```
 
-## Roles y utilidades
+## Tipos
 
 ```sql
 create type app_role as enum ('customer', 'staff', 'admin');
@@ -25,38 +28,82 @@ create type order_status as enum (
   'pending_payment', 'received', 'preparing', 'ready', 'out_for_delivery',
   'completed', 'cancelled', 'refunded', 'expired'
 );
-
-create function public.current_role() returns app_role
-language sql stable as $$
-  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role')::app_role, 'customer')
-$$;
-
-create function public.is_staff() returns boolean
-language sql stable as $$ select public.current_role() in ('staff', 'admin') $$;
-
-create function public.is_admin() returns boolean
-language sql stable as $$ select public.current_role() = 'admin' $$;
 ```
 
-El rol se copia en el JWT con un *custom access token hook* que lee `profiles.role`.
+## Usuarios y sesiones
 
-## Clientes
+Las tablas `users`, `sessions`, `accounts` y `verifications` son las de Better Auth, con nombres en plural y `uuid` como identificador. Los datos de perfil van como campos adicionales del usuario, así que no hace falta una tabla `profiles` aparte.
 
 ```sql
-create table profiles (
-  id uuid primary key references auth.users on delete cascade,
-  full_name text,
+create table users (
+  id uuid primary key,
+  name text not null,
+  email citext unique not null,
+  email_verified boolean not null default false,
+  image text,
   phone text,
   locale text not null default 'es' check (locale in ('es', 'en')),
   marketing_opt_in boolean not null default false,
   role app_role not null default 'customer',
+  is_demo boolean not null default false,
   stripe_customer_id text unique,
-  created_at timestamptz not null default now()
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
+create table sessions (
+  id uuid primary key,
+  user_id uuid not null references users on delete cascade,
+  token text unique not null,
+  expires_at timestamptz not null,
+  ip_address text,
+  user_agent text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table accounts (
+  id uuid primary key,
+  user_id uuid not null references users on delete cascade,
+  account_id text not null,
+  provider_id text not null,
+  password text,
+  access_token text,
+  refresh_token text,
+  id_token text,
+  access_token_expires_at timestamptz,
+  refresh_token_expires_at timestamptz,
+  scope text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table verifications (
+  id uuid primary key,
+  identifier text not null,
+  value text not null,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table rate_limits (
+  key text primary key,
+  count integer not null,
+  last_request bigint not null
+);
+```
+
+- **Campos protegidos:** `role`, `is_demo` y `stripe_customer_id` se declaran en Better Auth con `input: false`, así que ni el registro ni la edición de perfil pueden escribirlos.
+- **Contraseñas:** Better Auth las guarda con hash en `accounts.password`.
+
+## Datos del cliente
+
+```sql
 create table addresses (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references profiles on delete cascade,
+  user_id uuid not null references users on delete cascade,
   label text not null,
   line1 text not null,
   line2 text,
@@ -69,27 +116,27 @@ create table addresses (
 create unique index addresses_one_default on addresses (user_id) where is_default;
 
 create table favourites (
-  user_id uuid references profiles on delete cascade,
+  user_id uuid references users on delete cascade,
   product_id uuid references products on delete cascade,
   created_at timestamptz not null default now(),
   primary key (user_id, product_id)
 );
 
 create table carts (
-  user_id uuid primary key references profiles on delete cascade,
+  user_id uuid primary key references users on delete cascade,
   lines jsonb not null default '[]',
   updated_at timestamptz not null default now()
 );
 
 create table loyalty_ledger (
   id bigint generated always as identity primary key,
-  user_id uuid not null references profiles on delete cascade,
+  user_id uuid not null references users on delete cascade,
   order_id uuid references orders on delete set null,
   delta integer not null,
   reason text not null check (reason in ('purchase', 'redeem', 'refund', 'adjustment')),
   created_at timestamptz not null default now()
 );
-create view loyalty_balance with (security_invoker = true) as
+create view loyalty_balance as
   select user_id, sum(delta)::int as stamps from loyalty_ledger group by user_id;
 ```
 
@@ -111,7 +158,7 @@ create table products (
   short_description jsonb not null,
   description jsonb not null,
   alt jsonb not null,
-  image_path text,
+  image_url text,
   cup_color text not null check (cup_color ~ '^#[0-9a-fA-F]{6}$'),
   cup_name jsonb not null,
   base_price_cents integer not null check (base_price_cents > 0),
@@ -151,7 +198,8 @@ create table product_option_groups (
 );
 ```
 
-`allowed_option_ids` permite, por ejemplo, que Strawberry Matcha solo ofrezca la temperatura «Frío».
+- `allowed_option_ids` permite, por ejemplo, que Strawberry Matcha solo ofrezca la temperatura «Frío».
+- `image_url` apunta a una foto del repositorio (las seis actuales) o a una subida a Vercel Blob desde el panel.
 
 ## Tienda
 
@@ -171,6 +219,7 @@ create table store_settings (
   delivery_last_order_minutes integer not null default 30,
   delivery_eta_min integer not null default 30,
   delivery_eta_max integer not null default 45,
+  unpaid_hold_minutes integer not null default 30,
   loyalty_stamps_required integer not null default 8,
   vat_rate_bp integer not null default 1000
 );
@@ -214,7 +263,7 @@ create table coupons (
 create table orders (
   id uuid primary key default gen_random_uuid(),
   code text unique not null,
-  customer_id uuid references profiles on delete set null,
+  customer_id uuid references users on delete set null,
   contact_name text not null,
   contact_email citext not null,
   contact_phone text not null,
@@ -244,6 +293,7 @@ create table orders (
 );
 create index orders_board on orders (slot_start, status);
 create index orders_customer on orders (customer_id, created_at desc);
+create index orders_updated on orders (updated_at);
 
 create table order_items (
   id uuid primary key default gen_random_uuid(),
@@ -260,7 +310,7 @@ create table order_events (
   id bigint generated always as identity primary key,
   order_id uuid not null references orders on delete cascade,
   status order_status not null,
-  actor_id uuid references profiles on delete set null,
+  actor_id uuid references users on delete set null,
   note text,
   created_at timestamptz not null default now()
 );
@@ -273,68 +323,54 @@ create table coupon_redemptions (
 );
 ```
 
-`order_items` guarda una **copia** del nombre, las opciones y los precios: un pedido antiguo no cambia aunque el producto se edite o se borre.
+- `order_items` guarda una **copia** del nombre, las opciones y los precios: un pedido antiguo no cambia aunque el producto se edite o se borre.
+- `orders.updated_at` es la base del `ETag` del sondeo: el tablero y el seguimiento solo reciben datos cuando cambia.
 
-## Funciones atómicas
+## Funciones y triggers
+
+Todas se llaman con una sola sentencia, así que son atómicas también con el driver HTTP de Neon.
 
 | Función | Quién la llama | Qué hace |
 | --- | --- | --- |
-| `create_order(order jsonb, items jsonb)` | Servidor (`PlaceOrder`, clave de servicio) | Bloquea la franja con `pg_advisory_xact_lock`, comprueba la capacidad contando pedidos no cancelados ni caducados e inserta el pedido, sus líneas y el primer evento. Si no hay hueco, lanza `slot_full` |
-| `confirm_payment(payment_intent text)` | Webhook (`ConfirmPayment`) | Idempotente. Pasa `pending_payment` a `received`, fija `paid_at`, registra el cupón, resta los sellos canjeados y suma los ganados |
-| `advance_order_status(order_id uuid, next order_status)` | Panel (sesión de staff) | `security definer`. Comprueba `is_staff()` y la transición permitida, actualiza el pedido e inserta el evento |
-| `expire_unpaid_orders()` | Cron cada 5 min | Pasa a `expired` los pedidos en `pending_payment` de más de 30 min |
-| `delete_my_account()` | Cuenta del cliente | Anonimiza sus pedidos (nombre, email y teléfono) y borra el usuario de `auth.users` desde el servidor |
+| `create_order(order jsonb, items jsonb)` | `PlaceOrder` | Bloquea la franja con `pg_advisory_xact_lock`, cuenta los pedidos que la ocupan (pagados, o sin pagar de menos de `unpaid_hold_minutes`) e inserta el pedido, sus líneas y el primer evento. Si no hay hueco, lanza `slot_full` |
+| `confirm_payment(payment_intent text)` | `ConfirmPayment` (webhook) | Idempotente. Pasa `pending_payment` a `received`, fija `paid_at`, registra el cupón, resta los sellos canjeados y suma los ganados |
+| `advance_order_status(order_id uuid, next order_status, actor uuid)` | `AdvanceOrderStatus` | Comprueba que la transición está permitida (la misma tabla que el dominio), actualiza el pedido e inserta el evento. El rol ya lo ha comprobado el caso de uso |
+| `expire_unpaid_orders()` | `ExpireUnpaidOrders` (trabajo programado) | Pasa a `expired` los pedidos en `pending_payment` de más de 30 min |
+| `anonymize_customer(user_id uuid)` | `DeleteAccount` | Anonimiza sus pedidos (nombre, email y teléfono) y marca `users.deleted_at`. Después Better Auth borra sesiones y cuentas |
 
-**Trigger en `orders`:** tras cada cambio de `status` emite un *broadcast* de Realtime al canal `order:<code>` con el estado y la hora. Así el seguimiento de un invitado no necesita leer la tabla.
+**Trigger en `orders`:** mantiene `updated_at` al día en cada cambio.
 
-## Políticas RLS
+## Permisos
 
-| Tabla | `select` | `insert` / `update` / `delete` |
+No hay RLS porque el navegador nunca se conecta a la base de datos: todas las consultas pasan por casos de uso en el servidor. Las políticas viven en `src/core/domain/access` y se prueban al 100 %:
+
+| Recurso | Leer | Crear / cambiar / borrar |
 | --- | --- | --- |
-| `profiles` | Propio; staff todos | `update` propio, salvo `role` y `stripe_customer_id` (privilegios de columna); admin todo |
-| `addresses`, `favourites`, `carts` | Propios | Propios |
-| `loyalty_ledger` | Propio; staff todos | Solo funciones |
-| `categories`, `products`, `option_groups`, `options`, `product_option_groups` | Todos | Admin |
-| `store_settings`, `opening_hours`, `closures`, `delivery_zones` | Todos | Admin |
-| `coupons`, `coupon_redemptions` | Admin | Admin; validación desde el servidor |
-| `orders` | `customer_id = auth.uid()` o staff | Solo funciones y servidor |
-| `order_items`, `order_events` | Si el pedido es visible | Solo funciones y servidor |
+| Perfil | Propio; staff todos | Propio, salvo `role`, `is_demo` y `stripe_customer_id`; admin todo |
+| Direcciones, favoritos, carrito | Propios | Propios |
+| Sellos | Propios; staff todos | Solo `confirm_payment` y reembolsos |
+| Catálogo | Todos | Admin |
+| Ajustes, horario, cierres, zonas | Todos | Admin |
+| Cupones | Admin | Admin; el checkout los valida en el servidor |
+| Pedidos | Propios, invitado con `tracking_token`, staff todos | Crear: cualquiera por `PlaceOrder`. Cambiar estado: staff. Reembolsar: admin |
+| Clientes y panel de datos | Admin | — |
 
-```sql
-alter table orders enable row level security;
+El staff de demo (`is_demo = true`) tiene los mismos permisos de lectura que el staff y además puede avanzar pedidos de demostración, pero ninguna acción de admin.
 
-create policy "customers read their orders" on orders
-  for select to authenticated
-  using (customer_id = (select auth.uid()) or public.is_staff());
-
-create policy "order items follow their order" on order_items
-  for select to authenticated
-  using (exists (
-    select 1 from orders o
-    where o.id = order_id and (o.customer_id = (select auth.uid()) or public.is_staff())
-  ));
-
-create policy "catalog is public" on products
-  for select to anon, authenticated using (true);
-
-create policy "admins manage the catalog" on products
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
-
-revoke update on profiles from authenticated;
-grant update (full_name, phone, locale, marketing_opt_in) on profiles to authenticated;
-```
-
-## Datos de demostración (`seed.sql`)
+## Datos de demostración (`db/seed.ts`)
 
 - Las 6 bebidas actuales, los grupos de opciones del D-03, horario, zonas de reparto y cupones `BIENVENIDA10` y `MATCHAMIGO`.
-- Cuentas de demostración `staff@demo.mori` (rol staff, solo tablero) y `cliente@demo.mori` (con historial y 5 sellos). Las contraseñas se documentan en el README.
-- El cron de la demo crea pedidos `is_demo = true` a lo largo del día y los avanza de estado para que el tablero tenga movimiento.
+- Cuentas de demostración `staff@demo.mori` (rol staff, `is_demo`) y `cliente@demo.mori` (con historial y 5 sellos), creadas con la API de Better Auth para que las contraseñas lleven el mismo hash. Las contraseñas se documentan en el README.
+- El trabajo programado de la demo crea pedidos `is_demo = true` a lo largo del día y los avanza de estado para que el tablero tenga movimiento.
 
-## Tests de base de datos (pgTAP sobre PGlite)
+## Tests de base de datos
 
-- Un cliente no ve pedidos de otro y no puede cambiarse el rol.
-- Un invitado (`anon`) no lee `orders`.
-- El staff puede avanzar un pedido de `received` a `preparing`, pero no de `pending_payment` a `completed`.
-- El staff no puede editar productos; el admin sí.
-- `create_order` rechaza una franja llena aunque lleguen dos peticiones a la vez (se simula con dos transacciones).
+Se ejecutan con Vitest sobre PGlite, con las migraciones reales aplicadas:
+
+- Los repositorios de Drizzle pasan la misma batería de contratos que los de memoria.
+- `advance_order_status` acepta de `received` a `preparing`, pero rechaza de `pending_payment` a `completed`.
 - `confirm_payment` llamado dos veces suma los sellos una sola vez.
+- Un pedido sin pagar de hace 31 minutos ya no ocupa su franja.
+- `anonymize_customer` deja los pedidos sin datos personales y conserva los importes.
+
+La prueba de concurrencia necesita dos conexiones reales: dos `create_order` a la vez sobre la última plaza de una franja, de los que solo uno debe entrar. Por eso se ejecuta en CI contra un servicio Postgres de GitHub Actions.

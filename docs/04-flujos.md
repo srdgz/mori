@@ -38,7 +38,7 @@ Igual que la recogida, cambiando el paso de modalidad:
   - **Recogida:** Recibido → En preparación → Listo para recoger → Completado.
   - **Reparto:** Recibido → En preparación → En reparto → Entregado.
 - El paso actual se anima: un vaso que se llena de matcha.
-- La hora de cada paso se actualiza en directo. Al llegar a «Listo», aviso visual y, si el usuario lo permite, una notificación del navegador.
+- La página consulta el estado cada 10 segundos mientras está visible, así que cada paso aparece con su hora sin recargar. Al llegar a «Listo», aviso visual y, si el usuario lo permite, una notificación del navegador.
 
 ## Registro e inicio de sesión
 
@@ -60,7 +60,7 @@ Igual que la recogida, cambiando el paso de modalidad:
 
 - **Tablero:**
   - Columnas Nuevos · En preparación · Listos / En reparto · Completados (hoy), con tarjetas que muestran código, hora, modalidad, líneas resumidas y tiempo transcurrido.
-  - Al entrar un pedido nuevo, la tarjeta aparece con una animación y suena un aviso (activable).
+  - El tablero se refresca cada 5 segundos. Al entrar un pedido nuevo, la tarjeta aparece con una animación y suena un aviso (activable).
   - Se avanza de estado con un botón en la tarjeta o arrastrando entre columnas, con alternativa por teclado.
 - **Detalle:** datos del cliente, líneas con opciones, notas, historial, imprimir ticket (vista de impresión de 80 mm), cancelar y reembolsar total o parcial.
 - **Productos:** tabla con buscador. La disponibilidad se cambia con un interruptor directo («Agotado hoy»). La ficha de edición tiene vista previa de la tarjeta tal y como la verá el cliente.
@@ -77,7 +77,7 @@ Igual que la recogida, cambiando el paso de modalidad:
 | Desde | Hacia | Quién |
 | --- | --- | --- |
 | `pending_payment` | `received` | Webhook de Stripe |
-| `pending_payment` | `expired` | Cron (30 min) |
+| `pending_payment` | `expired` | Trabajo programado (pasados 30 min) |
 | `received` | `preparing`, `cancelled` | Staff |
 | `preparing` | `ready` (recogida), `out_for_delivery` (reparto) | Staff |
 | `ready`, `out_for_delivery` | `completed` | Staff |
