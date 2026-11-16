@@ -7,6 +7,8 @@ export default async function NotFound() {
   const t = await getTranslations("common");
   return (
     <section className="grid min-h-svh place-items-center pt-[var(--nav-h)] text-center">
+      <title>{`404 · ${t("notFoundTitle")} — MŌRI Matcha Bar & Culture`}</title>
+      <meta name="robots" content="noindex" />
       <div className="wrap">
         <span data-draw className="mx-auto mb-8 block size-20 text-forest">
           <Mark className="size-full" />

@@ -27,6 +27,7 @@ test("the language switch keeps the visitor on the same page", async ({ page }) 
 test("unknown routes answer 404 with a way home", async ({ page }) => {
   const response = await page.goto("/no-existe");
   expect(response?.status()).toBe(404);
+  await expect(page).toHaveTitle("404 · Página no encontrada — MŌRI Matcha Bar & Culture");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("404");
   await page.getByRole("link", { name: "Volver al inicio" }).click();
   await expect(page).toHaveURL(/\/$/);
