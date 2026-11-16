@@ -71,16 +71,18 @@ Entrance animations that affect the first screen run in CSS, so they never delay
 
 ## Performance
 
-Lighthouse (mobile, production build, measured locally):
+Lighthouse on the live site (median of three runs, November 2026):
 
-| Page           | Performance | Accessibility | Best practices |
-| -------------- | ----------- | ------------- | -------------- |
-| Home           | 93          | 100           | 100            |
-| Story          | 92          | 100           | 100            |
-| Menu           | 92          | 100           | 100            |
-| Matcha culture | 91          | 100           | 100            |
-| Find us        | 96          | 100           | 100            |
-| Contact        | 94          | 100           | 100            |
+| Page           | Performance (mobile) | Performance (desktop) | Accessibility | Best practices | SEO | LCP (mobile) |
+| -------------- | -------------------- | --------------------- | ------------- | -------------- | --- | ------------ |
+| Home           | 97                   | 100                   | 100           | 100            | 100 | 2.3 s        |
+| Story          | 98                   | 100                   | 100           | 100            | 100 | 1.9 s        |
+| Menu           | 100                  | 100                   | 100           | 100            | 100 | 1.4 s        |
+| Matcha culture | 98                   | 100                   | 100           | 100            | 100 | 2.3 s        |
+| Find us        | 100                  | 100                   | 100           | 100            | 100 | 1.5 s        |
+| Contact        | 99                   | 100                   | 100           | 100            | 100 | 2.1 s        |
+
+Cumulative Layout Shift is 0 on every page.
 
 What keeps it fast:
 

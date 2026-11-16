@@ -71,16 +71,18 @@ Las animaciones de entrada de la primera pantalla funcionan con CSS, así que nu
 
 ## Rendimiento
 
-Lighthouse (móvil, build de producción, medido en local):
+Lighthouse sobre la web publicada (mediana de tres pasadas, noviembre de 2026):
 
-| Página         | Rendimiento | Accesibilidad | Buenas prácticas |
-| -------------- | ----------- | ------------- | ---------------- |
-| Inicio         | 93          | 100           | 100              |
-| Historia       | 92          | 100           | 100              |
-| Carta          | 92          | 100           | 100              |
-| Cultura matcha | 91          | 100           | 100              |
-| Dónde estamos  | 96          | 100           | 100              |
-| Contacto       | 94          | 100           | 100              |
+| Página         | Rendimiento (móvil) | Rendimiento (escritorio) | Accesibilidad | Buenas prácticas | SEO | LCP (móvil) |
+| -------------- | ------------------- | ------------------------ | ------------- | ---------------- | --- | ----------- |
+| Inicio         | 97                  | 100                      | 100           | 100              | 100 | 2,3 s       |
+| Historia       | 98                  | 100                      | 100           | 100              | 100 | 1,9 s       |
+| Carta          | 100                 | 100                      | 100           | 100              | 100 | 1,4 s       |
+| Cultura matcha | 98                  | 100                      | 100           | 100              | 100 | 2,3 s       |
+| Dónde estamos  | 100                 | 100                      | 100           | 100              | 100 | 1,5 s       |
+| Contacto       | 99                  | 100                      | 100           | 100              | 100 | 2,1 s       |
+
+El desplazamiento acumulado del diseño (CLS) es 0 en todas las páginas.
 
 Lo que la hace rápida:
 
