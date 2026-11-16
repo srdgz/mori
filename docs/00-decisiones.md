@@ -14,7 +14,7 @@ La cuenta de Supabase ya tiene ocupados los dos proyectos activos del plan gratu
 | Acceso a datos | supabase-js | **Drizzle ORM** con migraciones versionadas |
 | Cuentas | Supabase Auth | **Better Auth**, con sus tablas en la misma base de datos |
 | Permisos | RLS | **Políticas en la capa de aplicación**, más funciones SQL para las operaciones críticas |
-| Tiempo real | Supabase Realtime | **Sondeo** cada pocos segundos con TanStack Query |
+| Tiempo real | Supabase Realtime | **Neon Realtime** con consultas selladas, y **sondeo** de respaldo con TanStack Query |
 | Fotos de producto | Supabase Storage | **Vercel Blob** |
 | Trabajos programados | Vercel Cron | **GitHub Actions** programado (ver D-26) |
 
@@ -81,8 +81,11 @@ Cada cambio queda en un historial con fecha, que forma la línea de tiempo del s
 
 ### D-07 · Seguimiento en directo — Aprobada (revisada el 16/11/2026)
 - Página de pedido con línea de tiempo animada, hora estimada y código de recogida corto (por ejemplo, `MR-4F7K`).
-- Se actualiza sola, sin recargar: consulta el estado cada 10 segundos mientras la pestaña está visible y deja de hacerlo cuando el pedido termina.
-- **Por qué sondeo y no WebSockets:** en Vercel las funciones no mantienen conexiones abiertas, y un servicio de tiempo real externo sería otro proveedor más. Para un pedido que cambia de estado cuatro o cinco veces, unos segundos de retraso no se notan.
+- Se actualiza sola, sin recargar, con **Neon Realtime** y **sondeo de respaldo**:
+  - **Neon Realtime:** el servidor comprueba quién pide el pedido y sella una consulta `SELECT` solo para ese pedido. El navegador se suscribe a ella y recibe cada cambio al instante, sin poder leer ni modificar la consulta.
+  - **Sondeo:** si Realtime no está configurado (CI, PGlite en local, una vista previa sin Realtime) o la suscripción falla, la página consulta el estado cada 10 segundos mientras está visible.
+  - En los dos casos se deja de escuchar cuando el pedido termina.
+- **Por qué los dos:** Neon Realtime está en beta. Con el sondeo detrás, la tienda sigue funcionando aunque la beta falle o cambie, y la interfaz no nota la diferencia.
 
 ### D-08 · Panel de tienda — Aprobada
 Roles `customer`, `staff` y `admin`.
@@ -167,7 +170,9 @@ Es la Fase 1 (ver [05 · Fases](05-fases.md)) y termina con la web idéntica a l
 - **Mutaciones:** **Server Actions** con validación **zod**.
 - **Route Handlers:** solo para lo que no puede ser una Server Action: el webhook de Stripe, Better Auth, el permiso de subida a Vercel Blob, las lecturas que sondea el cliente y los trabajos programados.
 - **Estado del carrito:** un store ligero de cliente (**Zustand**) persistido en `localStorage`.
-- **Datos del servidor en cliente:** el tablero y el seguimiento usan **TanStack Query** con `refetchInterval`. El sondeo se para con la pestaña en segundo plano, y las respuestas llevan `ETag` para que una consulta sin cambios no devuelva datos.
+- **Datos del servidor en cliente:** el tablero y el seguimiento usan **TanStack Query**.
+  - Con Neon Realtime, cada cambio recibido actualiza la caché de la consulta.
+  - Sin Realtime, la misma consulta usa `refetchInterval`. El sondeo se para con la pestaña en segundo plano, y las respuestas llevan `ETag` para que una consulta sin cambios no devuelva datos.
 
 ### D-19 · Clean architecture — Aprobada (revisada el 16/11/2026)
 Cuatro capas con dependencias solo hacia dentro. Detalle en [02 · Arquitectura](02-arquitectura.md).
@@ -261,5 +266,6 @@ Sustituye a la antigua «D-20 · Supabase».
 | 3 | Cuenta en Resend y su clave en `.env` y en Vercel | Sin dominio propio solo entrega a tu email, que basta para la demo |
 | 4 | Claves de prueba de Stripe en `.env` y en Vercel | No me las pegues en el chat |
 | 4 | Instalar Stripe CLI para los webhooks en local | Instalación global: la haces tú |
+| 5 | En Neon, activar **Realtime** en la rama principal y añadir los orígenes de la web (`allowedOrigins`) | Cambia `wal_level` a `logical` para siempre. Copiar `NEON_REALTIME_URL` y `NEON_REALTIME_SECRET` a `.env.local` y a Vercel |
 | 6 | En Vercel, Storage → añadir **Blob** | Vercel guarda `BLOB_READ_WRITE_TOKEN` |
 | 6 | Secretos `CRON_SECRET` y `SITE_URL` en GitHub (Settings → Secrets) | Para el workflow programado |

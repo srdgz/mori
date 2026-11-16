@@ -53,7 +53,8 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - El webhook es idempotente (test).
 
 ## Fase 5 · Pedidos del cliente (`feat/orders`)
-- Seguimiento en directo por sondeo con `ETag`, para usuarios con sesión y para invitados con enlace.
+- Seguimiento en directo con Neon Realtime y sondeo de respaldo (`ETag`), para usuarios con sesión y para invitados con enlace.
+- Activar Realtime en la rama principal de Neon y añadir los orígenes de la web.
 - Historial, detalle y «Repetir pedido».
 - Emails «listo para recoger» y «en reparto».
 - **Criterio de hecho:** E2E en el que el staff avanza un pedido y el cliente lo ve cambiar sin recargar.
