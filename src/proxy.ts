@@ -1,7 +1,33 @@
+import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse, type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
+import { privatePathnames, routing, type AppLocale } from "./i18n/routing";
 
-export default createMiddleware(routing);
+const intl = createMiddleware(routing);
+
+function localized(locale: AppLocale, pathname: keyof typeof routing.pathnames): string {
+  const entry = routing.pathnames[pathname];
+  const path = typeof entry === "string" ? entry : entry[locale];
+  return locale === routing.defaultLocale ? path : `/${locale}${path}`;
+}
+
+const signInPath: Record<AppLocale, string> = {
+  es: localized("es", "/account/sign-in"),
+  en: localized("en", "/account/sign-in"),
+};
+
+const privatePaths = routing.locales.flatMap((locale) => privatePathnames.map((p) => ({ locale, path: localized(locale, p) })));
+
+export default function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const match = privatePaths.find(({ path }) => pathname === path);
+  if (match && !getSessionCookie(request)) {
+    const url = new URL(signInPath[match.locale], request.url);
+    url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
+  }
+  return intl(request);
+}
 
 export const config = {
   matcher: ["/((?!api|_next|_vercel|brand|.*\\..*).*)"],

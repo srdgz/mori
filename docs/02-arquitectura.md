@@ -81,7 +81,7 @@ src/
 │  ├─ db/                    Cliente de Neon, esquema de Drizzle y repositorios
 │  ├─ auth/                  Configuración de Better Auth y lectura de la sesión
 │  ├─ stripe/                StripePaymentGateway, verificación del webhook
-│  ├─ resend/                ResendMailer y plantillas React Email
+│  ├─ mail/                  ResendMailer, buzón para E2E, consola y plantillas HTML
 │  ├─ blob/                  VercelBlobStorage
 │  └─ memory/                Repositorios y pasarela en memoria (tests y demo)
 ├─ composition/              container.ts (servidor)

@@ -34,7 +34,7 @@ export const fulfilmentKind = pgEnum("fulfilment_kind", FULFILMENT_KINDS);
 export const orderStatus = pgEnum("order_status", ORDER_STATUSES);
 
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: citext("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
@@ -50,48 +50,61 @@ export const users = pgTable("users", {
   updatedAt: updatedAt(),
 });
 
-export const sessions = pgTable("sessions", {
-  id: uuid("id").primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  token: text("token").notNull().unique(),
-  expiresAt: timestamptz("expires_at").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-});
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamptz("expires_at").notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("sessions_user").on(t.userId)],
+);
 
-export const accounts = pgTable("accounts", {
-  id: uuid("id").primaryKey(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  password: text("password"),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamptz("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamptz("refresh_token_expires_at"),
-  scope: text("scope"),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-});
+export const accounts = pgTable(
+  "accounts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    password: text("password"),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamptz("access_token_expires_at"),
+    refreshTokenExpiresAt: timestamptz("refresh_token_expires_at"),
+    scope: text("scope"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("accounts_user").on(t.userId)],
+);
 
-export const verifications = pgTable("verifications", {
-  id: uuid("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamptz("expires_at").notNull(),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-});
+export const verifications = pgTable(
+  "verifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamptz("expires_at").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("verifications_identifier").on(t.identifier)],
+);
 
 export const rateLimits = pgTable("rate_limits", {
-  key: text("key").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
   count: integer("count").notNull(),
   lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });

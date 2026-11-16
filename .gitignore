@@ -3,7 +3,8 @@ node_modules/
 out/
 coverage/
 playwright-report/
-test-results/
+test-results
+.e2e/
 .vercel/
 .env
 .env.*

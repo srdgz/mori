@@ -16,6 +16,15 @@ export const routing = defineRouting({
     "/culture": { es: "/cultura-matcha", en: "/matcha-culture" },
     "/find-us": { es: "/donde-estamos", en: "/find-us" },
     "/contact": { es: "/contacto", en: "/contact" },
+    "/account/sign-in": { es: "/cuenta/entrar", en: "/account/sign-in" },
+    "/account/sign-up": { es: "/cuenta/registro", en: "/account/sign-up" },
+    "/account/forgot-password": { es: "/cuenta/recuperar", en: "/account/forgot-password" },
+    "/account/reset-password": { es: "/cuenta/nueva-contrasena", en: "/account/reset-password" },
+    "/account": { es: "/cuenta", en: "/account" },
+    "/account/profile": { es: "/cuenta/perfil", en: "/account/profile" },
+    "/account/addresses": { es: "/cuenta/direcciones", en: "/account/addresses" },
+    "/account/favourites": { es: "/cuenta/favoritos", en: "/account/favourites" },
+    "/account/security": { es: "/cuenta/seguridad", en: "/account/security" },
   },
 });
 
@@ -23,7 +32,20 @@ export type AppPathname = keyof typeof routing.pathnames;
 
 export type StaticPathname = Exclude<AppPathname, `${string}[${string}`>;
 
+export const publicAccountPathnames = [
+  "/account/sign-in",
+  "/account/sign-up",
+  "/account/forgot-password",
+  "/account/reset-password",
+] as const satisfies readonly AppPathname[];
+
+export const privatePathnames = Object.keys(routing.pathnames).filter(
+  (p) => p.startsWith("/account") && !(publicAccountPathnames as readonly string[]).includes(p),
+) as StaticPathname[];
+
 export const staticPathnames = Object.keys(routing.pathnames).filter((p) => !p.includes("[")) as StaticPathname[];
+
+export const indexablePathnames = staticPathnames.filter((p) => !p.startsWith("/account"));
 
 export const navItems = [
   { href: "/story", key: "story" },
