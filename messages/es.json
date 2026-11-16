@@ -30,7 +30,8 @@
     "backHome": "Volver al inicio",
     "newTab": "(abre en una pestaña nueva)",
     "email": "Correo electrónico",
-    "closed": "Cerrado"
+    "closed": "Cerrado",
+    "account": "Tu cuenta"
   },
   "nav": {
     "home": "Inicio",
@@ -460,5 +461,212 @@
     "allergens": "¿Alergias o intolerancias? Pregúntanos antes de pedir.",
     "customize": "Personalizar",
     "title": "{name} — MŌRI Matcha Bar & Culture"
+  },
+  "account": {
+    "title": "Tu cuenta",
+    "metaTitle": "{page} — MŌRI Matcha Bar & Culture",
+    "nav": {
+      "label": "Secciones de tu cuenta",
+      "overview": "Resumen",
+      "profile": "Perfil",
+      "addresses": "Direcciones",
+      "favourites": "Favoritos",
+      "security": "Seguridad",
+      "signOut": "Cerrar sesión",
+      "account": "Tu cuenta"
+    },
+    "signIn": {
+      "title": "Hola de nuevo",
+      "lede": "Entra para ver tus pedidos y repetir tu favorito.",
+      "google": "Continuar con Google",
+      "or": "o con tu email",
+      "email": "Email",
+      "password": "Contraseña",
+      "forgot": "¿La has olvidado?",
+      "submit": "Entrar",
+      "noAccount": "¿Primera vez?",
+      "create": "Crea tu cuenta",
+      "googleFailed": "No hemos podido entrar con Google. Inténtalo de nuevo o usa tu email.",
+      "demoTitle": "¿Solo quieres echar un vistazo?",
+      "demo": "Entrar en modo demo",
+      "demoFailed": "No hemos podido entrar con la cuenta demo. Inténtalo en un momento.",
+      "demoLede": "Entra en una cuenta de demostración con dirección y favoritos de ejemplo."
+    },
+    "signUp": {
+      "title": "Crea tu cuenta",
+      "lede": "Guarda direcciones, favoritos y tu historial de pedidos.",
+      "name": "Nombre",
+      "email": "Email",
+      "password": "Contraseña",
+      "passwordHint": "Mínimo 8 caracteres. Mejor una frase que una palabra.",
+      "strength": "Seguridad de la contraseña: {level}",
+      "levels": ["muy baja", "baja", "aceptable", "buena", "muy buena"],
+      "privacy": "He leído y acepto la política de privacidad",
+      "marketing": "Quiero recibir novedades y promociones de MŌRI",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signIn": "Entra",
+      "forgot": "Recuperar contraseña",
+      "doneTitle": "Cuenta creada",
+      "doneText": "Ya puedes iniciar sesión con tu email y tu contraseña.",
+      "doneCta": "Iniciar sesión"
+    },
+    "forgot": {
+      "title": "Recupera tu contraseña",
+      "lede": "Te enviamos un enlace para elegir una nueva.",
+      "email": "Email",
+      "submit": "Enviar enlace",
+      "doneTitle": "Revisa tu email",
+      "doneText": "Si hay una cuenta con ese email, te llegará un enlace para elegir una contraseña nueva. Caduca en una hora.",
+      "back": "Volver a entrar"
+    },
+    "reset": {
+      "title": "Elige una contraseña nueva",
+      "lede": "Al guardarla cerraremos tus otras sesiones.",
+      "password": "Contraseña nueva",
+      "confirmation": "Repite la contraseña",
+      "submit": "Guardar contraseña",
+      "doneTitle": "Contraseña cambiada",
+      "doneText": "Ya puedes entrar con tu contraseña nueva.",
+      "signIn": "Entrar",
+      "invalidTitle": "Este enlace ya no sirve",
+      "invalidText": "Ha caducado o ya se ha usado. Pide uno nuevo y llegará en un momento.",
+      "requestNew": "Pedir otro enlace"
+    },
+    "overview": {
+      "morning": "Buenos días, {name}",
+      "afternoon": "Buenas tardes, {name}",
+      "evening": "Buenas noches, {name}",
+      "lede": "Aquí tienes tus favoritos, tus direcciones y tus datos.",
+      "ordersTitle": "Tus pedidos",
+      "ordersEmpty": "Aquí verás tus pedidos y podrás repetirlos. Los pedidos online llegan muy pronto.",
+      "favouritesTitle": "Favoritos",
+      "favouritesEmpty": "Guarda tus bebidas favoritas desde su página en la carta.",
+      "seeMenu": "Ver la carta",
+      "addressesTitle": "Direcciones",
+      "addressesCount": "{count, plural, =0 {Sin direcciones guardadas} one {# dirección guardada} other {# direcciones guardadas}}",
+      "manage": "Gestionar",
+      "demoTitle": "Cuenta de demostración",
+      "demoText": "Es una cuenta compartida: puedes probar el perfil, las direcciones y los favoritos, pero no cambiar su contraseña ni eliminarla."
+    },
+    "profile": {
+      "title": "Perfil",
+      "lede": "Tus datos para los pedidos y los emails.",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "phoneHint": "Opcional. Solo para avisarte si hay algún problema con tu pedido.",
+      "email": "Email",
+      "emailHint": "Si quieres cambiarlo, escríbenos.",
+      "locale": "Idioma de los emails",
+      "localeEs": "Español",
+      "localeEn": "English",
+      "marketing": "Quiero recibir novedades y promociones de MŌRI",
+      "save": "Guardar cambios",
+      "saved": "Cambios guardados."
+    },
+    "addresses": {
+      "title": "Direcciones",
+      "lede": "Para pedir a domicilio sin escribirla cada vez.",
+      "add": "Añadir dirección",
+      "editing": "Editar {label}",
+      "removeLabel": "Eliminar {label}",
+      "editLabel": "Editar {label}",
+      "edit": "Editar",
+      "remove": "Eliminar",
+      "default": "Predeterminada",
+      "label": "Nombre",
+      "labelHint": "Casa, Oficina…",
+      "line1": "Calle y número",
+      "line2": "Piso y puerta",
+      "instructions": "Indicaciones para el reparto",
+      "optional": "opcional",
+      "postalCode": "Código postal",
+      "city": "Ciudad",
+      "isDefault": "Usar como predeterminada",
+      "save": "Guardar dirección",
+      "cancel": "Cancelar",
+      "empty": "Aún no tienes direcciones guardadas.",
+      "saved": "Dirección guardada.",
+      "removed": "Dirección eliminada.",
+      "zone": "Repartimos en {codes}. Puedes guardar otras direcciones para recoger en tienda.",
+      "outOfZone": "Fuera de la zona de reparto"
+    },
+    "favourites": {
+      "title": "Favoritos",
+      "lede": "Tus bebidas guardadas, listas para cuando vuelvas.",
+      "empty": "Aún no has guardado ninguna bebida.",
+      "add": "Guardar en favoritos",
+      "remove": "Quitar de favoritos",
+      "added": "Guardada en favoritos.",
+      "removed": "Quitada de favoritos.",
+      "signIn": "Entra para guardar favoritos"
+    },
+    "security": {
+      "title": "Seguridad",
+      "lede": "Tu contraseña, tus sesiones y tu cuenta.",
+      "passwordTitle": "Cambiar contraseña",
+      "current": "Contraseña actual",
+      "password": "Contraseña nueva",
+      "confirmation": "Repite la contraseña nueva",
+      "save": "Cambiar contraseña",
+      "changed": "Contraseña cambiada. Te hemos enviado un aviso por email y hemos cerrado tus otras sesiones.",
+      "googleOnly": "Entras con Google, así que no tienes contraseña en MŌRI.",
+      "demoLocked": "Esta es una cuenta de demostración compartida: su contraseña no se puede cambiar ni se puede eliminar.",
+      "signOutTitle": "Cerrar sesión",
+      "signOutText": "Cierra la sesión en este dispositivo.",
+      "signOut": "Cerrar sesión",
+      "deleteTitle": "Eliminar cuenta",
+      "deleteText": "Borramos tus datos personales, direcciones y favoritos. Tus pedidos se conservan sin datos personales porque la ley nos obliga a guardarlos.",
+      "deleteConfirm": "Escribe {word} para confirmar",
+      "deletePassword": "Tu contraseña",
+      "deleteSubmit": "Eliminar mi cuenta"
+    },
+    "errors": {
+      "required": "Este campo es obligatorio.",
+      "invalid": "Revisa este campo.",
+      "too_short": "Mínimo 8 caracteres.",
+      "too_long": "Es demasiado largo.",
+      "mismatch": "No coincide.",
+      "wrong": "No es correcta.",
+      "invalid_credentials": "Email o contraseña incorrectos.",
+      "rate_limited": "Demasiados intentos. Espera unos minutos y vuelve a probar.",
+      "limit": "Has llegado al máximo de 10 direcciones.",
+      "not_found": "No hemos encontrado esa dirección.",
+      "auth_required": "Tu sesión ha caducado. Vuelve a entrar.",
+      "denied": "La cuenta de demostración no puede hacer esto.",
+      "generic": "Algo ha fallado. Inténtalo de nuevo.",
+      "summary": "{count, plural, one {Revisa el campo marcado.} other {Revisa los # campos marcados.}}",
+      "fields": {
+        "email": {
+          "invalid": "Escribe un email válido."
+        },
+        "phone": {
+          "invalid": "Escribe un teléfono válido, por ejemplo +34 600 000 000."
+        },
+        "postalCode": {
+          "invalid": "Escribe un código postal de 5 cifras."
+        },
+        "privacy": {
+          "required": "Necesitamos que aceptes la política de privacidad."
+        },
+        "confirmation": {
+          "mismatch": "Las contraseñas no coinciden."
+        },
+        "current": {
+          "wrong": "La contraseña actual no es correcta."
+        },
+        "password": {
+          "wrong": "La contraseña no es correcta."
+        },
+        "word": {
+          "mismatch": "Escribe la palabra exactamente como aparece, en mayúsculas."
+        }
+      },
+      "already_exists": "Ya hay una cuenta con este email. Entra con tu contraseña o con Google, o recupera tu contraseña."
+    },
+    "password": {
+      "show": "Mostrar contraseña",
+      "hide": "Ocultar contraseña"
+    }
   }
 }

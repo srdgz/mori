@@ -14,7 +14,7 @@ La cuenta de Supabase ya tiene ocupados los dos proyectos activos del plan gratu
 | Acceso a datos | supabase-js | **Drizzle ORM** con migraciones versionadas |
 | Cuentas | Supabase Auth | **Better Auth**, con sus tablas en la misma base de datos |
 | Permisos | RLS | **Políticas en la capa de aplicación**, más funciones SQL para las operaciones críticas |
-| Tiempo real | Supabase Realtime | **Sondeo** cada pocos segundos con TanStack Query |
+| Tiempo real | Supabase Realtime | **Neon Realtime** con consultas selladas, y **sondeo** de respaldo con TanStack Query |
 | Fotos de producto | Supabase Storage | **Vercel Blob** |
 | Trabajos programados | Vercel Cron | **GitHub Actions** programado (ver D-26) |
 
@@ -81,8 +81,11 @@ Cada cambio queda en un historial con fecha, que forma la línea de tiempo del s
 
 ### D-07 · Seguimiento en directo — Aprobada (revisada el 16/11/2026)
 - Página de pedido con línea de tiempo animada, hora estimada y código de recogida corto (por ejemplo, `MR-4F7K`).
-- Se actualiza sola, sin recargar: consulta el estado cada 10 segundos mientras la pestaña está visible y deja de hacerlo cuando el pedido termina.
-- **Por qué sondeo y no WebSockets:** en Vercel las funciones no mantienen conexiones abiertas, y un servicio de tiempo real externo sería otro proveedor más. Para un pedido que cambia de estado cuatro o cinco veces, unos segundos de retraso no se notan.
+- Se actualiza sola, sin recargar, con **Neon Realtime** y **sondeo de respaldo**:
+  - **Neon Realtime:** el servidor comprueba quién pide el pedido y sella una consulta `SELECT` solo para ese pedido. El navegador se suscribe a ella y recibe cada cambio al instante, sin poder leer ni modificar la consulta.
+  - **Sondeo:** si Realtime no está configurado (CI, PGlite en local, una vista previa sin Realtime) o la suscripción falla, la página consulta el estado cada 10 segundos mientras está visible.
+  - En los dos casos se deja de escuchar cuando el pedido termina.
+- **Por qué los dos:** Neon Realtime está en beta. Con el sondeo detrás, la tienda sigue funcionando aunque la beta falle o cambie, y la interfaz no nota la diferencia.
 
 ### D-08 · Panel de tienda — Aprobada
 Roles `customer`, `staff` y `admin`.
@@ -94,9 +97,9 @@ Roles `customer`, `staff` y `admin`.
 - **Cupones (admin):** código, porcentaje o importe, mínimo, caducidad y usos.
 - **Reembolsos (admin).**
 
-### D-09 · Cuenta de cliente — Aprobada
+### D-09 · Cuenta de cliente — Aprobada (revisada el 16/11/2026)
 - **Acceso:**
-  - Registro con email y contraseña, con confirmación por email.
+  - Registro con email y contraseña: la cuenta se crea al momento, la pantalla confirma que se ha creado y ofrece iniciar sesión. No se envía ningún email de confirmación. Así quien revise el portfolio no depende de recibir un email, igual que un invitado puede comprar dando cualquier email. Si el email ya tiene cuenta, el registro lo dice en pantalla y ofrece entrar, recuperar la contraseña o usar Google.
   - Inicio de sesión con email y contraseña o con **Google**.
   - Recuperar contraseña.
 - **Perfil:** nombre, teléfono, idioma preferido y consentimiento de comunicaciones.
@@ -116,11 +119,12 @@ Es una pieza muy visual para el portfolio (tarjeta con sellos animados) y típic
 - Cupones de demostración: `BIENVENIDA10` (10 % en el primer pedido) y `MATCHAMIGO` (2 € desde 15 €).
 
 ### D-12 · Emails transaccionales — Aprobada (revisada el 16/11/2026)
-- **Mensajes:** confirmación de pedido, pedido listo para recoger, pedido en reparto y reembolso. Se diseñan con React Email en la estética de MŌRI y se envían con **Resend**.
-- **Emails de autenticación** (confirmar cuenta y recuperar contraseña): Better Auth los pide a través del mismo puerto `Mailer`, así que comparten diseño, idiomas y proveedor con el resto.
+- **Mensajes:** confirmación de pedido, pedido listo para recoger, pedido en reparto y reembolso. Se escriben como plantillas HTML propias en la estética de MŌRI, sin dependencias extra, y se envían por **SMTP con una cuenta de Gmail** (contraseña de aplicación), que llega a cualquier dirección sin necesidad de dominio propio. Resend queda como alternativa si algún día hay dominio. En los E2E se guardan en un archivo y, sin configuración, en local salen por consola.
+- **Emails de autenticación** (recuperar contraseña y aviso de contraseña cambiada; no hay email de confirmación de cuenta): Better Auth los pide a través del mismo puerto `Mailer`, así que comparten diseño, idiomas y proveedor con el resto.
 - **Limitación sin dominio propio:** Resend solo entrega al email de la cuenta, lo que basta para la demo. Con un dominio verificado llegan a cualquiera.
 
 ### D-13 · Modo demo para quien revise el portfolio — Aprobada
+- **Cliente de demostración (desde la Fase 3):** la pantalla de entrar ofrece el botón **«Entrar en modo demo»**, que entra con un clic en la cuenta `cliente@demo.mori` sin escribir nada. Tiene dirección y favoritos de ejemplo y puede usar todo el área de cliente, pero no cambiar su contraseña ni eliminarse. Se crea con el seed.
 - **Panel de tienda:** la portada y el README ofrecen **«Ver el panel de tienda (demo)»**. Entra con una cuenta `staff` de demostración que ve pedidos reales de prueba, pero no puede cambiar ajustes ni productos. Las acciones de admin se muestran deshabilitadas con una explicación.
 - **Pedidos de ejemplo:** un trabajo programado genera algunos cada día para que el tablero nunca esté vacío.
 - **Pagos:** cualquiera puede pagar con la tarjeta de prueba `4242 4242 4242 4242`. Un aviso fijo en el checkout lo explica.
@@ -167,7 +171,9 @@ Es la Fase 1 (ver [05 · Fases](05-fases.md)) y termina con la web idéntica a l
 - **Mutaciones:** **Server Actions** con validación **zod**.
 - **Route Handlers:** solo para lo que no puede ser una Server Action: el webhook de Stripe, Better Auth, el permiso de subida a Vercel Blob, las lecturas que sondea el cliente y los trabajos programados.
 - **Estado del carrito:** un store ligero de cliente (**Zustand**) persistido en `localStorage`.
-- **Datos del servidor en cliente:** el tablero y el seguimiento usan **TanStack Query** con `refetchInterval`. El sondeo se para con la pestaña en segundo plano, y las respuestas llevan `ETag` para que una consulta sin cambios no devuelva datos.
+- **Datos del servidor en cliente:** el tablero y el seguimiento usan **TanStack Query**.
+  - Con Neon Realtime, cada cambio recibido actualiza la caché de la consulta.
+  - Sin Realtime, la misma consulta usa `refetchInterval`. El sondeo se para con la pestaña en segundo plano, y las respuestas llevan `ETag` para que una consulta sin cambios no devuelva datos.
 
 ### D-19 · Clean architecture — Aprobada (revisada el 16/11/2026)
 Cuatro capas con dependencias solo hacia dentro. Detalle en [02 · Arquitectura](02-arquitectura.md).
@@ -229,7 +235,7 @@ Sustituye a la antigua «D-20 · Supabase».
 - Solo euros, con el IVA (10 %, hostelería) incluido y desglosado en el ticket.
 
 ### D-24 · Seguridad — Aprobada (revisada el 16/11/2026)
-- **Peticiones:** las Server Actions comprueban el origen (por defecto en Next.js). También se verifica la firma del webhook de Stripe y hay límites de frecuencia en registro e inicio de sesión (los de Better Auth) y en cupones (una tabla propia).
+- **Peticiones:** las Server Actions comprueban el origen (por defecto en Next.js). También se verifica la firma del webhook de Stripe y hay límites de frecuencia propios, guardados en la base de datos, en registro, inicio de sesión, recuperación de contraseña y cupones. Los de Better Auth solo cubren las peticiones HTTP a `/api/auth`, y nuestros formularios usan Server Actions.
 - **Rutas protegidas:** `proxy.ts` solo mira si existe la cookie de sesión y redirige pronto a quien no la tiene. Cada layout de `/cuenta` y `/admin` valida la sesión y el rol en el servidor, y cada caso de uso vuelve a comprobar la política, así que saltarse la interfaz no da acceso a nada.
 - **Datos de otros:** las consultas de cliente siempre filtran por el usuario de la sesión, nunca por un id que venga del navegador. El seguimiento de un invitado exige el `tracking_token` del enlace.
 - **Cabeceras:** cabeceras de seguridad en `vercel.json`.
@@ -261,5 +267,6 @@ Sustituye a la antigua «D-20 · Supabase».
 | 3 | Cuenta en Resend y su clave en `.env` y en Vercel | Sin dominio propio solo entrega a tu email, que basta para la demo |
 | 4 | Claves de prueba de Stripe en `.env` y en Vercel | No me las pegues en el chat |
 | 4 | Instalar Stripe CLI para los webhooks en local | Instalación global: la haces tú |
+| 5 | En Neon, activar **Realtime** en la rama principal y añadir los orígenes de la web (`allowedOrigins`) | Cambia `wal_level` a `logical` para siempre. Copiar `NEON_REALTIME_URL` y `NEON_REALTIME_SECRET` a `.env.local` y a Vercel |
 | 6 | En Vercel, Storage → añadir **Blob** | Vercel guarda `BLOB_READ_WRITE_TOKEN` |
 | 6 | Secretos `CRON_SECRET` y `SITE_URL` en GitHub (Settings → Secrets) | Para el workflow programado |

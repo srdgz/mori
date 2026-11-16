@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { actorFor, authorize, can, canViewOrder, GUEST, type Actor, type Permission, type UserId } from "./actor";
+import { actorFor, authorize, can, canViewOrder, GUEST, isDemo, type Actor, type Permission, type UserId } from "./actor";
 
 const customer = actorFor({ id: "c1", role: "customer", isDemo: false });
 const staff = actorFor({ id: "s1", role: "staff", isDemo: false });
 const demoStaff = actorFor({ id: "s2", role: "staff", isDemo: true });
+const demoCustomer = actorFor({ id: "c9", role: "customer", isDemo: true });
 const admin = actorFor({ id: "a1", role: "admin", isDemo: false });
 
 const all: Permission[] = [
   "account.manage",
+  "account.credentials",
   "loyalty.redeem",
   "orders.board",
   "orders.advance",
@@ -25,7 +27,7 @@ function allowed(actor: Actor): Permission[] {
 
 describe("actorFor", () => {
   it("maps each role to its actor", () => {
-    expect(customer).toEqual({ kind: "customer", id: "c1" });
+    expect(customer).toEqual({ kind: "customer", id: "c1", demo: false });
     expect(staff).toEqual({ kind: "staff", id: "s1", demo: false });
     expect(admin).toEqual({ kind: "admin", id: "a1" });
   });
@@ -37,15 +39,23 @@ describe("can", () => {
   });
 
   it("lets a customer manage their account and redeem stamps", () => {
-    expect(allowed(customer)).toEqual(["account.manage", "loyalty.redeem"]);
+    expect(allowed(customer)).toEqual(["account.manage", "account.credentials", "loyalty.redeem"]);
   });
 
   it("lets staff work the order board but not run the shop", () => {
-    expect(allowed(staff)).toEqual(["account.manage", "orders.board", "orders.advance"]);
+    expect(allowed(staff)).toEqual(["account.manage", "account.credentials", "orders.board", "orders.advance"]);
   });
 
   it("stops the shared demo staff account from changing its own credentials", () => {
-    expect(allowed(demoStaff)).toEqual(["orders.board", "orders.advance"]);
+    expect(allowed(demoStaff)).toEqual(["account.manage", "orders.board", "orders.advance"]);
+  });
+
+  it("lets the shared demo customer use the account but not change its credentials", () => {
+    expect(allowed(demoCustomer)).toEqual(["account.manage", "loyalty.redeem"]);
+  });
+
+  it("knows which actors are shared demo accounts", () => {
+    expect([customer, demoCustomer, staff, demoStaff, admin, GUEST].map(isDemo)).toEqual([false, true, false, true, false, false]);
   });
 
   it("lets an admin run the whole shop, without the customer loyalty card", () => {

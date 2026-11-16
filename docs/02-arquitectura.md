@@ -6,7 +6,7 @@
 Navegador ──▶ Next.js 16 en Vercel
                ├─ Server Components (páginas, lectura de datos)
                ├─ Server Actions (mutaciones validadas con zod)
-               ├─ Route Handlers (Stripe, Better Auth, subida a Blob, sondeo, trabajos programados)
+               ├─ Route Handlers (Stripe, Better Auth, subida a Blob, Realtime y sondeo, trabajos programados)
                └─ proxy.ts (idioma y redirección temprana si no hay cookie de sesión)
                      │
                      ▼
@@ -55,6 +55,7 @@ src/
 │     ├─ uploads/            Permiso de subida a Vercel Blob (solo admin)
 │     ├─ orders/[code]/      Estado del pedido para el seguimiento (sondeo)
 │     ├─ admin/board/        Tablero del día para el panel (sondeo)
+│     ├─ live/[query]/       Sella consultas de Neon Realtime (pedido, tablero)
 │     └─ cron/               expire-orders, demo-orders
 ├─ core/
 │  ├─ domain/
@@ -80,7 +81,7 @@ src/
 │  ├─ db/                    Cliente de Neon, esquema de Drizzle y repositorios
 │  ├─ auth/                  Configuración de Better Auth y lectura de la sesión
 │  ├─ stripe/                StripePaymentGateway, verificación del webhook
-│  ├─ resend/                ResendMailer y plantillas React Email
+│  ├─ mail/                  ResendMailer, buzón para E2E, consola y plantillas HTML
 │  ├─ blob/                  VercelBlobStorage
 │  └─ memory/                Repositorios y pasarela en memoria (tests y demo)
 ├─ composition/              container.ts (servidor)
@@ -190,7 +191,27 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 - **`payment_intent.payment_failed`:** deja el pedido en `pending_payment` para reintentar.
 - **Caducidad:** un pedido sin pagar deja de ocupar su franja a los 30 minutos, porque `slotLoad` lo ignora. El trabajo programado lo pasa después a `expired`.
 
-## Actualización en directo (sondeo)
+## Actualización en directo (Neon Realtime con sondeo de respaldo)
+
+Un puerto de presentación, `LiveQuery`, tiene dos adaptadores con la misma interfaz. La pantalla no sabe cuál está usando.
+
+### Neon Realtime (principal)
+
+1. La página pide `POST /api/live/[query]` (por ejemplo `order` o `board`).
+2. El Route Handler obtiene el `Actor`, comprueba la política con el mismo caso de uso que la lectura normal y construye un `SELECT` con Drizzle, filtrado por el pedido o por el día recibido como parámetro (Realtime no admite `now()`).
+3. Lo sella con `NEON_REALTIME_SECRET` (`@neon/realtime` y su adaptador de Drizzle) y devuelve el sellado y la URL de Realtime.
+4. El navegador se suscribe con `@neon/realtime/client`: recibe las filas actuales y después cada cambio, que actualiza la caché de TanStack Query.
+5. El sellado caduca a los 60 segundos y el cliente lo renueva con el mismo endpoint, que vuelve a comprobar la sesión.
+
+Notas:
+- **Orígenes:** solo se aceptan los de la web, configurados en `allowedOrigins` de Neon.
+- **Seguridad:** el secreto nunca llega al navegador, y el cliente no puede cambiar la consulta ni sus parámetros.
+- **Base de datos:** las tablas no usan RLS, que Realtime no admite. Activarlo pone `wal_level` en `logical` para todo el proyecto.
+- **Consumo:** las suscripciones abiertas no mantienen despierta la base de datos; solo la despierta empezar una consulta en directo.
+
+### Sondeo (respaldo)
+
+Se usa cuando no hay `NEON_REALTIME_URL` (CI, PGlite en local, una vista previa sin Realtime) o cuando la suscripción no conecta.
 
 | Pantalla | Endpoint | Intervalo | Se para |
 | --- | --- | --- | --- |
@@ -199,8 +220,11 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 | Seguimiento de invitado | `GET /api/orders/[code]?t=<tracking_token>` | 10 s | Igual |
 
 - **Sin cambios, sin datos:** cada respuesta lleva un `ETag` calculado con el `updated_at` más reciente. Si nada ha cambiado, el servidor contesta `304` sin cuerpo.
-- **Panel:** el aviso sonoro y la animación de tarjeta nueva se disparan al comparar la respuesta nueva con la anterior.
-- **Consumo:** la base de datos solo está despierta mientras alguien mira el tablero o un pedido en curso. Eso cabe de sobra en las horas de cómputo del plan gratuito de Neon.
+
+### Común
+
+- **Panel:** el aviso sonoro y la animación de tarjeta nueva se disparan al comparar los datos nuevos con los anteriores, vengan de Realtime o del sondeo.
+- **Tests:** los E2E se ejecutan con el sondeo, porque CI usa un Postgres sin Realtime. Un test comprueba además que el endpoint de sellado rechaza a quien no puede ver el pedido.
 
 ## Base de datos y despliegue
 
@@ -229,10 +253,13 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 | `GOOGLE_CLIENT_ID` | Servidor | Inicio de sesión con Google |
 | `GOOGLE_CLIENT_SECRET` | Servidor | Inicio de sesión con Google |
 | `BLOB_READ_WRITE_TOKEN` | Servidor | Vercel Blob (lo crea Vercel) |
+| `NEON_REALTIME_URL` | Servidor | URL de Realtime de la rama; se pasa a la página desde el servidor |
+| `NEON_REALTIME_SECRET` | Servidor | Sella las consultas en directo. Sin estas dos variables se usa el sondeo |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Ambos | Payment Element (`pk_test_…`) |
 | `STRIPE_SECRET_KEY` | Servidor | PaymentIntents y reembolsos (`sk_test_…`) |
 | `STRIPE_WEBHOOK_SECRET` | Servidor | Firma del webhook (`whsec_…`) |
-| `RESEND_API_KEY` | Servidor | Emails |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` | Servidor | Envío por SMTP (Gmail con contraseña de aplicación). Tiene prioridad sobre Resend |
+| `RESEND_API_KEY` | Servidor | Alternativa a SMTP, útil con dominio propio |
 | `MAIL_FROM` | Servidor | Remitente |
 | `CRON_SECRET` | Servidor y GitHub | Protege `/api/cron/*` |
 

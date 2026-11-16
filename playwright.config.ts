@@ -1,10 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import { outbox } from "./e2e/outbox";
 
 const port = Number(process.env.E2E_PORT ?? 4500);
 
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
@@ -21,5 +23,9 @@ export default defineConfig({
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
+    env: {
+      BETTER_AUTH_URL: `http://localhost:${port}`,
+      MAIL_OUTBOX: outbox,
+    },
   },
 });

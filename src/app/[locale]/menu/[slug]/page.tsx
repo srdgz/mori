@@ -6,7 +6,7 @@ import { container } from "@/composition/container";
 import type { Product } from "@/core/domain/catalog/product";
 import { localize } from "@/core/domain/shared/locale";
 import { formatMoney } from "@/core/domain/shared/money";
-import { Link } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { productPhoto } from "@/ui/brand/photos";
 import { Icon } from "@/ui/primitives/Icon";
@@ -14,6 +14,8 @@ import { cssVar } from "@/ui/primitives/style";
 import { ProductJsonLd } from "@/ui/seo/ProductJsonLd";
 import { pageMetadata } from "@/ui/seo/metadata";
 import { DrinkConfigurator, type ConfiguratorLabels } from "@/ui/shop/DrinkConfigurator";
+import { FavouriteButton } from "@/ui/account/FavouriteButton";
+import { favouriteStatusAction, toggleFavouriteAction } from "../../account/actions";
 
 type Props = { params: Promise<{ locale: AppLocale; slug: string }> };
 
@@ -60,7 +62,11 @@ function RelatedDrink({ drink, locale }: { drink: Product; locale: AppLocale }) 
 export default async function ProductPage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const [t, page] = await Promise.all([getTranslations("product"), container().getProduct(slug)]);
+  const [t, fav, page] = await Promise.all([
+    getTranslations("product"),
+    getTranslations("account.favourites"),
+    container().getProduct(slug),
+  ]);
   if (!page) notFound();
   const { product, related } = page;
 
@@ -127,6 +133,15 @@ export default async function ProductPage({ params }: Props) {
             </h1>
             <p className="lede hero-in mt-5">{localize(product.shortDescription, locale)}</p>
             <p className="hero-in mt-4 max-w-[56ch] text-ink-soft">{localize(product.description, locale)}</p>
+            <div className="hero-in mt-6">
+              <FavouriteButton
+                slug={product.slug}
+                status={favouriteStatusAction}
+                toggle={toggleFavouriteAction}
+                next={getPathname({ locale, href: { pathname: "/menu/[slug]", params: { slug: product.slug } } })}
+                labels={{ add: fav("add"), remove: fav("remove"), added: fav("added"), removed: fav("removed"), signIn: fav("signIn") }}
+              />
+            </div>
 
             <div className="mt-[clamp(28px,4vw,44px)] border-t border-line pt-[clamp(24px,3vw,36px)]">
               {product.isAvailable ? (

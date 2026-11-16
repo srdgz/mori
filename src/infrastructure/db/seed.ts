@@ -1,21 +1,28 @@
 import { storeSeed } from "../memory/memory-store-repository";
+import { hashPassword } from "better-auth/crypto";
+import { eq } from "drizzle-orm";
 import { categorySeed, optionGroupSeed, productGroupIds, productSeed } from "../seed/catalog";
+import { demoAddress, demoCustomer, demoFavouriteSlugs } from "../seed/demo";
 import type { Database } from "./database";
 import {
+  accounts,
+  addresses,
   categories,
   coupons,
   deliveryZones,
+  favourites,
   openingHours,
   optionGroups,
   options,
   productOptionGroups,
   products,
   storeSettings,
+  users,
 } from "./schema";
 
 export const deliveryPostalCodes = ["28004", "28005", "28010", "28012", "28013", "28015"];
 
-export async function seedDatabase(db: Database): Promise<void> {
+async function seedShop(db: Database): Promise<void> {
   await db.transaction(async (tx) => {
     await tx.insert(storeSettings).values({ id: 1 }).onConflictDoNothing();
 
@@ -83,4 +90,29 @@ export async function seedDatabase(db: Database): Promise<void> {
       .values(productSeed.flatMap((product) => product.groups.map((group) => ({ productId: product.id, ...productGroupIds(group) }))))
       .onConflictDoNothing();
   });
+}
+
+async function seedDemoCustomer(db: Database): Promise<void> {
+  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, demoCustomer.email));
+  if (existing) return;
+  const password = await hashPassword(demoCustomer.password);
+  await db.transaction(async (tx) => {
+    await tx.insert(users).values({
+      id: demoCustomer.id,
+      name: demoCustomer.name,
+      email: demoCustomer.email,
+      emailVerified: true,
+      phone: demoCustomer.phone,
+      isDemo: true,
+    });
+    await tx.insert(accounts).values({ userId: demoCustomer.id, accountId: demoCustomer.id, providerId: "credential", password });
+    await tx.insert(addresses).values({ ...demoAddress, userId: demoCustomer.id, isDefault: true });
+    const favouriteIds = productSeed.filter((p) => (demoFavouriteSlugs as readonly string[]).includes(p.slug)).map((p) => p.id);
+    await tx.insert(favourites).values(favouriteIds.map((productId) => ({ userId: demoCustomer.id, productId })));
+  });
+}
+
+export async function seedDatabase(db: Database): Promise<void> {
+  await seedShop(db);
+  await seedDemoCustomer(db);
 }

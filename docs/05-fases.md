@@ -37,7 +37,7 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - Confirmación de email y recuperación de contraseña.
   - `proxy.ts` con la redirección temprana y layouts protegidos.
 - **Área de cliente:** perfil, direcciones, favoritos, seguridad y eliminar cuenta.
-- **Emails de autenticación** con la marca, a través del `Mailer` de Resend.
+- **Emails de cuenta** con la marca (recuperar contraseña y aviso de cambio), a través del `Mailer` de Resend. El registro no pide confirmar el email.
 - **Criterio de hecho:**
   - E2E de registro, inicio de sesión, edición de perfil y direcciones.
   - Un usuario no accede a datos de otro: tests de casos de uso por rol y E2E que lo intenta cambiando la URL.
@@ -53,7 +53,8 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - El webhook es idempotente (test).
 
 ## Fase 5 · Pedidos del cliente (`feat/orders`)
-- Seguimiento en directo por sondeo con `ETag`, para usuarios con sesión y para invitados con enlace.
+- Seguimiento en directo con Neon Realtime y sondeo de respaldo (`ETag`), para usuarios con sesión y para invitados con enlace.
+- Activar Realtime en la rama principal de Neon y añadir los orígenes de la web.
 - Historial, detalle y «Repetir pedido».
 - Emails «listo para recoger» y «en reparto».
 - **Criterio de hecho:** E2E en el que el staff avanza un pedido y el cliente lo ve cambiar sin recargar.

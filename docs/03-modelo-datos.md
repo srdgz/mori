@@ -325,7 +325,7 @@ create table coupon_redemptions (
 ```
 
 - `order_items` guarda una **copia** del nombre, las opciones y los precios: un pedido antiguo no cambia aunque el producto se edite o se borre.
-- `orders.updated_at` es la base del `ETag` del sondeo: el tablero y el seguimiento solo reciben datos cuando cambia.
+- `orders.updated_at` es la base del `ETag` del sondeo de respaldo: sin Realtime, el tablero y el seguimiento solo reciben datos cuando cambia.
 
 ## Funciones y triggers
 

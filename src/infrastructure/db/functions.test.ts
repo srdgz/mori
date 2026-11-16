@@ -230,7 +230,9 @@ describe("advance_order_status", () => {
 
   it("updates updated_at so polling clients see the change", async () => {
     const id = await createOrder();
+    await test.db.execute(sql`alter table orders disable trigger orders_touch_updated_at`);
     await test.db.execute(sql`update orders set status = 'received', updated_at = now() - interval '1 hour' where id = ${id}`);
+    await test.db.execute(sql`alter table orders enable trigger orders_touch_updated_at`);
     const [before] = await test.db.select({ updatedAt: orders.updatedAt }).from(orders).where(eq(orders.id, id));
 
     await test.db.execute(sql`select advance_order_status(${id}, 'preparing', null)`);
