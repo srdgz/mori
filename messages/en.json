@@ -30,7 +30,8 @@
     "backHome": "Back to home",
     "newTab": "(opens in a new tab)",
     "email": "Email",
-    "closed": "Closed"
+    "closed": "Closed",
+    "account": "Your account"
   },
   "nav": {
     "home": "Home",
@@ -460,5 +461,201 @@
     "allergens": "Allergies or intolerances? Ask us before you order.",
     "customize": "Customise",
     "title": "{name} — MŌRI Matcha Bar & Culture"
+  },
+  "account": {
+    "title": "Your account",
+    "metaTitle": "{page} — MŌRI Matcha Bar & Culture",
+    "nav": {
+      "label": "Account sections",
+      "overview": "Overview",
+      "profile": "Profile",
+      "addresses": "Addresses",
+      "favourites": "Favourites",
+      "security": "Security",
+      "signOut": "Sign out",
+      "account": "Your account"
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "lede": "Sign in to see your orders and repeat your favourite.",
+      "google": "Continue with Google",
+      "or": "or with your email",
+      "email": "Email",
+      "password": "Password",
+      "forgot": "Forgot it?",
+      "submit": "Sign in",
+      "noAccount": "First time here?",
+      "create": "Create your account",
+      "verified": "Email confirmed. You can sign in now.",
+      "googleFailed": "We couldn’t sign you in with Google. Try again or use your email."
+    },
+    "signUp": {
+      "title": "Create your account",
+      "lede": "Save addresses, favourites and your order history.",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 8 characters. A phrase beats a word.",
+      "strength": "Password strength: {level}",
+      "levels": ["very weak", "weak", "fair", "good", "strong"],
+      "privacy": "I have read and accept the privacy policy",
+      "marketing": "Send me news and offers from MŌRI",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "doneTitle": "Check your email",
+      "doneText": "If {email} didn’t have an account, we’ve sent a link to confirm it. It expires in one hour."
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "lede": "We’ll email you a link to choose a new one.",
+      "email": "Email",
+      "submit": "Send link",
+      "doneTitle": "Check your email",
+      "doneText": "If there’s an account with that email, a link to choose a new password is on its way. It expires in one hour.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "lede": "Saving it signs you out everywhere else.",
+      "password": "New password",
+      "confirmation": "Repeat the password",
+      "submit": "Save password",
+      "doneTitle": "Password changed",
+      "doneText": "You can sign in with your new password now.",
+      "signIn": "Sign in",
+      "invalidTitle": "This link no longer works",
+      "invalidText": "It has expired or was already used. Ask for a new one and it’ll arrive in a moment.",
+      "requestNew": "Ask for a new link"
+    },
+    "overview": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}",
+      "lede": "Your favourites, addresses and details, all in one place.",
+      "ordersTitle": "Your orders",
+      "ordersEmpty": "Your orders will show up here, ready to repeat. Online ordering is coming very soon.",
+      "favouritesTitle": "Favourites",
+      "favouritesEmpty": "Save your favourite drinks from their page on the menu.",
+      "seeMenu": "See the menu",
+      "addressesTitle": "Addresses",
+      "addressesCount": "{count, plural, =0 {No saved addresses} one {# saved address} other {# saved addresses}}",
+      "manage": "Manage"
+    },
+    "profile": {
+      "title": "Profile",
+      "lede": "Your details for orders and emails.",
+      "name": "Name",
+      "phone": "Phone",
+      "phoneHint": "Optional. Only to reach you if something’s up with your order.",
+      "email": "Email",
+      "emailHint": "To change it, get in touch.",
+      "locale": "Email language",
+      "localeEs": "Español",
+      "localeEn": "English",
+      "marketing": "Send me news and offers from MŌRI",
+      "save": "Save changes",
+      "saved": "Changes saved."
+    },
+    "addresses": {
+      "title": "Addresses",
+      "lede": "Order to your door without typing it every time.",
+      "add": "Add address",
+      "editing": "Edit {label}",
+      "removeLabel": "Remove {label}",
+      "editLabel": "Edit {label}",
+      "edit": "Edit",
+      "remove": "Remove",
+      "default": "Default",
+      "label": "Name",
+      "labelHint": "Home, Office…",
+      "line1": "Street and number",
+      "line2": "Floor and door",
+      "instructions": "Delivery notes",
+      "optional": "optional",
+      "postalCode": "Postcode",
+      "city": "City",
+      "isDefault": "Make it my default",
+      "save": "Save address",
+      "cancel": "Cancel",
+      "empty": "You haven’t saved any addresses yet.",
+      "saved": "Address saved.",
+      "removed": "Address removed.",
+      "zone": "We deliver to {codes}. You can save other addresses for pickup orders.",
+      "outOfZone": "Outside the delivery area"
+    },
+    "favourites": {
+      "title": "Favourites",
+      "lede": "Your saved drinks, ready for next time.",
+      "empty": "You haven’t saved any drinks yet.",
+      "add": "Save to favourites",
+      "remove": "Remove from favourites",
+      "added": "Saved to favourites.",
+      "removed": "Removed from favourites.",
+      "signIn": "Sign in to save favourites"
+    },
+    "security": {
+      "title": "Security",
+      "lede": "Your password, sessions and account.",
+      "passwordTitle": "Change password",
+      "current": "Current password",
+      "password": "New password",
+      "confirmation": "Repeat the new password",
+      "save": "Change password",
+      "changed": "Password changed. We’ve emailed you a notice and signed you out everywhere else.",
+      "googleOnly": "You sign in with Google, so you don’t have a MŌRI password.",
+      "demoLocked": "This is a shared demo account: its password can’t be changed and it can’t be deleted.",
+      "signOutTitle": "Sign out",
+      "signOutText": "Sign out on this device.",
+      "signOut": "Sign out",
+      "deleteTitle": "Delete account",
+      "deleteText": "We erase your personal details, addresses and favourites. Your orders are kept without personal data because the law requires it.",
+      "deleteConfirm": "Type {word} to confirm",
+      "deletePassword": "Your password",
+      "deleteSubmit": "Delete my account"
+    },
+    "errors": {
+      "required": "This field is required.",
+      "invalid": "Check this field.",
+      "too_short": "At least 8 characters.",
+      "too_long": "That’s too long.",
+      "mismatch": "It doesn’t match.",
+      "wrong": "That’s not right.",
+      "invalid_credentials": "Wrong email or password.",
+      "email_not_verified": "You haven’t confirmed your email yet. We’ve sent you another link.",
+      "rate_limited": "Too many attempts. Wait a few minutes and try again.",
+      "limit": "You’ve reached the limit of 10 addresses.",
+      "not_found": "We couldn’t find that address.",
+      "auth_required": "Your session expired. Sign in again.",
+      "denied": "The demo account can’t do this.",
+      "generic": "Something went wrong. Try again.",
+      "summary": "{count, plural, one {Check the highlighted field.} other {Check the # highlighted fields.}}",
+      "fields": {
+        "email": {
+          "invalid": "Enter a valid email."
+        },
+        "phone": {
+          "invalid": "Enter a valid phone, for example +34 600 000 000."
+        },
+        "postalCode": {
+          "invalid": "Enter a 5-digit postcode."
+        },
+        "privacy": {
+          "required": "Please accept the privacy policy."
+        },
+        "confirmation": {
+          "mismatch": "The passwords don’t match."
+        },
+        "current": {
+          "wrong": "Your current password isn’t right."
+        },
+        "password": {
+          "wrong": "That password isn’t right."
+        },
+        "word": {
+          "mismatch": "Type the word exactly as shown, in capitals."
+        }
+      }
+    }
   }
 }

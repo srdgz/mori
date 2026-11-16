@@ -1181,3 +1181,183 @@
   outline-offset: 4px;
   border-radius: 14px;
 }
+
+.auth-card {
+  align-self: center;
+  max-width: 520px;
+  width: 100%;
+}
+.auth-or {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+.auth-or::before,
+.auth-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-line);
+}
+.auth-done {
+  display: grid;
+  justify-items: start;
+}
+.form-note {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #f6e3dd;
+  color: #7a2a18;
+  font-size: 0.92rem;
+}
+.form-note.is-ok {
+  background: var(--color-matcha);
+  color: var(--color-forest);
+}
+.form-note.is-empty {
+  display: none;
+}
+.strength {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: rgb(24 61 43 / 0.15);
+  transition: background-color 0.3s;
+}
+.strength.is-on {
+  background: var(--color-forest);
+}
+.field input.is-readonly {
+  background: var(--color-cream);
+  color: var(--color-ink-soft);
+}
+.btn[data-pending] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.btn--danger {
+  --btn-bg: #8f2f1c;
+  --btn-fg: #fff;
+  --btn-fill: #6d2213;
+  --btn-fill-fg: #fff;
+}
+
+.account-shell {
+  display: grid;
+  gap: clamp(24px, 4vw, 64px);
+}
+@media (min-width: 60rem) {
+  .account-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: start;
+  }
+  .account-shell__side {
+    position: sticky;
+    top: calc(var(--nav-h) + 24px);
+  }
+}
+.account-shell__side {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.account-nav ul {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px;
+}
+@media (min-width: 60rem) {
+  .account-nav ul {
+    flex-direction: column;
+    overflow: visible;
+  }
+}
+.account-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0.55em 1.1em;
+  border-radius: 999px;
+  color: var(--color-forest);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.3s;
+}
+.account-nav__link:hover {
+  background: var(--color-cream);
+}
+.account-nav__link.is-current {
+  background: var(--color-forest);
+  color: var(--color-cream);
+}
+.account-nav__link:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 2px;
+}
+.account-nav__signout {
+  width: 100%;
+  color: var(--color-ink-soft);
+}
+.account-card {
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: var(--radius-card);
+  background: var(--color-cream);
+}
+.account-card--danger {
+  box-shadow: inset 0 0 0 1.5px rgb(143 47 28 / 0.35);
+  background: transparent;
+}
+a.account-card {
+  transition: transform 0.4s var(--ease-out-expo);
+}
+a.account-card:hover {
+  transform: translateY(-2px);
+}
+
+.fav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0.55em 1.1em;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px rgb(24 61 43 / 0.28);
+  color: var(--color-forest);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.fav-btn.is-on {
+  background: var(--color-forest);
+  color: var(--color-cream);
+}
+.fav-btn.is-on svg {
+  fill: currentColor;
+}
+.fav-btn:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 2px;
+}
+
+.account-link {
+  color: var(--color-forest);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+.account-link:hover {
+  background: var(--color-cream);
+}
+.account-link:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 2px;
+}
+.menu-open .account-link {
+  color: var(--color-cream);
+  box-shadow: inset 0 0 0 1px var(--color-line-light);
+}
