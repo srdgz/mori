@@ -62,6 +62,7 @@ test("checkout prices pickup, delivery and coupons on the server", async ({ page
   await page.getByLabel("Código postal").fill("28004");
   await expect(summary).toContainText("2,50 €");
   await expect(summary).toContainText("14,65 €");
+  await expect(summary).toContainText("Te faltan 11,50 € para el envío gratis a domicilio");
 });
 
 test("checkout explains coupons that don't apply", async ({ page }) => {

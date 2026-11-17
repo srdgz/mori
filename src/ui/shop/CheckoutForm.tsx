@@ -14,7 +14,7 @@ import { getPathname, Link } from "@/i18n/navigation";
 import { Submit } from "@/ui/account/form";
 import { cx } from "@/ui/primitives/cx";
 import { CartIssues, CartLines } from "./CartLines";
-import { useCartContext } from "./CartProvider";
+import { FreeDeliveryBar, useCartContext } from "./CartProvider";
 import { useCart } from "./cart-store";
 
 type AddressFields = { line1: string; line2: string; postalCode: string; city: string; instructions: string };
@@ -103,7 +103,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
   const t = useTranslations("shop.checkout");
   const locale = useLocale() as Locale;
   const { lines, ready } = useCart();
-  const { priced, catalog } = useCartContext();
+  const { priced, catalog, freeFrom } = useCartContext();
 
   const [contact, setContact] = useState({ name: user?.name ?? "", email: user?.email ?? "", phone: user?.phone ?? "" });
   const [kind, setKind] = useState<"pickup" | "delivery">("pickup");
@@ -488,6 +488,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
             <dd aria-live="polite">{formatMoney(total, locale)}</dd>
           </div>
         </dl>
+        {kind === "delivery" && quote?.delivery?.ok && <FreeDeliveryBar priced={quote.cart} freeFrom={freeFrom} />}
         {quote && <p className="text-xs text-ink-soft">{t("vat", { amount: formatMoney(quote.totals.vat, locale) })}</p>}
       </aside>
     </form>
