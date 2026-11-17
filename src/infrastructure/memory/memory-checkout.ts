@@ -1,7 +1,9 @@
 import type {
+  AdvanceResult,
   CouponRepository,
   NewOrder,
   OrderRepository,
+  OrderSummary,
   OrderView,
   PaymentEvent,
   PaymentGateway,
@@ -12,6 +14,7 @@ import type {
   StoredCoupon,
 } from "@/core/application/ports/checkout";
 import type { UserId } from "@/core/domain/access/actor";
+import { canStaffMove, type OrderStatus } from "@/core/domain/ordering/order-status";
 import { money } from "@/core/domain/shared/money";
 import { deliveryPostalCodes } from "../seed/shop";
 import { storeSeed } from "./memory-store-repository";
@@ -108,6 +111,7 @@ export class MemoryOrderRepository implements OrderRepository {
       total: order.total,
       vat: order.vat,
       lines: order.lines,
+      events: [{ status: "pending_payment", at: new Date() }],
       createdAt: new Date(),
       paymentIntentId: null,
       couponId: order.couponId,
@@ -126,7 +130,7 @@ export class MemoryOrderRepository implements OrderRepository {
     const order = this.orders[index];
     if (!order) return null;
     if (order.status !== "pending_payment" && order.status !== "expired") return { orderId: order.id, confirmedNow: false };
-    this.orders[index] = { ...order, status: "received" };
+    this.orders[index] = { ...order, status: "received", events: [...order.events, { status: "received", at: new Date() }] };
     if (order.couponId) this.coupons?.redemptions.push({ couponId: order.couponId, email: order.contactEmail });
     return { orderId: order.id, confirmedNow: true };
   }
@@ -146,6 +150,39 @@ export class MemoryOrderRepository implements OrderRepository {
         o.status !== "expired" &&
         (o.contactEmail === email || (customerId !== null && o.customerId === customerId)),
     ).length;
+  }
+  async listByCustomer(customerId: UserId, limit: number, before: Date | null): Promise<OrderSummary[]> {
+    return this.orders
+      .filter((o) => o.customerId === customerId && o.status !== "pending_payment" && o.status !== "expired")
+      .filter((o) => before === null || o.createdAt < before)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit)
+      .map((o) => ({
+        code: o.code,
+        status: o.status,
+        fulfilment: o.fulfilment,
+        slotStart: o.slotStart,
+        createdAt: o.createdAt,
+        items: o.lines.reduce((sum, l) => sum + l.quantity, 0),
+        total: o.total,
+      }));
+  }
+
+  async advance(orderId: string, next: OrderStatus): Promise<AdvanceResult> {
+    const index = this.orders.findIndex((o) => o.id === orderId);
+    const order = this.orders[index];
+    if (!order) return "not_found";
+    if (!canStaffMove(order.status, next, order.fulfilment)) return "invalid_transition";
+    this.orders[index] = { ...order, status: next, events: [...order.events, { status: next, at: new Date() }] };
+    return "advanced";
+  }
+
+  async assignCustomer(orderId: string, customerId: UserId): Promise<boolean> {
+    const index = this.orders.findIndex((o) => o.id === orderId && o.customerId === null);
+    const order = this.orders[index];
+    if (!order) return false;
+    this.orders[index] = { ...order, customerId };
+    return true;
   }
 }
 

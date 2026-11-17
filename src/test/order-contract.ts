@@ -123,5 +123,40 @@ export function orderRepositoryContract(name: string, setup: () => Promise<Order
       expect(await orders.paidOrderCount("eva@example.com", null)).toBe(1);
       expect(await orders.paidOrderCount("other@example.com", customerId)).toBe(1);
     });
+
+    it("records each step, advances only along the flow and lists a customer's orders", async () => {
+      const { orders, customerId } = await setup();
+      const input = newOrder({ customerId, contact: { name: "Noa", email: "noa@example.com", phone: "600000000" } });
+      const created = await orders.create(input);
+      if (typeof created === "string") throw new Error(created);
+      await orders.attachPayment(created.id, `pi_${input.code}`);
+      await orders.confirmPayment(`pi_${input.code}`);
+
+      expect(await orders.advance(created.id, "ready", null)).toBe("invalid_transition");
+      expect(await orders.advance(created.id, "preparing", null)).toBe("advanced");
+      expect(await orders.advance("00000000-0000-4000-8000-000000000000", "preparing", null)).toBe("not_found");
+      const view = await orders.byId(created.id);
+      expect(view?.status).toBe("preparing");
+      expect(view?.events.map((e) => e.status)).toEqual(["pending_payment", "received", "preparing"]);
+      expect(view?.events.every((e) => e.at instanceof Date)).toBe(true);
+
+      const unpaid = newOrder({ customerId });
+      await orders.create(unpaid);
+      const listed = await orders.listByCustomer(customerId, 10, null);
+      const mine = listed.find((o) => o.code === input.code);
+      expect(mine).toMatchObject({ status: "preparing", fulfilment: "pickup", items: 3, total: money(1680) });
+      expect(listed.some((o) => o.code === unpaid.code)).toBe(false);
+      expect(await orders.listByCustomer(customerId, 10, new Date(0))).toEqual([]);
+    });
+
+    it("links a guest order to a customer only once", async () => {
+      const { orders, customerId } = await setup();
+      const input = newOrder();
+      const created = await orders.create(input);
+      if (typeof created === "string") throw new Error(created);
+      expect(await orders.assignCustomer(created.id, customerId)).toBe(true);
+      expect((await orders.byId(created.id))?.customerId).toBe(customerId);
+      expect(await orders.assignCustomer(created.id, customerId)).toBe(false);
+    });
   });
 }

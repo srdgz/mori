@@ -13,8 +13,14 @@ export type OrderConfirmation = Recipient & {
   lines: readonly { name: string; quantity: number }[];
 };
 
+export type OrderUpdate = Recipient & {
+  kind: "order_ready" | "order_out_for_delivery";
+  code: string;
+  url: string;
+};
+
 export type TransactionalEmail =
-  (Recipient & { kind: "reset_password"; url: string }) | (Recipient & { kind: "password_changed" }) | OrderConfirmation;
+  (Recipient & { kind: "reset_password"; url: string }) | (Recipient & { kind: "password_changed" }) | OrderConfirmation | OrderUpdate;
 
 export interface Mailer {
   send(email: TransactionalEmail): Promise<void>;
