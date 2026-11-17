@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/i18n/routing";
 
-type Section = "signIn" | "signUp" | "forgot" | "reset" | "profile" | "addresses" | "favourites" | "security";
+type Section = "signIn" | "signUp" | "forgot" | "reset" | "profile" | "addresses" | "favourites" | "security" | "orders";
 
 export async function accountMetadata(locale: AppLocale, section: Section | "overview"): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "account" });

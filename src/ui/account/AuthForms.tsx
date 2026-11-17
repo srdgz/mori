@@ -97,7 +97,8 @@ function StrengthMeter({ password }: { password: string }) {
   );
 }
 
-export function SignUpForm({ action }: { action: FormAction }) {
+export function SignUpForm({ action, next }: { action: FormAction; next?: string }) {
+  const signInHref = { pathname: "/account/sign-in" as const, query: next ? { next } : {} };
   const t = useTranslations("account.signUp");
   const p = useTranslations("account.pending");
   const locale = useLocale();
@@ -108,7 +109,7 @@ export function SignUpForm({ action }: { action: FormAction }) {
     return (
       <Done title={t("doneTitle")}>
         <p className="mt-3 text-ink-soft">{t("doneText")}</p>
-        <Link href="/account/sign-in" className="btn mt-6">
+        <Link href={signInHref} className="btn mt-6">
           {t("doneCta")}
         </Link>
       </Done>
@@ -142,7 +143,7 @@ export function SignUpForm({ action }: { action: FormAction }) {
         <FormMessage state={state} />
         {state.code === "already_exists" && (
           <p className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            <Link href="/account/sign-in" className="link-u text-forest">
+            <Link href={signInHref} className="link-u text-forest">
               {t("signIn")}
             </Link>
             <Link href="/account/forgot-password" className="link-u text-forest">
@@ -156,7 +157,7 @@ export function SignUpForm({ action }: { action: FormAction }) {
       </form>
       <p className="text-center text-sm text-ink-soft">
         {t("hasAccount")}{" "}
-        <Link href="/account/sign-in" className="link-u text-forest">
+        <Link href={signInHref} className="link-u text-forest">
           {t("signIn")}
         </Link>
       </p>

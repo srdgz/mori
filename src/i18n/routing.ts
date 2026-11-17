@@ -24,6 +24,8 @@ export const routing = defineRouting({
     "/account/forgot-password": { es: "/cuenta/recuperar", en: "/account/forgot-password" },
     "/account/reset-password": { es: "/cuenta/nueva-contrasena", en: "/account/reset-password" },
     "/account": { es: "/cuenta", en: "/account" },
+    "/account/orders": { es: "/cuenta/pedidos", en: "/account/orders" },
+    "/account/orders/[code]": { es: "/cuenta/pedidos/[code]", en: "/account/orders/[code]" },
     "/account/profile": { es: "/cuenta/perfil", en: "/account/profile" },
     "/account/addresses": { es: "/cuenta/direcciones", en: "/account/addresses" },
     "/account/favourites": { es: "/cuenta/favoritos", en: "/account/favourites" },
@@ -44,7 +46,7 @@ export const publicAccountPathnames = [
 
 export const privatePathnames = Object.keys(routing.pathnames).filter(
   (p) => p.startsWith("/account") && !(publicAccountPathnames as readonly string[]).includes(p),
-) as StaticPathname[];
+) as AppPathname[];
 
 export const staticPathnames = Object.keys(routing.pathnames).filter((p) => !p.includes("[")) as StaticPathname[];
 
