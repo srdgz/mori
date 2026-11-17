@@ -52,12 +52,13 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - Los tests de casos de uso cubren franja llena, fuera de zona, mínimo no alcanzado, cupón caducado y precio manipulado.
   - El webhook es idempotente (test).
 
-## Fase 5 · Pedidos del cliente (`feat/orders`)
+## Fase 5 · Pedidos del cliente (`feat/orders`) — Hecha (Realtime pendiente de activar en Neon)
 - Seguimiento en directo con Neon Realtime y sondeo de respaldo (`ETag`), para usuarios con sesión y para invitados con enlace.
 - Activar Realtime en la rama principal de Neon y añadir los orígenes de la web.
 - Historial, detalle y «Repetir pedido».
 - Emails «listo para recoger» y «en reparto».
-- **Criterio de hecho:** E2E en el que el staff avanza un pedido y el cliente lo ve cambiar sin recargar.
+- «Guardar en mi cuenta» para pedidos de invitado abiertos con su enlace.
+- **Criterio de hecho:** E2E en el que el staff avanza un pedido y el cliente lo ve cambiar sin recargar. Hasta el panel de la fase 6, el test avanza el pedido con la misma función `advance_order_status` que usará el panel.
 
 ## Fase 6 · Panel de tienda (`feat/admin`)
 - Tablero en directo con aviso sonoro, detalle, ticket imprimible, cancelación y reembolso.

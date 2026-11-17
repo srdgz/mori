@@ -35,7 +35,8 @@ Decisiones afectadas, aprobadas el 16/11/2026: D-02, D-07, D-12, D-18, D-19, D-2
 ## Producto
 
 ### D-01 · Pedido como invitado o con cuenta — Aprobada
-Se puede comprar **sin cuenta**, solo con nombre, email y teléfono, como en la mayoría de tiendas actuales. La cuenta es opcional y ofrece historial, direcciones guardadas, repetir pedido y favoritos. Después de pagar como invitado se ofrece crear la cuenta con un clic, y el pedido queda vinculado a ella.
+Se puede comprar **sin cuenta**, solo con nombre, email y teléfono, como en la mayoría de tiendas actuales. La cuenta es opcional y ofrece historial, direcciones guardadas, repetir pedido y favoritos. Después de pagar como invitado se ofrece crear la cuenta con un clic.
+- **Vincular un pedido de invitado (revisado el 17/11/2026):** como el registro no verifica el email, los pedidos no se vinculan por coincidir el email. Solo se vincula un pedido cuando quien tiene la sesión iniciada abre su enlace con el `tracking_token` y pulsa «Guardar en mi cuenta»: el enlace demuestra que el pedido es suyo. «Crea tu cuenta» en la página del pedido lleva al registro y, al entrar, vuelve al pedido para guardarlo.
 Un invitado sigue su pedido con un enlace firmado que recibe por email y que aparece en la página de confirmación.
 
 ### D-02 · Catálogo en base de datos — Aprobada (revisada el 16/11/2026)
@@ -85,6 +86,7 @@ Cada cambio queda en un historial con fecha, que forma la línea de tiempo del s
   - **Neon Realtime:** el servidor comprueba quién pide el pedido y sella una consulta `SELECT` solo para ese pedido. El navegador se suscribe a ella y recibe cada cambio al instante, sin poder leer ni modificar la consulta.
   - **Sondeo:** si Realtime no está configurado (CI, PGlite en local, una vista previa sin Realtime) o la suscripción falla, la página consulta el estado cada 10 segundos mientras está visible.
   - En los dos casos se deja de escuchar cuando el pedido termina.
+  - **Implementación (17/11/2026):** la consulta sellada son los eventos del pedido (`order_events`), porque cada cambio de estado inserta uno. Al recibir un cambio, o si el sondeo ve otro `ETag`, la página se vuelve a renderizar en el servidor (`router.refresh()`), así que la línea de tiempo siempre sale del mismo componente de servidor. Mientras la suscripción está en directo no se sondea.
 - **Por qué los dos:** Neon Realtime está en beta. Con el sondeo detrás, la tienda sigue funcionando aunque la beta falle o cambie, y la interfaz no nota la diferencia.
 
 ### D-08 · Panel de tienda — Aprobada
@@ -172,7 +174,7 @@ Es la Fase 1 (ver [05 · Fases](05-fases.md)) y termina con la web idéntica a l
 - **Mutaciones:** **Server Actions** con validación **zod**.
 - **Route Handlers:** solo para lo que no puede ser una Server Action: el webhook de Stripe, Better Auth, el permiso de subida a Vercel Blob, las lecturas que sondea el cliente y los trabajos programados.
 - **Estado del carrito:** un store propio de cliente con `useSyncExternalStore`, persistido en `localStorage`. Cubre lo mismo que Zustand sin añadir una dependencia.
-- **Datos del servidor en cliente:** el tablero y el seguimiento usan **TanStack Query**.
+- **Datos del servidor en cliente:** el tablero usará **TanStack Query** (fase 6). El seguimiento no lo necesita: un hook propio vigila el pedido y pide al servidor que vuelva a renderizar la página (ver D-07).
   - Con Neon Realtime, cada cambio recibido actualiza la caché de la consulta.
   - Sin Realtime, la misma consulta usa `refetchInterval`. El sondeo se para con la pestaña en segundo plano, y las respuestas llevan `ETag` para que una consulta sin cambios no devuelva datos.
 
@@ -268,6 +270,6 @@ Sustituye a la antigua «D-20 · Supabase».
 | 3 | Cuenta en Resend y su clave en `.env` y en Vercel | Sin dominio propio solo entrega a tu email, que basta para la demo |
 | 4 | Claves de prueba de Stripe en `.env` y en Vercel | No me las pegues en el chat |
 | 4 | Instalar Stripe CLI para los webhooks en local | Instalación global: la haces tú |
-| 5 | En Neon, activar **Realtime** en la rama principal y añadir los orígenes de la web (`allowedOrigins`) | Cambia `wal_level` a `logical` para siempre. Copiar `NEON_REALTIME_URL` y `NEON_REALTIME_SECRET` a `.env.local` y a Vercel |
+| 5 | En Neon, activar **Realtime** en la rama principal y añadir los orígenes de la web (`allowedOrigins`) | Copiar `NEON_REALTIME_URL` y `NEON_REALTIME_SECRET` a `.env.local` y a Vercel. Sin ellas la web usa solo el sondeo |
 | 6 | En Vercel, Storage → añadir **Blob** | Vercel guarda `BLOB_READ_WRITE_TOKEN` |
 | 6 | Secretos `CRON_SECRET` y `SITE_URL` en GitHub (Settings → Secrets) | Para el workflow programado |
