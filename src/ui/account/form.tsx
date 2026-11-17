@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useRef, useState, type InputHTMLAttributes, type ReactNode } from "react";
+import { useFormStatus } from "react-dom";
 import { cx } from "@/ui/primitives/cx";
 import { Icon } from "@/ui/primitives/Icon";
 import { IDLE, type FormAction, type FormState } from "./form-state";
@@ -144,10 +145,30 @@ export function FormMessage({ state, success }: { state: FormState; success?: st
   );
 }
 
-export function Submit({ pending, children, className }: { pending: boolean; children: ReactNode; className?: string }) {
+type SubmitProps = { pending: boolean; children: ReactNode; pendingLabel?: string; className?: string };
+
+export function Submit({ pending, children, pendingLabel, className }: SubmitProps) {
   return (
-    <button type="submit" className={cx("btn", className)} aria-disabled={pending || undefined} data-pending={pending || undefined}>
-      {children}
+    <button
+      type="submit"
+      className={cx("btn", className)}
+      aria-disabled={pending || undefined}
+      aria-busy={pending || undefined}
+      data-pending={pending || undefined}
+    >
+      {pending && <span className="spinner" aria-hidden="true" />}
+      {pending && pendingLabel ? pendingLabel : children}
     </button>
+  );
+}
+
+type PendingButtonProps = { children: ReactNode; pendingLabel: string; className?: string };
+
+export function PendingButton({ children, pendingLabel, className }: PendingButtonProps) {
+  const { pending } = useFormStatus();
+  return (
+    <Submit pending={pending} pendingLabel={pendingLabel} className={className}>
+      {children}
+    </Submit>
   );
 }

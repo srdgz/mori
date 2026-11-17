@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { passwordStrength } from "@/core/domain/account/account";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/ui/primitives/Icon";
-import { Check, Field, FormMessage, Submit, useAccountForm } from "./form";
+import { Check, Field, FormMessage, PendingButton, Submit, useAccountForm } from "./form";
 import type { FormAction } from "./form-state";
 
 function Done({ title, children }: { title: string; children: React.ReactNode }) {
@@ -33,6 +33,7 @@ type SignInProps = {
 
 export function SignInForm({ action, googleAction, next, notice }: SignInProps) {
   const t = useTranslations("account.signIn");
+  const p = useTranslations("account.pending");
   const locale = useLocale();
   const { state, formAction, pending, formRef } = useAccountForm(action);
   return (
@@ -47,10 +48,10 @@ export function SignInForm({ action, googleAction, next, notice }: SignInProps) 
           <form action={googleAction}>
             <input type="hidden" name="locale" value={locale} />
             {next && <input type="hidden" name="next" value={next} />}
-            <button type="submit" className="btn btn--ghost w-full">
+            <PendingButton className="btn--ghost w-full" pendingLabel={p("google")}>
               <Icon name="google" size={18} />
               {t("google")}
-            </button>
+            </PendingButton>
           </form>
           <p className="auth-or">{t("or")}</p>
         </>
@@ -66,7 +67,7 @@ export function SignInForm({ action, googleAction, next, notice }: SignInProps) 
           </Link>
         </div>
         <FormMessage state={state} />
-        <Submit pending={pending} className="w-full">
+        <Submit pending={pending} pendingLabel={p("signIn")} className="w-full">
           {t("submit")}
         </Submit>
       </form>
@@ -98,6 +99,7 @@ function StrengthMeter({ password }: { password: string }) {
 
 export function SignUpForm({ action }: { action: FormAction }) {
   const t = useTranslations("account.signUp");
+  const p = useTranslations("account.pending");
   const locale = useLocale();
   const { state, formAction, pending, formRef } = useAccountForm(action);
   const [password, setPassword] = useState("");
@@ -148,7 +150,7 @@ export function SignUpForm({ action }: { action: FormAction }) {
             </Link>
           </p>
         )}
-        <Submit pending={pending} className="w-full">
+        <Submit pending={pending} pendingLabel={p("signUp")} className="w-full">
           {t("submit")}
         </Submit>
       </form>
