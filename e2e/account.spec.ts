@@ -227,3 +227,18 @@ test("the auth API only exposes what the browser needs", async ({ request }) => 
     expect((await request.post(path, { data: {} })).status(), path).toBe(404);
   }
 });
+
+test("a signed-in cart keeps its quantities across languages and reloads", async ({ page }) => {
+  await signUpNew(page, uniqueEmail("noa"));
+  await page.goto("/carta/classic-matcha");
+  await page.getByRole("button", { name: /^Añadir ·/ }).click();
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(1000);
+  for (const path of ["/en/menu/classic-matcha", "/en", "/carta/classic-matcha"]) {
+    await page.goto(path);
+    await page.waitForTimeout(800);
+  }
+  await page.reload();
+  await page.waitForTimeout(800);
+  await expect(page.getByRole("button", { name: /Abrir tu pedido, 1 bebida/ })).toBeVisible();
+});

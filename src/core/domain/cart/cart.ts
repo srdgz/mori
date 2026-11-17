@@ -52,6 +52,15 @@ export function mergeCarts(first: Cart, second: Cart): Cart {
   );
 }
 
+export function rebaseCart(sent: Cart, current: Cart, synced: Cart): Cart {
+  if (current === sent) return synced;
+  const known = new Set(sent.map(lineKey));
+  return mergeCarts(
+    current,
+    synced.filter((line) => !known.has(lineKey(line))),
+  );
+}
+
 function issueReason(error: unknown): CartIssue["reason"] {
   if (error instanceof DomainError && error.code === "catalog.product_unavailable") return "unavailable";
   if (error instanceof DomainError && error.code.startsWith("catalog.")) return "options_changed";

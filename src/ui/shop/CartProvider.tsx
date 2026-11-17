@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
-import { priceCart, type Cart, type PricedCart } from "@/core/domain/cart/cart";
+import { priceCart, rebaseCart, type Cart, type PricedCart } from "@/core/domain/cart/cart";
 import type { Product } from "@/core/domain/catalog/product";
 import { freeDeliveryProgress } from "@/core/domain/fulfilment/delivery";
 import type { Locale } from "@/core/domain/shared/locale";
@@ -12,7 +12,23 @@ import { Icon } from "@/ui/primitives/Icon";
 import { CartIssues, CartLines } from "./CartLines";
 import { cart, useCart } from "./cart-store";
 
-type SyncCart = (lines: Cart, mode: "merge" | "replace") => Promise<Cart | null>;
+type SyncCart = (lines: Cart, owner: string | null) => Promise<{ owner: string; lines: Cart } | null>;
+
+const OWNER_KEY = "mori-cart-owner";
+
+function readOwner(): string | null {
+  try {
+    return window.localStorage.getItem(OWNER_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeOwner(owner: string) {
+  try {
+    window.localStorage.setItem(OWNER_KEY, owner);
+  } catch {}
+}
 
 type CartContextValue = { catalog: readonly Product[]; freeFrom: Money; priced: PricedCart };
 
@@ -112,23 +128,25 @@ type ProviderProps = { catalog: readonly Product[]; freeFrom: Money; sync: SyncC
 
 export function CartProvider({ catalog, freeFrom, sync, children }: ProviderProps) {
   const { lines } = useCart();
-  const signedIn = useRef(false);
+  const owner = useRef<string | null>(null);
   const priced = useMemo(() => priceCart(lines, catalog), [lines, catalog]);
 
   useEffect(() => {
     cart.hydrate();
     let timer: ReturnType<typeof setTimeout> | undefined;
-    sync(cart.snapshot(), "merge")
-      .then((merged) => {
-        if (!merged) return;
-        signedIn.current = true;
-        cart.replace(merged);
+    const sent = cart.snapshot();
+    sync(sent, readOwner())
+      .then((synced) => {
+        if (!synced) return;
+        owner.current = synced.owner;
+        writeOwner(synced.owner);
+        cart.replace(rebaseCart(sent, cart.snapshot(), synced.lines));
       })
       .catch(() => undefined);
     const stop = cart.onChange((next) => {
-      if (!signedIn.current) return;
+      if (!owner.current) return;
       clearTimeout(timer);
-      timer = setTimeout(() => void sync(next, "replace").catch(() => undefined), 600);
+      timer = setTimeout(() => void sync(next, owner.current).catch(() => undefined), 600);
     });
     return () => {
       stop();

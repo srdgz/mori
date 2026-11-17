@@ -43,14 +43,27 @@ describe("SyncCart", () => {
     expect(await makeSyncCart(new MemorySavedCartRepository(), identity)([line("a", 1)], "merge")).toBeNull();
   });
 
-  it("merges the saved cart on sign-in and replaces it afterwards", async () => {
+  it("merges the saved cart once on sign-in and replaces it afterwards", async () => {
     const user = identity.addUser({ email: "ana@example.com" });
     identity.signInAs(user);
     const carts = new MemorySavedCartRepository();
     await carts.save(user.id, [line("a", 1), line("b", 1)]);
     const sync = makeSyncCart(carts, identity);
-    expect(await sync([line("a", 2)], "merge")).toEqual([line("a", 3), line("b", 1)]);
-    expect(await sync([line("c", 1)], "replace")).toEqual([line("c", 1)]);
+    expect(await sync([line("a", 2)], null)).toEqual({ owner: user.id, lines: [line("a", 3), line("b", 1)] });
+    expect(await sync([line("a", 3), line("b", 1)], user.id)).toEqual({ owner: user.id, lines: [line("a", 3), line("b", 1)] });
+    expect(await sync([line("c", 1)], user.id)).toEqual({ owner: user.id, lines: [line("c", 1)] });
     expect(await carts.load(user.id)).toEqual([line("c", 1)]);
+  });
+
+  it("merges again when another account signs in on the same browser", async () => {
+    const ana = identity.addUser({ email: "ana@example.com" });
+    const leo = identity.addUser({ email: "leo@example.com" });
+    const carts = new MemorySavedCartRepository();
+    await carts.save(leo.id, [line("b", 1)]);
+    identity.signInAs(leo);
+    expect(await makeSyncCart(carts, identity)([line("a", 1)], ana.id)).toEqual({
+      owner: leo.id,
+      lines: [line("b", 1), line("a", 1)],
+    });
   });
 });

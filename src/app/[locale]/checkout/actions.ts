@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { checkout, paymentsEnabled } from "@/composition/checkout";
 import type { CheckoutQuote, PlaceOrderResult } from "@/core/application/checkout/checkout";
+import type { SyncedCart } from "@/core/application/checkout/orders";
 import type { Cart, CartLine } from "@/core/domain/cart/cart";
 
 const lineSchema = z.object({
@@ -36,10 +37,10 @@ function toFulfilment(input: z.infer<typeof fulfilmentSchema>) {
     : { kind: "delivery" as const, address: input.address };
 }
 
-export async function syncCartAction(lines: Cart, mode: "merge" | "replace"): Promise<Cart | null> {
+export async function syncCartAction(lines: Cart, owner: string | null): Promise<SyncedCart | null> {
   const cart = toCart(lines);
   if (!cart) return null;
-  return checkout().syncCart(cart, mode === "merge" ? "merge" : "replace");
+  return checkout().syncCart(cart, typeof owner === "string" ? owner : null);
 }
 
 export type QuoteInput = { cart: Cart; fulfilment: z.infer<typeof fulfilmentSchema>; couponCode: string | null; email: string | null };

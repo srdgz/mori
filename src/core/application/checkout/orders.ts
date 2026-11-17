@@ -18,12 +18,14 @@ export function makeGetOrder(orders: OrderRepository, identity: Identity) {
   };
 }
 
+export type SyncedCart = { owner: string; lines: Cart };
+
 export function makeSyncCart(carts: SavedCartRepository, identity: Identity) {
-  return async (local: Cart, mode: "merge" | "replace"): Promise<Cart | null> => {
+  return async (local: Cart, owner: string | null): Promise<SyncedCart | null> => {
     const user = await identity.currentUser();
     if (!user) return null;
-    const next = mode === "merge" ? mergeCarts(await carts.load(user.id), local) : local;
-    await carts.save(user.id, next);
-    return next;
+    const lines = owner === user.id ? local : mergeCarts(await carts.load(user.id), local);
+    await carts.save(user.id, lines);
+    return { owner: user.id, lines };
   };
 }

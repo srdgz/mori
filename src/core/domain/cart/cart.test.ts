@@ -4,7 +4,18 @@ import type { OptionId } from "../catalog/options";
 import type { ProductId } from "../catalog/product";
 import { DomainError } from "../shared/domain-error";
 import { money } from "../shared/money";
-import { addToCart, lineKey, MAX_LINES, mergeCarts, priceCart, replaceOptions, setQuantity, type Cart, type CartLine } from "./cart";
+import {
+  addToCart,
+  lineKey,
+  MAX_LINES,
+  mergeCarts,
+  priceCart,
+  rebaseCart,
+  replaceOptions,
+  setQuantity,
+  type Cart,
+  type CartLine,
+} from "./cart";
 
 const regular = option("regular", { sort: 1 });
 const large = option("large", { sort: 2, priceDelta: money(90) });
@@ -66,6 +77,23 @@ describe("cart editing", () => {
   it("drops saved lines that no longer fit when merging", () => {
     const full: Cart = Array.from({ length: MAX_LINES }, (_, i) => line(`p${i}`, []));
     expect(mergeCarts(full, [line("extra", []), line("p0", [], 2)])[0]?.quantity).toBe(3);
+  });
+
+  it("takes the synced cart when nothing changed while it was syncing", () => {
+    const sent: Cart = [line("classic", [regular.id])];
+    const synced: Cart = [line("classic", [regular.id]), line("vanilla", [regular.id])];
+    expect(rebaseCart(sent, sent, synced)).toBe(synced);
+  });
+
+  it("keeps edits made while syncing and adds only the account's own lines", () => {
+    const sent: Cart = [line("classic", [regular.id])];
+    const current: Cart = [line("classic", [regular.id], 2), line("coconut", [regular.id])];
+    const synced: Cart = [line("classic", [regular.id], 3), line("vanilla", [regular.id])];
+    expect(rebaseCart(sent, current, synced)).toEqual([
+      line("classic", [regular.id], 2),
+      line("coconut", [regular.id]),
+      line("vanilla", [regular.id]),
+    ]);
   });
 });
 
