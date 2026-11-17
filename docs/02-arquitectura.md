@@ -201,8 +201,8 @@ Un puerto de presentación, `LiveQuery`, tiene dos adaptadores con la misma inte
 1. La página pide `POST /api/live/[query]` (por ejemplo `order` o `board`).
 2. El Route Handler obtiene el `Actor`, comprueba la política con el mismo caso de uso que la lectura normal y construye un `SELECT` con Drizzle, filtrado por el pedido o por el día recibido como parámetro (Realtime no admite `now()`).
 3. Lo sella con `NEON_REALTIME_SECRET` (`@neon/realtime` y su adaptador de Drizzle) y devuelve el sellado y la URL de Realtime.
-4. El navegador se suscribe con `@neon/realtime/client`: recibe las filas actuales y después cada cambio, que actualiza la caché de TanStack Query.
-5. El sellado caduca a los 60 segundos y el cliente lo renueva con el mismo endpoint, que vuelve a comprobar la sesión.
+4. El navegador se suscribe con `@neon/realtime/client`. En el seguimiento no usa las filas: cada cambio en los eventos del pedido hace que la página se vuelva a renderizar en el servidor. El tablero (fase 6) sí actualizará la caché de TanStack Query.
+5. El sellado caduca a los 60 segundos y el cliente lo renueva con el mismo endpoint (`QueryRefreshController` del SDK), que vuelve a comprobar la sesión o el enlace.
 
 Notas:
 - **Orígenes:** solo se aceptan los de la web, configurados en `allowedOrigins` de Neon.

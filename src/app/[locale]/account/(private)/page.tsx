@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { checkout } from "@/composition/checkout";
 import { account } from "@/composition/container";
 import { formatMoney } from "@/core/domain/shared/money";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { productPhoto } from "@/ui/brand/photos";
 import { Icon } from "@/ui/primitives/Icon";
+import { isInProgress, OrderCard } from "@/ui/shop/OrderList";
+import { reorderAction } from "../../order/actions";
 import { accountMetadata } from "../shared";
 
 type Props = { params: Promise<{ locale: AppLocale }> };
@@ -27,12 +30,14 @@ export default async function AccountOverviewPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const services = account();
-  const [t, { user }, favourites, addresses] = await Promise.all([
+  const [t, { user }, favourites, addresses, history] = await Promise.all([
     getTranslations("account.overview"),
     services.currentActor(),
     services.listFavourites(),
     services.listAddresses(),
+    checkout().listOrders(null),
   ]);
+  const latest = history?.orders[0] ?? null;
   const firstName = user?.name.split(" ")[0] ?? "";
 
   return (
@@ -52,15 +57,27 @@ export default async function AccountOverviewPage({ params }: Props) {
       )}
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="account-card bg-matcha" aria-labelledby="orders-h">
+        <section className="account-card grid content-start gap-4 bg-matcha" aria-labelledby="orders-h">
           <h2 id="orders-h" className="font-semibold text-forest">
-            {t("ordersTitle")}
+            {latest ? t("lastOrder") : t("ordersTitle")}
           </h2>
-          <p className="mt-2 text-forest">{t("ordersEmpty")}</p>
-          <Link href="/menu" className="link-u mt-5 text-forest">
-            {t("seeMenu")}
-            <Icon name="arrow" size={16} />
-          </Link>
+          {latest ? (
+            <>
+              <OrderCard order={latest} locale={locale} reorderAction={reorderAction} highlight={isInProgress(latest)} />
+              <Link href="/account/orders" className="link-u text-forest">
+                {t("seeOrders")}
+                <Icon name="arrow" size={16} />
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-forest">{t("ordersEmpty")}</p>
+              <Link href="/menu" className="link-u text-forest">
+                {t("seeMenu")}
+                <Icon name="arrow" size={16} />
+              </Link>
+            </>
+          )}
         </section>
 
         <section className="account-card" aria-labelledby="addresses-h">

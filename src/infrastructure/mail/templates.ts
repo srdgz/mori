@@ -52,6 +52,38 @@ const copy: Record<TransactionalEmail["kind"], Record<"es" | "en", Copy>> = {
       footer: "Keep this email: the link shows your order status without signing in.",
     },
   },
+  order_ready: {
+    es: {
+      subject: "Tu pedido {code} está listo · MŌRI",
+      heading: "¡Está listo, {name}!",
+      body: "Tu pedido {code} te espera en la barra de C/ Espíritu Santo, 18. Enséñanos el código al llegar.",
+      cta: "Ver mi pedido",
+      footer: "Lo guardamos frío o caliente, como lo pediste, hasta que vengas.",
+    },
+    en: {
+      subject: "Your order {code} is ready · MŌRI",
+      heading: "It’s ready, {name}!",
+      body: "Your order {code} is waiting at the bar on C/ Espíritu Santo, 18. Show us the code when you arrive.",
+      cta: "View my order",
+      footer: "We keep it hot or iced, the way you ordered it, until you get here.",
+    },
+  },
+  order_out_for_delivery: {
+    es: {
+      subject: "Tu pedido {code} va de camino · MŌRI",
+      heading: "Va de camino, {name}",
+      body: "Tu pedido {code} acaba de salir de la tienda. Llegará en unos minutos.",
+      cta: "Seguir mi pedido",
+      footer: "Si no vas a estar, avísanos respondiendo a este email.",
+    },
+    en: {
+      subject: "Your order {code} is on its way · MŌRI",
+      heading: "On its way, {name}",
+      body: "Your order {code} just left the shop. It’ll be with you in a few minutes.",
+      cta: "Track my order",
+      footer: "If you won’t be in, let us know by replying to this email.",
+    },
+  },
 };
 
 const fulfilmentCopy = {
@@ -87,7 +119,7 @@ function escape(value: string): string {
 
 export function renderEmail(email: TransactionalEmail): RenderedEmail {
   const c = copy[email.kind][email.locale];
-  const code = email.kind === "order_confirmed" ? email.code : "";
+  const code = "code" in email ? email.code : "";
   const details = email.kind === "order_confirmed" ? orderDetails(email) : null;
   const heading = c.heading.replace("{name}", email.name);
   const body = c.body.replace("{code}", code).replace("{when}", details?.sentence ?? "");

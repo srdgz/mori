@@ -47,7 +47,7 @@ Igual que la recogida, cambiando el paso de modalidad:
 - **Recuperar contraseña:** email → enlace → `/cuenta/nueva-contrasena`.
 - **Al iniciar sesión:**
   - El carrito local se fusiona con el de la cuenta, sumando cantidades de líneas idénticas.
-  - Los pedidos hechos como invitado con el mismo email confirmado se vinculan a la cuenta.
+  - Los pedidos de invitado no se vinculan por email (el registro no lo verifica). Se guardan en la cuenta desde su enlace con «Guardar en mi cuenta».
 - **Mensajes:** son genéricos («Email o contraseña incorrectos») para no revelar qué emails existen.
 
 ## Área de cliente

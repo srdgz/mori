@@ -467,6 +467,7 @@
     "nav": {
       "label": "Account sections",
       "overview": "Overview",
+      "orders": "Orders",
       "profile": "Profile",
       "addresses": "Addresses",
       "favourites": "Favourites",
@@ -539,7 +540,7 @@
       "morning": "Good morning, {name}",
       "afternoon": "Good afternoon, {name}",
       "evening": "Good evening, {name}",
-      "lede": "Your favourites, addresses and details, all in one place.",
+      "lede": "Here are your orders, your favourites and your details.",
       "ordersTitle": "Your orders",
       "ordersEmpty": "Your orders will show up here, ready to repeat.",
       "favouritesTitle": "Favourites",
@@ -549,7 +550,9 @@
       "addressesCount": "{count, plural, =0 {No saved addresses} one {# saved address} other {# saved addresses}}",
       "manage": "Manage",
       "demoTitle": "Demo account",
-      "demoText": "It’s a shared account: try the profile, addresses and favourites, but its password can’t be changed and it can’t be deleted."
+      "demoText": "It’s a shared account: try the profile, addresses and favourites, but its password can’t be changed and it can’t be deleted.",
+      "lastOrder": "Your latest order",
+      "seeOrders": "See all your orders"
     },
     "profile": {
       "title": "Profile",
@@ -674,6 +677,22 @@
       "signIn": "Signing in…",
       "signUp": "Creating your account…",
       "google": "Connecting to Google…"
+    },
+    "orders": {
+      "title": "Your orders",
+      "lede": "Track the orders on their way and repeat your favourites.",
+      "empty": "You haven’t placed an order with your account yet.",
+      "emptyCta": "See the menu",
+      "current": "In progress",
+      "past": "Earlier",
+      "track": "Track order",
+      "details": "View order",
+      "older": "See earlier orders",
+      "newest": "Back to the latest",
+      "summary": "{date} · {fulfilment} · {count, plural, one {# drink} other {# drinks}} · {total}",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "back": "All your orders"
     }
   },
   "shop": {
@@ -787,7 +806,6 @@
       "title": "Order {code}",
       "processingTitle": "Processing your payment…",
       "processingText": "This takes a few seconds. No need to reload the page.",
-      "confirmedTitle": "Order confirmed!",
       "pickupText": "Pick it up at C/ Espíritu Santo, 18 (Malasaña) on {date} at {time}. Show us this code when you arrive:",
       "deliveryText": "We’ll bring it to {address} in about 30–45 minutes. Your order code is:",
       "emailSent": "We’ve emailed the confirmation to {email}.",
@@ -809,7 +827,50 @@
       "notFoundText": "Check the link in your confirmation email or sign in to your account.",
       "backToMenu": "Back to the menu",
       "createAccount": "Create an account with {email} to keep your orders",
-      "trackingSoon": "Soon you’ll be able to follow your order live right here."
+      "titles": {
+        "received": "Order confirmed!",
+        "preparing": "We’re making your order",
+        "ready": "Your order is ready!",
+        "out_for_delivery": "Your order is on its way",
+        "completed": "Enjoy!",
+        "cancelled": "Order cancelled",
+        "refunded": "Order refunded"
+      },
+      "endedText": {
+        "cancelled": "We cancelled this order and you haven’t been charged.",
+        "refunded": "We’ve refunded you. It can take a few days to show on your card.",
+        "expired": "The payment wasn’t completed in time and the order has expired. You can place it again from the menu."
+      },
+      "code": "Your code",
+      "timeline": {
+        "title": "Tracking",
+        "pickup": {
+          "received": "Received",
+          "preparing": "Being made",
+          "ready": "Ready to pick up",
+          "completed": "Picked up"
+        },
+        "delivery": {
+          "received": "Received",
+          "preparing": "Being made",
+          "out_for_delivery": "Out for delivery",
+          "completed": "Delivered"
+        },
+        "current": "Current step: {step}",
+        "live": "Updates by itself",
+        "notify": "Let me know when it’s ready",
+        "notifyOn": "We’ll let you know in this browser",
+        "notifyTitle": "Your order {code} is ready",
+        "notifyBody": "We’re waiting for you at C/ Espíritu Santo, 18."
+      },
+      "reorder": "Order again",
+      "reorderPending": "Adding…",
+      "reorderSkipped": "We didn’t add {names}: they aren’t available right now.",
+      "reorderNone": "None of the drinks in this order are available right now.",
+      "claimTitle": "Is this your order?",
+      "claimText": "Save it to your account to see it in your history and order it again whenever you like.",
+      "claim": "Save to my account",
+      "claimed": "Saved to your account."
     }
   }
 }

@@ -467,6 +467,7 @@
     "nav": {
       "label": "Secciones de tu cuenta",
       "overview": "Resumen",
+      "orders": "Pedidos",
       "profile": "Perfil",
       "addresses": "Direcciones",
       "favourites": "Favoritos",
@@ -539,7 +540,7 @@
       "morning": "Buenos días, {name}",
       "afternoon": "Buenas tardes, {name}",
       "evening": "Buenas noches, {name}",
-      "lede": "Aquí tienes tus favoritos, tus direcciones y tus datos.",
+      "lede": "Aquí tienes tus pedidos, tus favoritos y tus datos.",
       "ordersTitle": "Tus pedidos",
       "ordersEmpty": "Aquí verás tus pedidos y podrás repetirlos.",
       "favouritesTitle": "Favoritos",
@@ -549,7 +550,9 @@
       "addressesCount": "{count, plural, =0 {Sin direcciones guardadas} one {# dirección guardada} other {# direcciones guardadas}}",
       "manage": "Gestionar",
       "demoTitle": "Cuenta de demostración",
-      "demoText": "Es una cuenta compartida: puedes probar el perfil, las direcciones y los favoritos, pero no cambiar su contraseña ni eliminarla."
+      "demoText": "Es una cuenta compartida: puedes probar el perfil, las direcciones y los favoritos, pero no cambiar su contraseña ni eliminarla.",
+      "lastOrder": "Tu último pedido",
+      "seeOrders": "Ver todos tus pedidos"
     },
     "profile": {
       "title": "Perfil",
@@ -674,6 +677,22 @@
       "signIn": "Entrando…",
       "signUp": "Creando tu cuenta…",
       "google": "Conectando con Google…"
+    },
+    "orders": {
+      "title": "Tus pedidos",
+      "lede": "Sigue tus pedidos en curso y repite tus favoritos.",
+      "empty": "Aún no has hecho ningún pedido con tu cuenta.",
+      "emptyCta": "Ver la carta",
+      "current": "En curso",
+      "past": "Anteriores",
+      "track": "Seguir pedido",
+      "details": "Ver pedido",
+      "older": "Ver pedidos anteriores",
+      "newest": "Volver a los más recientes",
+      "summary": "{date} · {fulfilment} · {count, plural, one {# bebida} other {# bebidas}} · {total}",
+      "pickup": "Recogida",
+      "delivery": "A domicilio",
+      "back": "Todos tus pedidos"
     }
   },
   "shop": {
@@ -787,7 +806,6 @@
       "title": "Pedido {code}",
       "processingTitle": "Procesando tu pago…",
       "processingText": "Esto tarda unos segundos. No hace falta que recargues la página.",
-      "confirmedTitle": "¡Pedido confirmado!",
       "pickupText": "Recógelo en C/ Espíritu Santo, 18 (Malasaña) el {date} a las {time}. Enséñanos este código al llegar:",
       "deliveryText": "Lo llevamos a {address} en unos 30–45 minutos. Tu código de pedido es:",
       "emailSent": "Te hemos enviado la confirmación a {email}.",
@@ -809,7 +827,50 @@
       "notFoundText": "Revisa el enlace del email de confirmación o entra en tu cuenta.",
       "backToMenu": "Volver a la carta",
       "createAccount": "Crea una cuenta con {email} para guardar tus pedidos",
-      "trackingSoon": "Muy pronto podrás seguir aquí tu pedido en directo."
+      "titles": {
+        "received": "¡Pedido confirmado!",
+        "preparing": "Estamos preparando tu pedido",
+        "ready": "¡Tu pedido está listo!",
+        "out_for_delivery": "Tu pedido va de camino",
+        "completed": "¡Que lo disfrutes!",
+        "cancelled": "Pedido cancelado",
+        "refunded": "Pedido reembolsado"
+      },
+      "endedText": {
+        "cancelled": "Hemos cancelado este pedido y no se te ha cobrado nada.",
+        "refunded": "Te hemos devuelto el importe. Puede tardar unos días en aparecer en tu tarjeta.",
+        "expired": "El pago no se completó a tiempo y el pedido ha caducado. Puedes volver a hacerlo desde la carta."
+      },
+      "code": "Tu código",
+      "timeline": {
+        "title": "Seguimiento",
+        "pickup": {
+          "received": "Recibido",
+          "preparing": "En preparación",
+          "ready": "Listo para recoger",
+          "completed": "Recogido"
+        },
+        "delivery": {
+          "received": "Recibido",
+          "preparing": "En preparación",
+          "out_for_delivery": "En reparto",
+          "completed": "Entregado"
+        },
+        "current": "Paso actual: {step}",
+        "live": "Se actualiza solo",
+        "notify": "Avísame cuando esté listo",
+        "notifyOn": "Te avisaremos en este navegador",
+        "notifyTitle": "Tu pedido {code} está listo",
+        "notifyBody": "Te esperamos en C/ Espíritu Santo, 18."
+      },
+      "reorder": "Repetir pedido",
+      "reorderPending": "Añadiendo…",
+      "reorderSkipped": "No hemos añadido {names}: ahora no están disponibles.",
+      "reorderNone": "Ninguna bebida de este pedido está disponible ahora.",
+      "claimTitle": "¿Es tu pedido?",
+      "claimText": "Guárdalo en tu cuenta para verlo en tu historial y repetirlo cuando quieras.",
+      "claim": "Guardar en mi cuenta",
+      "claimed": "Guardado en tu cuenta."
     }
   }
 }

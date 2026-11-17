@@ -1,20 +1,33 @@
-import { and, count, eq, gte, inArray, not, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNull, lt, not, sql, sum, type SQL } from "drizzle-orm";
 import type {
+  AdvanceResult,
   CouponRepository,
   NewOrder,
   OrderRepository,
+  OrderSummary,
   OrderView,
   SettingsRepository,
   ShopSettings,
   StoredCoupon,
 } from "@/core/application/ports/checkout";
 import type { UserId } from "@/core/domain/access/actor";
+import type { OrderStatus } from "@/core/domain/ordering/order-status";
 import type { TimeOfDay, Weekday, WeeklySchedule } from "@/core/domain/fulfilment/opening-hours";
 import { isLocale } from "@/core/domain/shared/locale";
 import { money } from "@/core/domain/shared/money";
 import type { LocalDate } from "@/core/domain/shared/zoned-time";
 import type { Database } from "./database";
-import { closures, couponRedemptions, coupons, deliveryZones, openingHours, orderItems, orders, storeSettings } from "./schema";
+import {
+  closures,
+  couponRedemptions,
+  coupons,
+  deliveryZones,
+  openingHours,
+  orderEvents,
+  orderItems,
+  orders,
+  storeSettings,
+} from "./schema";
 
 async function rows<T>(db: Database, statement: SQL): Promise<T[]> {
   return ((await db.execute(statement)) as unknown as { rows: T[] }).rows;
@@ -178,6 +191,11 @@ export class DrizzleOrderRepository implements OrderRepository {
     const [order] = await this.db.select().from(orders).where(where);
     if (!order) return null;
     const lines = await this.db.select().from(orderItems).where(eq(orderItems.orderId, order.id)).orderBy(orderItems.lineTotalCents);
+    const events = await this.db
+      .select({ status: orderEvents.status, at: orderEvents.createdAt })
+      .from(orderEvents)
+      .where(eq(orderEvents.orderId, order.id))
+      .orderBy(asc(orderEvents.id));
     return {
       id: order.id,
       code: order.code,
@@ -213,6 +231,7 @@ export class DrizzleOrderRepository implements OrderRepository {
           quantity: l.quantity,
           total: money(l.lineTotalCents),
         })),
+      events,
       createdAt: order.createdAt,
     };
   }
@@ -234,5 +253,52 @@ export class DrizzleOrderRepository implements OrderRepository {
       .from(orders)
       .where(and(owner, not(inArray(orders.status, ["pending_payment", "expired"]))));
     return row?.n ?? 0;
+  }
+
+  async listByCustomer(customerId: UserId, limit: number, before: Date | null): Promise<OrderSummary[]> {
+    const result = await this.db
+      .select({
+        code: orders.code,
+        status: orders.status,
+        fulfilment: orders.fulfilment,
+        slotStart: orders.slotStart,
+        createdAt: orders.createdAt,
+        totalCents: orders.totalCents,
+        items: sum(orderItems.quantity).mapWith(Number),
+      })
+      .from(orders)
+      .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
+      .where(
+        and(
+          eq(orders.customerId, customerId),
+          not(inArray(orders.status, ["pending_payment", "expired"])),
+          before ? lt(orders.createdAt, before) : undefined,
+        ),
+      )
+      .groupBy(orders.id)
+      .orderBy(desc(orders.createdAt))
+      .limit(limit);
+    return result.map(({ totalCents, ...row }) => ({ ...row, items: row.items ?? 0, total: money(totalCents) }));
+  }
+
+  async advance(orderId: string, next: OrderStatus, actorId: UserId | null): Promise<AdvanceResult> {
+    try {
+      await this.db.execute(sql`select advance_order_status(${orderId}, ${next}, ${actorId})`);
+      return "advanced";
+    } catch (error) {
+      const message = causeMessage(error);
+      if (message.includes("order_not_found")) return "not_found";
+      if (message.includes("invalid_transition")) return "invalid_transition";
+      throw error;
+    }
+  }
+
+  async assignCustomer(orderId: string, customerId: UserId): Promise<boolean> {
+    const updated = await this.db
+      .update(orders)
+      .set({ customerId })
+      .where(and(eq(orders.id, orderId), isNull(orders.customerId)))
+      .returning({ id: orders.id });
+    return updated.length > 0;
   }
 }

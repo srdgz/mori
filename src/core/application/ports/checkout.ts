@@ -2,6 +2,7 @@ import type { UserId } from "@/core/domain/access/actor";
 import type { CartLine } from "@/core/domain/cart/cart";
 import type { WeeklySchedule } from "@/core/domain/fulfilment/opening-hours";
 import type { OrderStatus } from "@/core/domain/ordering/order-status";
+import type { OrderEvent } from "@/core/domain/ordering/timeline";
 import type { Coupon } from "@/core/domain/promotions/coupon";
 import type { Locale, LocalizedText } from "@/core/domain/shared/locale";
 import type { Money } from "@/core/domain/shared/money";
@@ -94,8 +95,21 @@ export type OrderView = Readonly<{
   total: Money;
   vat: Money;
   lines: readonly OrderLineSnapshot[];
+  events: readonly OrderEvent[];
   createdAt: Date;
 }>;
+
+export type OrderSummary = Readonly<{
+  code: string;
+  status: OrderStatus;
+  fulfilment: "pickup" | "delivery";
+  slotStart: Date | null;
+  createdAt: Date;
+  items: number;
+  total: Money;
+}>;
+
+export type AdvanceResult = "advanced" | "invalid_transition" | "not_found";
 
 export interface OrderRepository {
   slotLoad(from: Date, to: Date): Promise<Map<number, number>>;
@@ -105,6 +119,9 @@ export interface OrderRepository {
   byId(id: string): Promise<OrderView | null>;
   byCode(code: string): Promise<OrderView | null>;
   paidOrderCount(email: string, customerId: UserId | null): Promise<number>;
+  listByCustomer(customerId: UserId, limit: number, before: Date | null): Promise<OrderSummary[]>;
+  advance(orderId: string, next: OrderStatus, actorId: UserId | null): Promise<AdvanceResult>;
+  assignCustomer(orderId: string, customerId: UserId): Promise<boolean>;
 }
 
 export type PaymentIntent = Readonly<{ id: string; clientSecret: string }>;

@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@neon/realtime": "^0.2.1",
+    "@neon/realtime-drizzle": "^0.2.0",
     "@stripe/react-stripe-js": "^7.1.0",
     "@stripe/stripe-js": "^10.3.0",
     "@vercel/functions": "^3.11.3",
