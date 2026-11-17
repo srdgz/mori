@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -5,7 +7,7 @@ import { container } from "@/composition/container";
 import { localize } from "@/core/domain/shared/locale";
 import { formatMoney } from "@/core/domain/shared/money";
 import { Link } from "@/i18n/navigation";
-import type { AppLocale } from "@/i18n/routing";
+import { routing, type AppLocale } from "@/i18n/routing";
 import { Mark } from "@/ui/brand/Mark";
 import { Marquee } from "@/ui/brand/Marquee";
 import { OpenNow } from "@/ui/brand/OpenNow";
@@ -35,6 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const [t, common, drinks, store] = await Promise.all([
     getTranslations("home"),

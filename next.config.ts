@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
     imageSizes: [96, 160, 240, 320, 480],
     qualities: [75, 80],
   },
+  async redirects() {
+    return [{ source: "/favicon.ico", destination: "/favicon.svg", permanent: true }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
