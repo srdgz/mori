@@ -7,6 +7,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { navItems, routing } from "@/i18n/routing";
 import { cx } from "@/ui/primitives/cx";
 import { AccountLink } from "@/ui/account/AccountLink";
+import { CartButton } from "@/ui/shop/CartProvider";
 import { Mark, Wordmark } from "./Mark";
 
 const HIDE_THRESHOLD = 64;
@@ -171,6 +172,7 @@ export function Header({ address, instagram }: Props) {
               ))}
             </div>
             <AccountLink label={t("account")} />
+            <CartButton />
             <button
               ref={burgerRef}
               type="button"

@@ -23,11 +23,13 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx db/migrate.ts",
     "db:seed": "tsx db/seed.ts",
-    "db:local": "pglite-server --extensions=citext --max-connections=10 --port=5433",
+    "db:local": "pglite-server --extensions=citext --max-connections=100 --port=5433",
     "vercel-build": "npm run db:migrate && npm run db:seed && npm run build"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@stripe/react-stripe-js": "^7.1.0",
+    "@stripe/stripe-js": "^10.3.0",
     "@vercel/functions": "^3.11.3",
     "better-auth": "^1.7.25",
     "drizzle-orm": "^0.45.4",
@@ -41,6 +43,7 @@
     "react-dom": "^19.3.1",
     "resend": "^6.38.1",
     "server-only": "^0.0.1",
+    "stripe": "^23.1.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

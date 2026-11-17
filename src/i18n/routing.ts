@@ -16,6 +16,9 @@ export const routing = defineRouting({
     "/culture": { es: "/cultura-matcha", en: "/matcha-culture" },
     "/find-us": { es: "/donde-estamos", en: "/find-us" },
     "/contact": { es: "/contacto", en: "/contact" },
+    "/cart": { es: "/carrito", en: "/cart" },
+    "/checkout": { es: "/checkout", en: "/checkout" },
+    "/order/[code]": { es: "/pedido/[code]", en: "/order/[code]" },
     "/account/sign-in": { es: "/cuenta/entrar", en: "/account/sign-in" },
     "/account/sign-up": { es: "/cuenta/registro", en: "/account/sign-up" },
     "/account/forgot-password": { es: "/cuenta/recuperar", en: "/account/forgot-password" },
@@ -45,7 +48,7 @@ export const privatePathnames = Object.keys(routing.pathnames).filter(
 
 export const staticPathnames = Object.keys(routing.pathnames).filter((p) => !p.includes("[")) as StaticPathname[];
 
-export const indexablePathnames = staticPathnames.filter((p) => !p.startsWith("/account"));
+export const indexablePathnames = staticPathnames.filter((p) => !p.startsWith("/account") && p !== "/cart" && p !== "/checkout");
 
 export const navItems = [
   { href: "/story", key: "story" },

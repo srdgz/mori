@@ -3,6 +3,7 @@ import { hashPassword } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 import { categorySeed, optionGroupSeed, productGroupIds, productSeed } from "../seed/catalog";
 import { demoAddress, demoCustomer, demoFavouriteSlugs } from "../seed/demo";
+import { couponSeed, deliveryPostalCodes } from "../seed/shop";
 import type { Database } from "./database";
 import {
   accounts,
@@ -20,7 +21,7 @@ import {
   users,
 } from "./schema";
 
-export const deliveryPostalCodes = ["28004", "28005", "28010", "28012", "28013", "28015"];
+export { deliveryPostalCodes } from "../seed/shop";
 
 async function seedShop(db: Database): Promise<void> {
   await db.transaction(async (tx) => {
@@ -44,10 +45,7 @@ async function seedShop(db: Database): Promise<void> {
 
     await tx
       .insert(coupons)
-      .values([
-        { code: "BIENVENIDA10", kind: "percent", value: 10, firstOrderOnly: true },
-        { code: "MATCHAMIGO", kind: "amount", value: 200, minSubtotalCents: 1500, perCustomerLimit: null },
-      ])
+      .values(couponSeed.map((c) => ({ ...c })))
       .onConflictDoNothing();
 
     await tx.insert(categories).values(categorySeed).onConflictDoNothing();

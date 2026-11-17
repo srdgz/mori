@@ -41,7 +41,7 @@ export default defineConfig([
             allowFrom("domain", ["domain"]),
             allowFrom("application", ["domain", "application"]),
             allowFrom("infrastructure", ["domain", "application", "infrastructure"]),
-            allowFrom("composition", ["domain", "application", "infrastructure", "composition"]),
+            allowFrom("composition", ["domain", "application", "infrastructure", "composition", "i18n"]),
             allowFrom("i18n", ["i18n"]),
             allowFrom("ui", ["domain", "application", "i18n", "ui", "assets"]),
             allowFrom("app", ["domain", "application", "composition", "i18n", "ui", "styles", "app"]),

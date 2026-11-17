@@ -47,10 +47,12 @@ test("iced-only drinks only offer iced", async ({ page }) => {
   await expect(temperature.getByRole("radio", { name: "Iced" })).toBeChecked();
 });
 
-test("adding explains that online ordering is coming", async ({ page }) => {
+test("adding puts the drink in the order", async ({ page }) => {
   await page.goto("/en/menu/classic-matcha");
   await page.getByRole("button", { name: /^Add ·/ }).click();
-  await expect(page.getByRole("status").filter({ hasText: /online ordering/i })).toHaveText(/online ordering is coming very soon/i);
+  const drawer = page.getByRole("dialog", { name: "Your order" });
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toContainText("Classic Matcha");
 });
 
 test("the language switch keeps the same drink", async ({ page }) => {

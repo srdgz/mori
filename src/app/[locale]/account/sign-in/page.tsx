@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { account } from "@/composition/container";
-import { getPathname, redirect } from "@/i18n/navigation";
+import { getPathname, Link, redirect } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { AuthShell } from "@/ui/account/AuthShell";
 import { SignInForm } from "@/ui/account/AuthForms";
+import { PendingButton } from "@/ui/account/form";
 import { Icon } from "@/ui/primitives/Icon";
 import { demoSignInAction, googleSignInAction, signInAction } from "../actions";
 import { accountMetadata } from "../shared";
@@ -24,6 +25,7 @@ export default async function SignInPage({ params, searchParams }: Props) {
   if ((await services.currentActor()).user) redirect({ href: "/account", locale });
   const t = await getTranslations("account.signIn");
   const google = services.identity.socialProviders().includes("google");
+  const fromCheckout = safeNext === getPathname({ locale, href: "/checkout" });
   const notice = error === "demo" ? t("demoFailed") : error ? t("googleFailed") : null;
   return (
     <AuthShell title={t("title")} lede={t("lede")}>
@@ -33,6 +35,18 @@ export default async function SignInPage({ params, searchParams }: Props) {
         next={safeNext ?? getPathname({ locale, href: "/account" })}
         notice={notice}
       />
+      {fromCheckout && (
+        <section className="account-card mt-8" aria-labelledby="guest-h">
+          <h2 id="guest-h" className="font-semibold text-forest">
+            {t("guest")}
+          </h2>
+          <p className="mt-2 text-sm text-ink-soft">{t("guestText")}</p>
+          <Link href="/checkout" className="btn btn--ghost mt-4">
+            {t("guest")}
+            <Icon name="arrow" />
+          </Link>
+        </section>
+      )}
       <section className="account-card mt-8" aria-labelledby="demo-h">
         <h2 id="demo-h" className="font-semibold text-forest">
           {t("demoTitle")}
@@ -40,10 +54,10 @@ export default async function SignInPage({ params, searchParams }: Props) {
         <p className="mt-2 text-sm text-ink-soft">{t("demoLede")}</p>
         <form action={demoSignInAction} className="mt-4">
           <input type="hidden" name="locale" value={locale} />
-          <button type="submit" className="btn btn--ghost">
+          <PendingButton className="btn--ghost" pendingLabel={t("demoPending")}>
             <Icon name="user" size={18} />
             {t("demo")}
-          </button>
+          </PendingButton>
         </form>
       </section>
     </AuthShell>

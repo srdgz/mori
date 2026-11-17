@@ -1,0 +1,127 @@
+import { describe, expect, it } from "vitest";
+import type { NewOrder, OrderRepository } from "@/core/application/ports/checkout";
+import type { UserId } from "@/core/domain/access/actor";
+import { money } from "@/core/domain/shared/money";
+
+export type OrderSetup = { orders: OrderRepository; customerId: UserId; setCapacity(capacity: number): Promise<void> };
+
+const slot = new Date("2030-01-07T10:00:00Z");
+let sequence = 0;
+
+export function newOrder(overrides: Partial<NewOrder> = {}): NewOrder {
+  sequence += 1;
+  return {
+    code: `MR-T${String(sequence).padStart(3, "0")}`,
+    customerId: null,
+    contact: { name: "Ana", email: "ana@example.com", phone: "600000000" },
+    locale: "es",
+    fulfilment: "pickup",
+    slotStart: slot,
+    deliveryAddress: null,
+    notes: null,
+    subtotal: money(1680),
+    discount: money(0),
+    deliveryFee: money(0),
+    total: money(1680),
+    vat: money(153),
+    couponId: null,
+    lines: [
+      {
+        productId: "10000000-0000-4000-8000-000000000001",
+        productName: "Classic Matcha",
+        options: [{ group: "size", code: "large", name: { es: "Grande", en: "Large" }, priceDeltaCents: 90 }],
+        unitPrice: money(580),
+        quantity: 2,
+        total: money(1160),
+      },
+      {
+        productId: "10000000-0000-4000-8000-000000000003",
+        productName: "Vanilla Matcha",
+        options: [],
+        unitPrice: money(520),
+        quantity: 1,
+        total: money(520),
+      },
+    ],
+    ...overrides,
+  };
+}
+
+export function orderRepositoryContract(name: string, setup: () => Promise<OrderSetup>) {
+  describe(`${name} (OrderRepository contract)`, () => {
+    it("stores an order and reads it back by code", async () => {
+      const { orders } = await setup();
+      const input = newOrder();
+      const created = await orders.create(input);
+      if (typeof created === "string") throw new Error(created);
+      const view = await orders.byCode(input.code);
+      expect(view).toMatchObject({
+        id: created.id,
+        code: input.code,
+        status: "pending_payment",
+        trackingToken: created.trackingToken,
+        contactEmail: "ana@example.com",
+        fulfilment: "pickup",
+        slotStart: slot,
+        total: money(1680),
+        vat: money(153),
+      });
+      expect(view?.lines).toEqual(input.lines);
+      expect(await orders.byId(created.id)).toEqual(view);
+      expect(await orders.byCode("MR-NONE")).toBeNull();
+    });
+
+    it("keeps a delivery address", async () => {
+      const { orders } = await setup();
+      const address = { line1: "C/ del Pez 12", line2: "2º B", postalCode: "28004", city: "Madrid", instructions: null };
+      const input = newOrder({ fulfilment: "delivery", slotStart: null, deliveryAddress: address });
+      await orders.create(input);
+      expect((await orders.byCode(input.code))?.deliveryAddress).toEqual(address);
+    });
+
+    it("refuses a repeated code and a full slot", async () => {
+      const { orders, setCapacity } = await setup();
+      const first = newOrder({ slotStart: new Date("2030-01-07T11:00:00Z") });
+      await orders.create(first);
+      expect(
+        await orders.create({
+          ...newOrder({
+            slotStart: null,
+            fulfilment: "delivery",
+            deliveryAddress: { line1: "x", line2: null, postalCode: "28004", city: "Madrid", instructions: null },
+          }),
+          code: first.code,
+        }),
+      ).toBe("code_taken");
+      await setCapacity(1);
+      expect(await orders.create(newOrder({ slotStart: new Date("2030-01-07T11:00:00Z") }))).toBe("slot_full");
+      await setCapacity(8);
+    });
+
+    it("counts the load of each slot in a range", async () => {
+      const { orders } = await setup();
+      const start = new Date("2030-01-08T09:00:00Z");
+      await orders.create(newOrder({ slotStart: start }));
+      await orders.create(newOrder({ slotStart: start }));
+      const load = await orders.slotLoad(new Date("2030-01-08T00:00:00Z"), new Date("2030-01-09T00:00:00Z"));
+      expect(load.get(start.getTime())).toBe(2);
+    });
+
+    it("confirms a payment once and counts paid orders", async () => {
+      const { orders, customerId } = await setup();
+      const input = newOrder({ customerId, contact: { name: "Eva", email: "eva@example.com", phone: "600000000" } });
+      const created = await orders.create(input);
+      if (typeof created === "string") throw new Error(created);
+      expect(await orders.paidOrderCount("eva@example.com", null)).toBe(0);
+
+      await orders.attachPayment(created.id, `pi_${input.code}`);
+      expect(await orders.confirmPayment(`pi_${input.code}`)).toEqual({ orderId: created.id, confirmedNow: true });
+      expect(await orders.confirmPayment(`pi_${input.code}`)).toEqual({ orderId: created.id, confirmedNow: false });
+      expect(await orders.confirmPayment("pi_unknown")).toBeNull();
+
+      expect((await orders.byId(created.id))?.status).toBe("received");
+      expect(await orders.paidOrderCount("eva@example.com", null)).toBe(1);
+      expect(await orders.paidOrderCount("other@example.com", customerId)).toBe(1);
+    });
+  });
+}

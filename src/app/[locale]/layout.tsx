@@ -12,6 +12,8 @@ import { Header } from "@/ui/brand/Header";
 import { LogoSprite } from "@/ui/brand/LogoSprite";
 import { MotionRoot } from "@/ui/motion/MotionRoot";
 import { StoreJsonLd } from "@/ui/seo/StoreJsonLd";
+import { CartProvider } from "@/ui/shop/CartProvider";
+import { syncCartAction } from "./checkout/actions";
 import "@/styles/globals.css";
 
 const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk", display: "swap" });
@@ -35,8 +37,14 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
-  const [messages, t, store] = await Promise.all([getMessages(), getTranslations("common"), container().getStoreInfo()]);
-  const clientMessages = { common: messages.common, nav: messages.nav };
+  const [messages, t, store, menu, settings] = await Promise.all([
+    getMessages(),
+    getTranslations("common"),
+    container().getStoreInfo(),
+    container().getMenu(),
+    container().getShopSettings(),
+  ]);
+  const clientMessages = { common: messages.common, nav: messages.nav, shop: { cart: messages.shop.cart } };
 
   return (
     <html lang={locale} className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
@@ -50,11 +58,13 @@ export default async function LocaleLayout({ children, params }: Props) {
           >
             {t("skip")}
           </a>
-          <Header address={store.address.street} instagram={store.instagram} />
-          <main id="main" tabIndex={-1} className="outline-none">
-            {children}
-          </main>
-          <Footer store={store} />
+          <CartProvider catalog={menu} freeFrom={settings.delivery.freeFrom} sync={syncCartAction}>
+            <Header address={store.address.street} instagram={store.instagram} />
+            <main id="main" tabIndex={-1} className="outline-none">
+              {children}
+            </main>
+            <Footer store={store} />
+          </CartProvider>
           <MotionRoot />
         </NextIntlClientProvider>
       </body>

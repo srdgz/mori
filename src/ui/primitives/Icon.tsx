@@ -28,6 +28,7 @@ const paths = {
   play: <path d="M8 5.5v13l10-6.5-10-6.5Z" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   minus: <path d="M5 12h14" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
   plus: <path d="M12 5v14M5 12h14" />,
   user: (
     <>
