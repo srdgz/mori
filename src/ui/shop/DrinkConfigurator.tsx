@@ -7,6 +7,7 @@ import type { Product } from "@/core/domain/catalog/product";
 import { localize, type Locale } from "@/core/domain/shared/locale";
 import { formatMoney } from "@/core/domain/shared/money";
 import { Icon } from "@/ui/primitives/Icon";
+import { cart } from "./cart-store";
 
 export type ConfiguratorLabels = {
   configure: string;
@@ -17,7 +18,7 @@ export type ConfiguratorLabels = {
   more: string;
   unitPrice: string;
   add: string;
-  soon: string;
+  added: string;
 };
 
 type Props = { product: Product; locale: Locale; labels: ConfiguratorLabels };
@@ -35,14 +36,12 @@ export function DrinkConfigurator({ product, locale, labels }: Props) {
   const formId = useId();
   const [selection, setSelection] = useState(() => initialSelection(product));
   const [quantity, setQuantity] = useState(1);
-  const [notice, setNotice] = useState(false);
 
   const groups = useMemo(() => [...product.optionGroups].sort((a, b) => a.sort - b.sort), [product]);
   const drink = configureDrink(product, Object.values(selection).flat());
   const total = formatMoney(lineTotal(drink, quantity), locale);
 
   function choose(group: OptionGroup, id: OptionId, checked: boolean) {
-    setNotice(false);
     setSelection((current) => {
       const picked = current[group.id] ?? [];
       const next = group.selection === "single" ? [id] : checked ? [...picked, id] : picked.filter((o) => o !== id);
@@ -52,7 +51,8 @@ export function DrinkConfigurator({ product, locale, labels }: Props) {
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    setNotice(true);
+    cart.add({ productId: product.id, optionIds: Object.values(selection).flat(), quantity }, labels.added.replace("{name}", product.name));
+    setQuantity(1);
   }
 
   return (
@@ -114,10 +114,6 @@ export function DrinkConfigurator({ product, locale, labels }: Props) {
         </button>
       </div>
       <p className="buy-bar__unit">{fill(labels.unitPrice, formatMoney(drink.unitPrice, locale))}</p>
-
-      <p role="status" className="configurator__notice">
-        {notice && labels.soon}
-      </p>
     </form>
   );
 }

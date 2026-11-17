@@ -12,6 +12,7 @@ import { systemClock } from "@/infrastructure/clock";
 import { getDatabase } from "@/infrastructure/db/client";
 import { DrizzleAddressRepository, DrizzleFavouriteRepository } from "@/infrastructure/db/drizzle-account-repositories";
 import { DrizzleCatalogRepository } from "@/infrastructure/db/drizzle-catalog-repository";
+import { DrizzleSettingsRepository } from "@/infrastructure/db/drizzle-checkout-repositories";
 import { DrizzleRateLimiter } from "@/infrastructure/db/drizzle-rate-limiter";
 import { MemoryContactInbox } from "@/infrastructure/memory/memory-contact-inbox";
 import { MemoryStoreRepository } from "@/infrastructure/memory/memory-store-repository";
@@ -26,6 +27,7 @@ function build() {
     getMenu: makeGetMenu(catalog),
     getProduct: makeGetProduct(catalog),
     getStoreInfo: makeGetStoreInfo(store),
+    getShopSettings: () => new DrizzleSettingsRepository(getDatabase()).load(),
     submitContactMessage: makeSubmitContactMessage(contactInbox, systemClock),
   };
 }

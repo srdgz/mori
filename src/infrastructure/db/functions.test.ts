@@ -160,9 +160,11 @@ describe("confirm_payment", () => {
   it("is idempotent when the webhook arrives twice", async () => {
     const id = await paidOrder({ stamps_redeemed: 8 });
 
-    await test.db.execute(sql`select confirm_payment(${`pi_${id}`})`);
-    await test.db.execute(sql`select confirm_payment(${`pi_${id}`})`);
+    const first = await query<{ order_id: string; confirmed_now: boolean }>(sql`select * from confirm_payment(${`pi_${id}`})`);
+    const second = await query<{ order_id: string; confirmed_now: boolean }>(sql`select * from confirm_payment(${`pi_${id}`})`);
 
+    expect(first).toEqual([{ order_id: id, confirmed_now: true }]);
+    expect(second).toEqual([{ order_id: id, confirmed_now: false }]);
     expect(await test.db.$count(loyaltyLedger)).toBe(2);
     expect(await test.db.$count(orderEvents, eq(orderEvents.orderId, id))).toBe(2);
     const [balance] = await query<{ stamps: number }>(sql`select stamps from loyalty_balance where user_id = ${customerId}`);
@@ -189,8 +191,7 @@ describe("confirm_payment", () => {
   });
 
   it("ignores an unknown payment", async () => {
-    const [result] = await query<{ id: string | null }>(sql`select confirm_payment('pi_unknown') as id`);
-    expect(result?.id).toBeNull();
+    expect(await query(sql`select * from confirm_payment('pi_unknown')`)).toEqual([]);
   });
 });
 

@@ -62,9 +62,10 @@ function RelatedDrink({ drink, locale }: { drink: Product; locale: AppLocale }) 
 export default async function ProductPage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const [t, fav, page] = await Promise.all([
+  const [t, fav, tShop, page] = await Promise.all([
     getTranslations("product"),
     getTranslations("account.favourites"),
+    getTranslations("shop.cart"),
     container().getProduct(slug),
   ]);
   if (!page) notFound();
@@ -79,7 +80,7 @@ export default async function ProductPage({ params }: Props) {
     more: t("more"),
     unitPrice: t.raw("unitPrice") as string,
     add: t.raw("add") as string,
-    soon: t("soon"),
+    added: tShop("added", { name: "{name}" }),
   };
 
   return (

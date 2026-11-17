@@ -185,9 +185,10 @@ Los tests de este caso de uso usan los adaptadores en memoria y un `Clock` fijo.
 
 ## Pagos
 
-- **Creación:** el PaymentIntent se crea en `PlaceOrder`, y el Payment Element se monta con su `clientSecret` y la Appearance API de MŌRI.
-- **Confirmación:** al confirmar, Stripe redirige a `/pedido/[codigo]?payment_intent=…`, y la página muestra «procesando» hasta que llega el webhook.
-- **Webhook:** se ejecuta en Node (`runtime = "nodejs"`) y lee el cuerpo sin procesar para verificar la firma. Llama a `ConfirmPayment`, que es idempotente: si el pedido ya está `received`, no hace nada.
+- **Creación:** el Payment Element se monta en modo diferido (importe y moneda, sin `clientSecret`). Al pagar, `elements.submit()` valida la tarjeta, `PlaceOrder` recalcula el precio en el servidor y crea el pedido y el PaymentIntent (clave de idempotencia `order-<id>`), y el navegador llama a `confirmPayment` con su `clientSecret`.
+- **Confirmación:** Stripe redirige a `/pedido/[codigo]?t=<tracking_token>`, y la página muestra «procesando» y se refresca hasta que llega el webhook.
+- **Webhook:** se ejecuta en Node (`runtime = "nodejs"`) y lee el cuerpo sin procesar para verificar la firma. Llama a `ConfirmPayment`, que es idempotente: `confirm_payment` devuelve `confirmed_now` y el email solo sale la primera vez.
+- **En local:** `stripe listen --forward-to localhost:3000/api/stripe/webhook` y el `whsec_…` que imprime en `STRIPE_WEBHOOK_SECRET`.
 - **`payment_intent.payment_failed`:** deja el pedido en `pending_payment` para reintentar.
 - **Caducidad:** un pedido sin pagar deja de ocupar su franja a los 30 minutos, porque `slotLoad` lo ignora. El trabajo programado lo pasa después a `expired`.
 

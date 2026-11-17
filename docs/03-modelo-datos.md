@@ -334,7 +334,7 @@ Todas se llaman con una sola sentencia, así que son atómicas sin abrir transac
 | Función | Quién la llama | Qué hace |
 | --- | --- | --- |
 | `create_order(order jsonb, items jsonb)` | `PlaceOrder` | Bloquea la franja con `pg_advisory_xact_lock`, cuenta los pedidos que la ocupan (pagados, o sin pagar de menos de `unpaid_hold_minutes`) e inserta el pedido, sus líneas y el primer evento. Si no hay hueco, lanza `slot_full` |
-| `confirm_payment(payment_intent text)` | `ConfirmPayment` (webhook) | Idempotente. Pasa `pending_payment` a `received`, fija `paid_at`, registra el cupón, resta los sellos canjeados y suma los ganados |
+| `confirm_payment(payment_intent text)` | `ConfirmPayment` (webhook) | Idempotente y devuelve `(order_id, confirmed_now)`. Pasa `pending_payment` a `received`, fija `paid_at`, registra el cupón, resta los sellos canjeados y suma los ganados |
 | `advance_order_status(order_id uuid, next order_status, actor uuid)` | `AdvanceOrderStatus` | Comprueba que la transición está permitida (la misma tabla que el dominio), actualiza el pedido e inserta el evento. El rol ya lo ha comprobado el caso de uso |
 | `expire_unpaid_orders()` | `ExpireUnpaidOrders` (trabajo programado) | Pasa a `expired` los pedidos en `pending_payment` de más de 30 min |
 | `anonymize_customer(user_id uuid)` | `DeleteAccount` | Anonimiza sus pedidos (nombre, email y teléfono) y marca `users.deleted_at`. Después Better Auth borra sesiones y cuentas |

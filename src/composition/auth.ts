@@ -8,7 +8,7 @@ import { ConsoleMailer, OutboxMailer, ResendMailer, SmtpMailer } from "@/infrast
 
 const LOCAL_SECRET = "mori-local-development-secret-not-for-production";
 
-function baseURL(): string {
+export function baseURL(): string {
   if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
   if (process.env.VERCEL_ENV === "production" && process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;

@@ -143,6 +143,7 @@ Es una pieza muy visual para el portfolio (tarjeta con sellos animados) y típic
 - **Interfaz:** panel lateral accesible, abierto desde un icono con contador en la cabecera, y página `/carrito` como alternativa.
 - **Persistencia:** el carrito se guarda en el navegador. Al iniciar sesión se fusiona con el guardado en la cuenta, así que el mismo carrito está en el móvil y en el ordenador.
 - **Avisos:** se avisa si una bebida se agota o su precio cambia antes de pagar.
+- **Invitado:** quien llega a «Entrar» desde el checkout ve también «Continuar como invitado».
 
 ## Técnicas
 
@@ -170,7 +171,7 @@ Es la Fase 1 (ver [05 · Fases](05-fases.md)) y termina con la web idéntica a l
 - **Componentes de cliente (`"use client"`):** carrito, configurador de bebida, checkout con Payment Element, formularios, panel en directo y animaciones.
 - **Mutaciones:** **Server Actions** con validación **zod**.
 - **Route Handlers:** solo para lo que no puede ser una Server Action: el webhook de Stripe, Better Auth, el permiso de subida a Vercel Blob, las lecturas que sondea el cliente y los trabajos programados.
-- **Estado del carrito:** un store ligero de cliente (**Zustand**) persistido en `localStorage`.
+- **Estado del carrito:** un store propio de cliente con `useSyncExternalStore`, persistido en `localStorage`. Cubre lo mismo que Zustand sin añadir una dependencia.
 - **Datos del servidor en cliente:** el tablero y el seguimiento usan **TanStack Query**.
   - Con Neon Realtime, cada cambio recibido actualiza la caché de la consulta.
   - Sin Realtime, la misma consulta usa `refetchInterval`. El sondeo se para con la pestaña en segundo plano, y las respuestas llevan `ETag` para que una consulta sin cambios no devuelva datos.

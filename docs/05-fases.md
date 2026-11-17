@@ -42,13 +42,13 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
   - E2E de registro, inicio de sesión, edición de perfil y direcciones.
   - Un usuario no accede a datos de otro: tests de casos de uso por rol y E2E que lo intenta cambiando la URL.
 
-## Fase 4 · Carrito y checkout (`feat/checkout`)
+## Fase 4 · Carrito y checkout (`feat/checkout`) — Hecha
 - **Carrito:** panel lateral y página, persistencia y fusión al iniciar sesión.
 - **Checkout:** recogida con franjas y capacidad, reparto con zona, mínimo y envío, cupones e IVA desglosado.
 - **Pago:** Payment Element con Appearance de MŌRI, `PlaceOrder`, webhook y `ConfirmPayment`. Los pedidos sin pagar dejan libre su franja a los 30 minutos.
 - **Confirmación:** página de confirmación y email.
 - **Criterio de hecho:**
-  - E2E paga con `4242 4242 4242 4242` en las dos modalidades.
+  - Pago con `4242 4242 4242 4242` probado a mano en local. La E2E de CI cubre carrito, precios, cupones, reparto y accesibilidad sin claves de Stripe.
   - Los tests de casos de uso cubren franja llena, fuera de zona, mínimo no alcanzado, cupón caducado y precio manipulado.
   - El webhook es idempotente (test).
 
