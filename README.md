@@ -94,7 +94,7 @@ e2e/                   Playwright and axe tests
 Key decisions (the full list, in Spanish, is in [`docs/00-decisiones.md`](docs/00-decisiones.md)):
 
 - **Server first.** Brand pages and the menu are static Server Components, revalidated when the panel changes the catalogue. Only interaction and motion run on the client.
-- **Three layers of permissions.** Domain policies are checked in every use case (100 % tested). Critical operations (create order, confirm payment, change status) are SQL functions that validate transitions and capacity on their own. In production the app connects with a Postgres role that can only read and write rows.
+- **Three layers of permissions.** Domain policies are checked in every use case (100 % tested). Critical operations (create order, confirm payment, change status) are SQL functions that validate transitions and capacity on their own. The app is ready to connect with a Postgres role that can only read and write rows (`db/app-role.sql`).
 - **The browser never talks to the database.** Server Actions validate input with zod and call use cases. Guests reach their order only with its tracking token.
 - **Realtime without lock-in.** Neon Realtime sealed queries push changes to the board and the tracking page. If Realtime is off, the same screens poll with `ETag` and `304` responses.
 - **Scheduled jobs on GitHub Actions** every 15 minutes, because Vercel Hobby cron runs once a day.
