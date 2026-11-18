@@ -236,11 +236,11 @@ Se usa cuando no hay `NEON_REALTIME_URL` (CI, PGlite en local, una vista previa 
 
 ## Rendimiento
 
-- **Páginas de marca y carta:** Server Components estáticos. Solo son cliente las animaciones (GSAP y Lenis cargados cuando el navegador está libre y el usuario no ha pedido reducir el movimiento) y el botón «Añadir».
+- **Páginas de marca y carta:** Server Components estáticos. Solo son cliente las animaciones (GSAP y Lenis cargados después del evento `load`, cuando el navegador está libre, y el usuario no ha pedido reducir el movimiento) y el botón «Añadir».
 - **Sin consultas en las páginas estáticas:** la carta se genera al compilar y se regenera con `revalidateTag` cuando el panel cambia el catálogo. Por eso la pausa de Neon tras un rato sin uso no afecta a la web pública.
-- **Recursos:** `next/font` para Space Grotesk y DM Sans (autoalojadas, con `preload`). `next/image` con AVIF y WebP y `priority` en el hero.
+- **Recursos:** `next/font` para Space Grotesk y DM Sans (autoalojadas, con `preload`). `next/image` con AVIF y WebP, y `preload` con `fetchPriority="high"` en la imagen principal de cada página.
 - **Stripe.js:** se carga solo en `/checkout`.
-- **Presupuesto de JS por ruta:** comprobado en CI.
+- **Presupuesto de JS por ruta:** Lighthouse CI lo comprueba en las páginas públicas (`lighthouserc.json`).
 
 ## Variables de entorno
 
@@ -248,6 +248,7 @@ Se usa cuando no hay `NEON_REALTIME_URL` (CI, PGlite en local, una vista previa 
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Ambos | URL canónica |
 | `DATABASE_URL` | Servidor | Conexión a Neon con pooling (la crea la integración de Vercel) |
+| `DATABASE_APP_URL` | Servidor | Opcional. Conexión con el rol `mori_app` de permisos mínimos; si existe, la app la usa en lugar de `DATABASE_URL` |
 | `DATABASE_URL_UNPOOLED` | Servidor | Conexión directa para las migraciones |
 | `BETTER_AUTH_SECRET` | Servidor | Firma de las sesiones |
 | `BETTER_AUTH_URL` | Servidor | URL base de la autenticación |

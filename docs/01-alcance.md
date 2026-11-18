@@ -39,7 +39,7 @@
 - Emails transaccionales con la marca.
 - Páginas legales.
 - Modo demo para quien revise el portfolio (ver D-13).
-- SEO: metadatos, `hreflang`, sitemap, `robots` y datos estructurados de `Product`, `CafeOrCoffeeShop` y `BreadcrumbList`.
+- SEO: metadatos, `hreflang`, sitemap, `robots` y datos estructurados de `Product`, `BreadcrumbList` y `WebSite`.
 
 ## Fuera de alcance
 - Reparto real con repartidores o integración con plataformas externas.

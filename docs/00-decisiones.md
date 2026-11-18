@@ -140,6 +140,11 @@ Es una pieza muy visual para el portfolio (tarjeta con sellos animados) y típic
 ### D-14 · Páginas legales — Aprobada
 - **Páginas:** Aviso legal, Privacidad, Cookies, y Condiciones de venta con devoluciones, en ES y EN, adaptadas a una marca ficticia.
 - **Cookies:** solo se usan cookies técnicas (sesión y carrito), así que no hace falta banner de consentimiento. Si más adelante se añade analítica, se incorporaría el banner.
+- **Implementación (Fase 7):**
+  - Una plantilla común con índice lateral y un aviso fijo: MŌRI es una marca ficticia de un proyecto de portfolio, sin local ni cobros reales.
+  - No hay datos reales: ni NIF, ni razón social, ni dirección. El responsable es «Proyecto de portfolio de srdgz» y el contacto va por la página de contacto.
+  - Enlaces en el pie y en la casilla de privacidad del registro.
+  - Los datos estructurados de negocio local (`CafeOrCoffeeShop`) se retiran para no presentar a Google una dirección inventada como real. Se quedan `Product`, `BreadcrumbList` y `WebSite`.
 
 ### D-15 · Páginas de producto — Aprobada
 - **Ruta:** cada bebida tiene su página (`/carta/classic-matcha`, `/en/menu/classic-matcha`).
@@ -211,7 +216,7 @@ Sustituye a la antigua «D-20 · Supabase».
 - **Permisos:** como el navegador nunca habla con la base de datos, no hace falta RLS.
   - **Primera capa:** las políticas de dominio, comprobadas en cada caso de uso y cubiertas al 100 % por tests.
   - **Segunda capa:** las operaciones críticas (crear pedido, confirmar pago, cambiar estado) son funciones SQL que validan por sí mismas la transición y la capacidad.
-  - En la Fase 7 se valora conectar la app con un rol de Postgres de permisos mínimos.
+  - **Tercera capa (Fase 7):** en producción la app se conecta con el rol `mori_app` (`DATABASE_APP_URL`), que solo puede leer y escribir filas y ejecutar las funciones. No puede cambiar el esquema ni borrar tablas. Las migraciones y el seed siguen usando el rol dueño (`DATABASE_URL_UNPOOLED`). El SQL está en `db/app-role.sql`.
 - **Funciones SQL** para las operaciones que deben ser atómicas: reservar franja, crear pedido, confirmar pago y sumar sellos. Cada llamada es una sola sentencia, así que es atómica sin transacciones abiertas desde la app.
 - **Vercel Blob:** fotos subidas desde el panel. El navegador sube directo a Blob con un permiso de un solo uso que firma el servidor tras comprobar que el usuario es admin.
 - **Secretos:** solo en el servidor (variables de entorno de Vercel), nunca en el navegador.
@@ -234,7 +239,7 @@ Sustituye a la antigua «D-20 · Supabase».
 | Componentes | Vitest + Testing Library | Configurador, carrito, formularios y estados vacíos y de error |
 | Extremo a extremo | Playwright | Compra con recogida y con reparto pagando con la tarjeta de prueba de Stripe, registro, cuenta y panel en directo. Cuatro anchos de pantalla |
 | Accesibilidad | axe en Playwright | Todas las pantallas en ES y EN |
-| Rendimiento | Lighthouse CI | Marca ≥ 90 en móvil, resto de categorías 100 |
+| Rendimiento | Lighthouse CI | Marca ≥ 90 en móvil en producción, resto de categorías 100 y JS por ruta ≤ 270 KB comprimido. En CI se mide `next start` (HTTP/1.1 y gzip), que da unos 6 puntos menos que Vercel (HTTP/2 y Brotli), así que el umbral de CI es 85 |
 
 **Integración continua:** GitHub Actions con lint, typecheck, tests unitarios, tests de base de datos y E2E. Además, Vercel crea una vista previa por cada pull request.
 
@@ -243,10 +248,10 @@ Sustituye a la antigua «D-20 · Supabase».
 - Solo euros, con el IVA (10 %, hostelería) incluido y desglosado en el ticket.
 
 ### D-24 · Seguridad — Aprobada (revisada el 16/11/2026)
-- **Peticiones:** las Server Actions comprueban el origen (por defecto en Next.js). También se verifica la firma del webhook de Stripe y hay límites de frecuencia propios, guardados en la base de datos, en registro, inicio de sesión, recuperación de contraseña y cupones. Los de Better Auth solo cubren las peticiones HTTP a `/api/auth`, y nuestros formularios usan Server Actions.
+- **Peticiones:** las Server Actions comprueban el origen (por defecto en Next.js). También se verifica la firma del webhook de Stripe y hay límites de frecuencia propios, guardados en la base de datos, en registro, inicio de sesión, recuperación de contraseña y creación de pedidos (10 cada 10 minutos por visitante, para que nadie pueda llenar las franjas con pedidos sin pagar). Los de Better Auth solo cubren las peticiones HTTP a `/api/auth`, y nuestros formularios usan Server Actions.
 - **Rutas protegidas:** `proxy.ts` solo mira si existe la cookie de sesión y redirige pronto a quien no la tiene. Cada layout de `/cuenta` y `/admin` valida la sesión y el rol en el servidor, y cada caso de uso vuelve a comprobar la política, así que saltarse la interfaz no da acceso a nada.
 - **Datos de otros:** las consultas de cliente siempre filtran por el usuario de la sesión, nunca por un id que venga del navegador. El seguimiento de un invitado exige el `tracking_token` del enlace.
-- **Cabeceras:** cabeceras de seguridad en `vercel.json`.
+- **Cabeceras:** en `next.config.ts`. CSP con `default-src 'self'` y solo los orígenes de Stripe, Link, Vercel Blob y Neon Realtime, `frame-ancestors 'none'`, HSTS, `nosniff`, `Referrer-Policy` y `Permissions-Policy`. Los scripts en línea de Next.js obligan a `'unsafe-inline'` en `script-src`: un nonce haría dinámicas todas las páginas estáticas.
 - **Errores:** ningún mensaje filtra si un email está registrado.
 - **Secretos:** solo en `.env` local (fuera de git) y en Vercel. El repo incluye un `.env.example` con los nombres.
 
