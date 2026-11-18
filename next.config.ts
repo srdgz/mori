@@ -5,7 +5,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const realtimeOrigin = (() => {
   try {
-    return process.env.NEON_REALTIME_URL ? new URL(process.env.NEON_REALTIME_URL).origin : "";
+    if (!process.env.NEON_REALTIME_URL) return "";
+    const { host } = new URL(process.env.NEON_REALTIME_URL);
+    return `https://${host} wss://${host}`;
   } catch {
     return "";
   }
