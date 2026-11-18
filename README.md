@@ -51,13 +51,17 @@ Everything works like a real shop, but nothing is charged and no drink is made.
 - **Stripe Payment Element** styled with the brand, confirmed by webhook. Unpaid orders free their slot after 30 minutes.
 - **Live tracking** through Neon Realtime, with polling as a fallback, for both account holders and guests with a private link. Emails when the order is ready or out for delivery.
 - **Account:** order history and reorder, profile, addresses, favourites, password and account deletion. Sign in with email, Google or a one-click demo account.
+- **MŌRI card:** every paid drink earns a stamp. With 8, the customer picks which drink in the order is on us, extras included. Cancellations give the stamps back.
+- **Reviews:** customers rate the drinks they've received, from the order page. Reviews show on the drink page as verified purchases.
+- **Installable app and push alerts:** a PWA with an offline page, and Web Push alerts when the order is ready or on its way.
+- **Dark mode:** follows the system by default, or set it in your profile. The brand, the shop and the panel all have a dark version.
 
 ### For the store
 
 - **Live board** with one column per step and a button to move each order on. Optional sound alert for new orders.
 - **Order detail** with history, an 80 mm printable ticket, cancellation and refunds through Stripe.
 - **Catalogue editor** with photo upload to Vercel Blob, "sold out today" switches per drink and per ingredient, and instant menu revalidation.
-- **Coupons, opening hours, closed days, slot capacity, delivery zones, customers and a sales dashboard.**
+- **Coupons, opening hours, closed days, slot capacity, delivery zones, customers, reviews and a sales dashboard.**
 - **Demo mode:** a staff account that can see everything but only move example orders, which a scheduled job keeps going.
 
 ## Design
@@ -128,7 +132,7 @@ Lighthouse on the live site, mobile, median of three runs, November 2026:
 
 ## Stack
 
-[Next.js 16](https://nextjs.org) (App Router, React 19) · TypeScript · [Tailwind CSS 4](https://tailwindcss.com) · [next-intl](https://next-intl.dev) · [Neon](https://neon.com) Postgres and Realtime · [Drizzle ORM](https://orm.drizzle.team) · [Better Auth](https://www.better-auth.com) · [Stripe](https://stripe.com) · Vercel Blob · [GSAP](https://gsap.com) · [Lenis](https://lenis.darkroom.engineering) · zod · Vitest · PGlite · Playwright · axe · Lighthouse CI · GitHub Actions · Vercel
+[Next.js 16](https://nextjs.org) (App Router, React 19) · TypeScript · [Tailwind CSS 4](https://tailwindcss.com) · [next-intl](https://next-intl.dev) · [Neon](https://neon.com) Postgres and Realtime · [Drizzle ORM](https://orm.drizzle.team) · [Better Auth](https://www.better-auth.com) · [Stripe](https://stripe.com) · Vercel Blob · Web Push · [GSAP](https://gsap.com) · [Lenis](https://lenis.darkroom.engineering) · zod · Vitest · PGlite · Playwright · axe · Lighthouse CI · GitHub Actions · Vercel
 
 ## Running it locally
 

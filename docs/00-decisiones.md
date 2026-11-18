@@ -121,6 +121,12 @@ Cada bebida pagada suma un sello. Con 8 sellos la siguiente bebida es gratis, y 
 Es una pieza muy visual para el portfolio (tarjeta con sellos animados) y típica de las cafeterías de especialidad.
 **Prioridad baja:** el modelo de datos la contempla desde el principio (`loyalty_ledger`), pero la interfaz y el canje se construyen en la Fase 8, después del lanzamiento.
 
+**Implementación (Fase 8):**
+- **Sellos:** `confirm_payment` suma uno por bebida pagada y resta los canjeados. Cancelar o reembolsar un pedido deshace su saldo neto (`advance_order_status`), así que nunca se pierden ni se regalan sellos.
+- **Canje:** con 8 sellos, el cliente elige en el checkout qué bebida de su pedido le invitamos y se descuenta una unidad con sus extras. El cupón se aplica después, sobre lo que queda.
+- **Tarjeta:** en «Tu cuenta», con el emblema de MŌRI en cada sello (atenuado si falta) y una animación de estampado en el último. Solo la tienen los clientes; los invitados ven «Entra para sumar sellos».
+- **Demo:** la cuenta demo empieza con 5 sellos.
+
 ### D-11 · Cupones — Aprobada
 - Un cupón por pedido, que el servidor valida y Stripe cobra ya descontado.
 - Cupones de demostración: `BIENVENIDA10` (10 % en el primer pedido) y `MATCHAMIGO` (2 € desde 15 €).
@@ -269,6 +275,23 @@ Sustituye a la antigua «D-20 · Supabase».
 - **Solución:** un workflow programado de GitHub Actions llama cada 15 minutos a los Route Handlers `/api/cron/*`, que exigen `CRON_SECRET`.
 - **Disponibilidad de franjas:** la capacidad ya ignora los pedidos sin pagar de más de 30 minutos. Así la franja queda libre a tiempo aunque el trabajo se retrase, y el trabajo solo pone el estado `expired` por orden.
 
+### D-27 · Reseñas de bebidas — Aprobada (18/11/2026)
+- **Quién:** solo clientes con un pedido completado que incluya la bebida, desde el detalle de ese pedido. Una reseña por cliente y bebida, que se puede editar.
+- **Contenido:** de 1 a 5 estrellas y un texto opcional de hasta 280 caracteres. En la ficha aparece el nombre y la inicial del apellido, con la etiqueta «Compra verificada».
+- **Moderación:** se publican al momento. El personal y los admins las ocultan desde «Reseñas» en el panel. La cuenta demo no puede publicar y el personal de demo no puede ocultar, para que nadie use las cuentas compartidas para escribir en público.
+- **SEO:** la ficha añade `aggregateRating` a sus datos estructurados cuando hay reseñas visibles.
+
+### D-28 · Web instalable y avisos push — Aprobada (18/11/2026)
+- **PWA:** manifest con iconos generados del emblema, service worker propio (`public/sw.js`) con una página sin conexión, y un botón «Instalar la app» en el pie cuando el navegador lo ofrece.
+- **Push:** en el seguimiento, «Avísame cuando esté listo» suscribe el navegador con Web Push (VAPID) a ese pedido. Al pasar a «listo» o «en reparto», el servidor envía el aviso en el idioma del pedido y olvida las suscripciones caducadas. En iPhone solo funciona con la web instalada.
+- **Sin claves VAPID:** el botón vuelve al aviso del navegador mientras la página está abierta, como antes.
+
+### D-29 · Modo oscuro — Aprobada (18/11/2026)
+- **Tokens:** los colores de marca se redefinen en oscuro (bosque casi negro, crema para el texto y matcha para el acento). Las secciones de marca oscuras (`.on-dark`) y la foto de portada (`.keep-light`) mantienen sus colores originales.
+- **Preferencia:** por defecto sigue al sistema. En «Perfil → Apariencia» se elige Sistema, Claro u Oscuro; se guarda en la cuenta y en una cookie, y un script en `<head>` la aplica antes de pintar para que no parpadee.
+- **Stripe:** el Payment Element usa su tema `night` con los colores de MŌRI cuando la web está en oscuro.
+- **Accesibilidad:** axe revisa las páginas públicas, la cuenta y el checkout también en oscuro.
+
 ## Lo que necesito de ti, y cuándo
 
 | Fase | Qué | Notas |
@@ -283,3 +306,4 @@ Sustituye a la antigua «D-20 · Supabase».
 | 5 | En Neon, activar **Realtime** en la rama principal y añadir los orígenes de la web (`allowedOrigins`) | Copiar `NEON_REALTIME_URL` y `NEON_REALTIME_SECRET` a `.env.local` y a Vercel. Sin ellas la web usa solo el sondeo |
 | 6 | En Vercel, Storage → añadir **Blob** | Vercel guarda `BLOB_READ_WRITE_TOKEN` |
 | 6 | Secretos `CRON_SECRET` y `SITE_URL` en GitHub (Settings → Secrets) | Para el workflow programado |
+| 8 | Claves VAPID para Web Push: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT` en Vercel | Las generas tú con `npx web-push generate-vapid-keys`. Sin ellas no hay avisos push |

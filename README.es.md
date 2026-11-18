@@ -51,13 +51,17 @@ Todo funciona como en una tienda de verdad, pero no se cobra nada y no se prepar
 - **Stripe Payment Element** con la estética de la marca y confirmación por webhook. Los pedidos sin pagar liberan su franja a los 30 minutos.
 - **Seguimiento en directo** con Neon Realtime y sondeo de respaldo, tanto con cuenta como para invitados con un enlace privado. Emails cuando el pedido está listo o en reparto.
 - **Cuenta:** historial y «Repetir pedido», perfil, direcciones, favoritos, contraseña y borrado de cuenta. Acceso con email, Google o una cuenta demo en un clic.
+- **Tarjeta MŌRI:** cada bebida pagada suma un sello. Con 8, el cliente elige qué bebida de su pedido le invitamos, con sus extras. Si se cancela el pedido, los sellos vuelven.
+- **Reseñas:** los clientes valoran las bebidas que han recibido desde el detalle del pedido, y aparecen en la ficha como compra verificada.
+- **App instalable y avisos push:** PWA con página sin conexión y avisos Web Push cuando el pedido está listo o va de camino.
+- **Modo oscuro:** sigue al sistema por defecto o se elige en el perfil. La marca, la tienda y el panel tienen su versión oscura.
 
 ### Para la tienda
 
 - **Tablero en directo** con una columna por paso y un botón para avanzar cada pedido. Aviso sonoro opcional para los pedidos nuevos.
 - **Detalle del pedido** con su historial, ticket imprimible de 80 mm, cancelación y reembolsos con Stripe.
 - **Editor de la carta** con subida de fotos a Vercel Blob, interruptores de «agotado hoy» por bebida y por ingrediente, y regeneración inmediata de la carta.
-- **Cupones, horario, días de cierre, capacidad por franja, zonas de reparto, clientes y panel de datos.**
+- **Cupones, horario, días de cierre, capacidad por franja, zonas de reparto, clientes, reseñas y panel de datos.**
 - **Modo demo:** una cuenta de personal que lo ve todo pero solo mueve pedidos de ejemplo, que un trabajo programado mantiene en marcha.
 
 ## Diseño
@@ -128,7 +132,7 @@ Lighthouse en la web publicada, móvil, mediana de tres pasadas, noviembre de 20
 
 ## Stack
 
-[Next.js 16](https://nextjs.org) (App Router, React 19) · TypeScript · [Tailwind CSS 4](https://tailwindcss.com) · [next-intl](https://next-intl.dev) · Postgres y Realtime de [Neon](https://neon.com) · [Drizzle ORM](https://orm.drizzle.team) · [Better Auth](https://www.better-auth.com) · [Stripe](https://stripe.com) · Vercel Blob · [GSAP](https://gsap.com) · [Lenis](https://lenis.darkroom.engineering) · zod · Vitest · PGlite · Playwright · axe · Lighthouse CI · GitHub Actions · Vercel
+[Next.js 16](https://nextjs.org) (App Router, React 19) · TypeScript · [Tailwind CSS 4](https://tailwindcss.com) · [next-intl](https://next-intl.dev) · Postgres y Realtime de [Neon](https://neon.com) · [Drizzle ORM](https://orm.drizzle.team) · [Better Auth](https://www.better-auth.com) · [Stripe](https://stripe.com) · Vercel Blob · Web Push · [GSAP](https://gsap.com) · [Lenis](https://lenis.darkroom.engineering) · zod · Vitest · PGlite · Playwright · axe · Lighthouse CI · GitHub Actions · Vercel
 
 ## Ejecutarla en local
 
