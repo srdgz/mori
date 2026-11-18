@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect as nextRedirect } from "next/navigation";
 import { z } from "zod";
-import { account, demoCustomer } from "@/composition/container";
+import { account, demoCustomer, demoStaff } from "@/composition/container";
 import type { FormResult } from "@/core/application/account/session";
 import type { AddressId } from "@/core/domain/account/address";
 import { DomainError } from "@/core/domain/shared/domain-error";
@@ -88,6 +88,13 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
   const locale = localeOf(formData);
   const next = getPathname({ locale, href: "/account" });
   const outcome = await account().signIn(demoCustomer.email, demoCustomer.password, next, await clientKey());
+  nextRedirect(outcome === "signed_in" ? next : `${getPathname({ locale, href: "/account/sign-in" })}?error=demo`);
+}
+
+export async function staffDemoSignInAction(formData: FormData): Promise<void> {
+  const locale = localeOf(formData);
+  const next = getPathname({ locale, href: "/admin/orders" });
+  const outcome = await account().signIn(demoStaff.email, demoStaff.password, next, await clientKey());
   nextRedirect(outcome === "signed_in" ? next : `${getPathname({ locale, href: "/account/sign-in" })}?error=demo`);
 }
 

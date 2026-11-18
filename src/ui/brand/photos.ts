@@ -31,6 +31,13 @@ export const photos = {
 
 const productPhotos: Record<string, StaticImageData> = { classic, strawberry, vanilla, coconut, dirty, mango };
 
+export const productPhotoKeys = Object.keys(productPhotos);
+
+export function isUploadedPhoto(imageKey: string): boolean {
+  return /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/products\//.test(imageKey);
+}
+
 export function productPhoto(imageKey: string): StaticImageData {
+  if (isUploadedPhoto(imageKey)) return { src: imageKey, width: 1200, height: 1500 };
   return productPhotos[imageKey] ?? classic;
 }
