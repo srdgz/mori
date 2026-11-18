@@ -23,6 +23,8 @@ export type Permission =
   | "account.manage"
   | "account.credentials"
   | "loyalty.redeem"
+  | "reviews.write"
+  | "reviews.moderate"
   | "orders.board"
   | "orders.advance"
   | "orders.refund"
@@ -33,16 +35,16 @@ export type Permission =
   | "dashboard.view";
 
 const ownAccount: readonly Permission[] = ["account.manage", "account.credentials"];
-const staffPermissions: readonly Permission[] = [...ownAccount, "orders.board", "orders.advance"];
+const staffPermissions: readonly Permission[] = [...ownAccount, "orders.board", "orders.advance", "reviews.moderate"];
 
 const grants: Record<Actor["kind"], readonly Permission[]> = {
   guest: [],
-  customer: [...ownAccount, "loyalty.redeem"],
+  customer: [...ownAccount, "loyalty.redeem", "reviews.write"],
   staff: staffPermissions,
   admin: [...staffPermissions, "orders.refund", "catalog.manage", "settings.manage", "coupons.manage", "customers.view", "dashboard.view"],
 };
 
-const sharedDemoAccountLocks: readonly Permission[] = ["account.credentials"];
+const sharedDemoAccountLocks: readonly Permission[] = ["account.credentials", "reviews.write", "reviews.moderate"];
 
 export function isDemo(actor: Actor): boolean {
   return (actor.kind === "customer" || actor.kind === "staff") && actor.demo;

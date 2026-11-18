@@ -9,11 +9,14 @@ import type { Address } from "@/core/domain/account/address";
 import type { Cart } from "@/core/domain/cart/cart";
 import { firstAvailable, type PickupDay } from "@/core/domain/fulfilment/pickup-slots";
 import type { Locale } from "@/core/domain/shared/locale";
-import { formatMoney, type Money } from "@/core/domain/shared/money";
+import { lineKey } from "@/core/domain/cart/cart";
+import { localize } from "@/core/domain/shared/locale";
+import { formatMoney, subtract, ZERO, type Money } from "@/core/domain/shared/money";
 import { getPathname, Link } from "@/i18n/navigation";
 import { Submit } from "@/ui/account/form";
 import { cx } from "@/ui/primitives/cx";
 import { Icon } from "@/ui/primitives/Icon";
+import { useIsDark } from "@/ui/theme/ThemeClient";
 import { CartIssues, CartLines } from "./CartLines";
 import { FreeDeliveryBar, useCartContext } from "./CartProvider";
 import { useCart } from "./cart-store";
@@ -32,6 +35,7 @@ export type CheckoutActions = {
     fulfilment: FulfilmentInput;
     couponCode: string | null;
     email: string | null;
+    redeemLine: string | null;
   }) => Promise<CheckoutQuote | null>;
   place: (input: {
     cart: Cart;
@@ -39,6 +43,7 @@ export type CheckoutActions = {
     fulfilment: FulfilmentInput;
     notes: string;
     couponCode: string | null;
+    redeemLine: string | null;
     locale: string;
   }) => Promise<PlaceResult>;
 };
@@ -50,6 +55,20 @@ type Props = {
   addresses: readonly Address[];
   publishableKey: string | null;
   actions: CheckoutActions;
+};
+
+const darkAppearance: Appearance = {
+  theme: "night",
+  variables: {
+    colorPrimary: "#b6d66b",
+    colorBackground: "#1d2f24",
+    colorText: "#e8e1d4",
+    colorDanger: "#f29a85",
+    fontFamily: "DM Sans, system-ui, sans-serif",
+    borderRadius: "12px",
+    spacingUnit: "4px",
+  },
+  rules: { ".Input": { boxShadow: "inset 0 0 0 1.5px rgba(232,225,212,.28)" }, ".Input:focus": { boxShadow: "inset 0 0 0 2px #b6d66b" } },
 };
 
 const appearance: Appearance = {
@@ -103,6 +122,7 @@ function stripeFor(key: string): Promise<Stripe | null> {
 export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKey, actions }: Props) {
   const t = useTranslations("shop.checkout");
   const locale = useLocale() as Locale;
+  const dark = useIsDark();
   const { lines, ready } = useCart();
   const { priced, catalog, freeFrom } = useCartContext();
 
@@ -116,6 +136,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
   const [notes, setNotes] = useState("");
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState<string | null>(null);
+  const [redeemLine, setRedeemLine] = useState<string | null>(null);
   const [quote, setQuote] = useState<CheckoutQuote | null>(null);
   const [error, setError] = useState("");
   const [paying, setPaying] = useState(false);
@@ -145,7 +166,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
     let active = true;
     const timer = setTimeout(() => {
       actions
-        .quote({ cart: lines, fulfilment, couponCode: coupon, email: contact.email || null })
+        .quote({ cart: lines, fulfilment, couponCode: coupon, email: contact.email || null, redeemLine })
         .then((result) => active && setQuote(result))
         .catch(() => undefined);
     }, 250);
@@ -153,7 +174,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
       active = false;
       clearTimeout(timer);
     };
-  }, [actions, lines, fulfilment, coupon, contact.email, ready]);
+  }, [actions, lines, fulfilment, coupon, contact.email, ready, redeemLine]);
 
   const total = quote?.totals.total ?? priced.subtotal;
   const stripePromise = publishableKey ? stripeFor(publishableKey) : null;
@@ -171,6 +192,8 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
 
   const deliveryError = quote?.delivery && !quote.delivery.ok ? quote.delivery : null;
   const couponState = quote?.coupon ?? null;
+  const loyaltyDiscount = quote?.loyalty?.redemption?.discount ?? null;
+  const couponDiscount = quote ? subtract(quote.totals.discount, loyaltyDiscount ?? ZERO) : ZERO;
   const feeLabel =
     kind === "delivery" && !quote?.delivery
       ? t("feePending")
@@ -199,10 +222,10 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
       setError(submitted.error.message ?? t("errors.generic"));
       return;
     }
-    const key = JSON.stringify({ lines, fulfilment, coupon, contact, notes });
+    const key = JSON.stringify({ lines, fulfilment, coupon, contact, notes, redeemLine });
     let result = placed?.key === key ? placed.result : null;
     if (!result) {
-      const response = await actions.place({ cart: lines, contact, fulfilment, notes, couponCode: coupon, locale });
+      const response = await actions.place({ cart: lines, contact, fulfilment, notes, couponCode: coupon, redeemLine, locale });
       if (!response.ok) {
         const key = `errors.${response.error}` as "errors.generic";
         setError(t.has(key) ? t(key) : t("errors.generic"));
@@ -469,15 +492,22 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
             </p>
           )}
         </div>
+        <LoyaltyBox quote={quote} signedIn={!!user} redeemLine={redeemLine} onChange={setRedeemLine} />
         <dl className="totals">
           <div>
             <dt>{t("subtotal")}</dt>
             <dd>{formatMoney(quote?.totals.subtotal ?? priced.subtotal, locale)}</dd>
           </div>
-          {quote && quote.totals.discount.cents > 0 && (
+          {loyaltyDiscount && (
+            <div>
+              <dt>{t("loyalty.line")}</dt>
+              <dd>−{formatMoney(loyaltyDiscount, locale)}</dd>
+            </div>
+          )}
+          {quote && couponDiscount.cents > 0 && (
             <div>
               <dt>{t("discount")}</dt>
-              <dd>−{formatMoney(quote.totals.discount, locale)}</dd>
+              <dd>−{formatMoney(couponDiscount, locale)}</dd>
             </div>
           )}
           <div>
@@ -503,7 +533,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
         mode: "payment",
         amount: Math.max(total.cents, 50),
         currency: "eur",
-        appearance,
+        appearance: dark ? darkAppearance : appearance,
         locale: locale === "es" ? "es" : "en-GB",
       }}
     >
@@ -538,6 +568,83 @@ function TestCard() {
         <Icon name={copied ? "check" : "copy"} size={16} />
         <span aria-live="polite">{copied ? t("cardCopied") : t("copyCard")}</span>
       </button>
+    </div>
+  );
+}
+
+function LoyaltyBox({
+  quote,
+  signedIn,
+  redeemLine,
+  onChange,
+}: {
+  quote: CheckoutQuote | null;
+  signedIn: boolean;
+  redeemLine: string | null;
+  onChange: (line: string | null) => void;
+}) {
+  const t = useTranslations("shop.checkout.loyalty");
+  const locale = useLocale() as Locale;
+  if (!quote) return null;
+  if (!quote.loyalty) {
+    if (signedIn) return null;
+    return (
+      <p className="loyalty-note">
+        <Icon name="leaf" size={18} />
+        <Link href={{ pathname: "/account/sign-in", query: { next: "/checkout" } }} className="link-u">
+          {t("guest")}
+        </Link>
+      </p>
+    );
+  }
+  const { card } = quote.loyalty;
+  if (!card.canRedeem) {
+    return (
+      <p className="loyalty-note">
+        <Icon name="leaf" size={18} />
+        <span>{t("progress", { filled: card.filled, required: card.required, earn: quote.cart.items })}</span>
+      </p>
+    );
+  }
+  const on = redeemLine !== null;
+  const choices = quote.cart.lines;
+  const mostExpensive = [...choices].sort((a, b) => b.drink.unitPrice.cents - a.drink.unitPrice.cents)[0];
+  return (
+    <div className="loyalty-redeem">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        className="loyalty-redeem__toggle"
+        onClick={() => onChange(on ? null : mostExpensive ? lineKey(mostExpensive.line) : null)}
+      >
+        <span className="switch" aria-hidden="true">
+          <span className="switch__thumb" />
+        </span>
+        <span className="grid text-left">
+          <span className="font-semibold">{t("use", { required: card.required })}</span>
+          <span className="text-xs">{t("useHint")}</span>
+        </span>
+      </button>
+      {on && (
+        <fieldset className="grid gap-2">
+          <legend className="field-label mb-2">{t("choose")}</legend>
+          {choices.map((priced) => {
+            const key = lineKey(priced.line);
+            const options = priced.drink.choices.flatMap((c) => c.options.map((o) => localize(o.name, locale))).join(" · ");
+            return (
+              <label key={key} className="loyalty-redeem__choice">
+                <input type="radio" name="redeem-line" checked={redeemLine === key} onChange={() => onChange(key)} />
+                <span className="grid flex-1">
+                  <span className="font-semibold">{priced.drink.product.name}</span>
+                  <span className="text-xs text-ink-soft">{options}</span>
+                </span>
+                <span>{formatMoney(priced.drink.unitPrice, locale)}</span>
+              </label>
+            );
+          })}
+        </fieldset>
+      )}
     </div>
   );
 }

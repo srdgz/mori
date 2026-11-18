@@ -36,7 +36,8 @@
     "errorText": "Algo ha fallado de nuestro lado. Tu carrito sigue a salvo: vuelve a intentarlo en un momento.",
     "retry": "Reintentar",
     "errorRef": "Referencia del error: {ref}",
-    "legalNav": "Información legal"
+    "legalNav": "Información legal",
+    "install": "Instalar la app"
   },
   "nav": {
     "home": "Inicio",
@@ -464,7 +465,16 @@
     "related": "También te puede gustar",
     "allergens": "¿Alergias o intolerancias? Pregúntanos antes de pedir.",
     "customize": "Personalizar",
-    "title": "{name} — MŌRI Matcha Bar & Culture"
+    "title": "{name} — MŌRI Matcha Bar & Culture",
+    "reviews": {
+      "title": "Reseñas",
+      "average": "{value} de 5 estrellas",
+      "count": "{count, plural, one {# reseña} other {# reseñas}}",
+      "empty": "Aún no hay reseñas de esta bebida.",
+      "how": "Solo pueden opinar quienes ya la han recibido, desde el detalle de su pedido.",
+      "rating": "{rating} de 5 estrellas",
+      "verified": "Compra verificada"
+    }
   },
   "account": {
     "title": "Tu cuenta",
@@ -701,6 +711,49 @@
       "pickup": "Recogida",
       "delivery": "A domicilio",
       "back": "Todos tus pedidos"
+    },
+    "loyalty": {
+      "title": "Tarjeta MŌRI",
+      "count": "{filled} / {required}",
+      "stampsLabel": "Sellos: {filled} de {required}",
+      "stamped": "Sello {n}: conseguido",
+      "empty": "Sello {n}: pendiente",
+      "free": "Gratis",
+      "missing": "Te {count, plural, one {falta # sello} other {faltan # sellos}} para tu próxima bebida gratis.",
+      "ready": "Bebida gratis lista para canjear",
+      "readyCta": "Elige tu bebida",
+      "how": "Cada bebida pagada suma un sello. Con {required}, la siguiente va por nuestra cuenta: la eliges en el checkout."
+    },
+    "reviews": {
+      "title": "Valora tus bebidas",
+      "lede": "Tu opinión aparece en la ficha de la bebida con tu nombre y la inicial de tu apellido.",
+      "question": "¿Qué tal tu {name}?",
+      "ratingLegend": "Puntuación para {name}",
+      "stars": "{count, plural, one {# estrella} other {# estrellas}}",
+      "body": "Cuéntanos",
+      "optional": "opcional",
+      "left": "{count, plural, one {Queda # carácter} other {Quedan # caracteres}}",
+      "submit": "Publicar reseña",
+      "update": "Actualizar reseña",
+      "saved": "¡Gracias! Tu reseña ya está publicada.",
+      "hidden": "El equipo ha ocultado esta reseña. Puedes editarla, pero seguirá oculta.",
+      "errors": {
+        "rating": "Elige de 1 a 5 estrellas.",
+        "body": "El texto puede tener como mucho 280 caracteres.",
+        "forbidden": "No puedes valorar esta bebida desde esta cuenta."
+      }
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "lede": "Elige cómo quieres ver MŌRI. Se guarda en tu cuenta y se aplica en todos tus dispositivos.",
+      "system": "Sistema",
+      "systemHint": "Sigue el ajuste de tu dispositivo",
+      "light": "Claro",
+      "lightHint": "Crema y verde bosque",
+      "dark": "Oscuro",
+      "darkHint": "Bosque de noche, más suave a la vista",
+      "saved": "Apariencia guardada.",
+      "error": "No hemos podido guardarla. Inténtalo de nuevo."
     }
   },
   "shop": {
@@ -806,12 +859,21 @@
         "coupon_invalid": "El cupón ya no se puede aplicar a este pedido.",
         "payment": "El pago no se ha completado: {message}",
         "generic": "Algo ha fallado. Inténtalo de nuevo.",
-        "unavailable": "Los pagos online no están configurados en este entorno."
+        "unavailable": "Los pagos online no están configurados en este entorno.",
+        "loyalty_unavailable": "Ya no tienes sellos suficientes para la bebida gratis. Quítala y vuelve a intentarlo."
       },
       "paused": "Ahora mismo no aceptamos pedidos online. Vuelve en un rato o pásate por la tienda.",
       "emptyTitle": "Tu pedido está vacío",
       "copyCard": "Copiar número de tarjeta",
-      "cardCopied": "Número copiado"
+      "cardCopied": "Número copiado",
+      "loyalty": {
+        "line": "Tarjeta MŌRI",
+        "guest": "Entra para sumar sellos con este pedido",
+        "progress": "Tarjeta MŌRI: {filled} de {required} sellos. Este pedido suma {earn, plural, one {# sello} other {# sellos}}.",
+        "use": "Usar {required} sellos",
+        "useHint": "Una bebida gratis, con sus extras",
+        "choose": "¿Cuál te invitamos?"
+      }
     },
     "order": {
       "title": "Pedido {code}",
@@ -872,7 +934,9 @@
         "notify": "Avísame cuando esté listo",
         "notifyOn": "Te avisaremos en este navegador",
         "notifyTitle": "Tu pedido {code} está listo",
-        "notifyBody": "Te esperamos en C/ Espíritu Santo, 18."
+        "notifyBody": "Te esperamos en C/ Espíritu Santo, 18.",
+        "notifyDelivery": "Avísame cuando salga hacia tu casa",
+        "notifyFailed": "No hemos podido activar los avisos en este navegador. Te escribiremos por email."
       },
       "reorder": "Repetir pedido",
       "reorderPending": "Añadiendo…",
@@ -897,7 +961,8 @@
       "customers": "Clientes",
       "settings": "Ajustes",
       "adminOnly": "Solo para administración",
-      "backToShop": "Volver a la web"
+      "backToShop": "Volver a la web",
+      "reviews": "Reseñas"
     },
     "demo": {
       "title": "Panel en modo demo",
@@ -1137,6 +1202,18 @@
       "topItem": "{name} · {count}",
       "empty": "Aún no hay ventas en este periodo.",
       "includesDemo": "Incluye los pedidos de ejemplo de la demo."
+    },
+    "reviews": {
+      "title": "Reseñas",
+      "lede": "Las reseñas se publican al momento. Oculta las que no deban verse en la web.",
+      "readOnly": "En la demo puedes verlas, pero no ocultarlas.",
+      "empty": "Todavía no hay reseñas.",
+      "rating": "{rating} de 5 estrellas",
+      "hiddenTag": "Oculta",
+      "visible": "Visible",
+      "hidden": "Oculta",
+      "visibleLabel": "Reseña de {author} sobre {product} visible",
+      "older": "Ver reseñas anteriores"
     }
   },
   "legal": {

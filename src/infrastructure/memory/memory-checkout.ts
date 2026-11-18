@@ -2,6 +2,7 @@ import type {
   AdvanceResult,
   BoardCard,
   CouponRepository,
+  LoyaltyRepository,
   NewOrder,
   OrderRepository,
   OrderSummary,
@@ -29,6 +30,7 @@ export const defaultShopSettings: ShopSettings = {
   ordersPaused: false,
   unpaidHoldMinutes: 30,
   vatRateBasisPoints: 1000,
+  loyaltyStampsRequired: 8,
   schedule: storeSeed.schedule,
   closures: [],
   delivery: {
@@ -66,10 +68,13 @@ export class MemoryCouponRepository implements CouponRepository {
   }
 }
 
-type StoredOrder = OrderView & { couponId: string | null };
+type StoredOrder = OrderView & { couponId: string | null; stampsRedeemed: number };
 
-export class MemoryOrderRepository implements OrderRepository {
+type LedgerEntry = { userId: UserId; orderId: string | null; delta: number; reason: "purchase" | "redeem" | "refund" | "adjustment" };
+
+export class MemoryOrderRepository implements OrderRepository, LoyaltyRepository {
   readonly orders: StoredOrder[] = [];
+  readonly ledger: LedgerEntry[] = [];
   private counter = 0;
 
   constructor(
@@ -120,6 +125,7 @@ export class MemoryOrderRepository implements OrderRepository {
       createdAt: new Date(),
       paymentIntentId: null,
       couponId: order.couponId,
+      stampsRedeemed: order.stampsRedeemed ?? 0,
     };
     this.orders.push(stored);
     return { id: stored.id, trackingToken: stored.trackingToken };
@@ -138,6 +144,13 @@ export class MemoryOrderRepository implements OrderRepository {
     if (order.status !== "pending_payment" && order.status !== "expired") return { orderId: order.id, confirmedNow: false };
     this.orders[index] = { ...order, status: "received", events: [...order.events, { status: "received", at: new Date() }] };
     if (order.couponId) this.coupons?.redemptions.push({ couponId: order.couponId, email: order.contactEmail });
+    if (order.customerId) {
+      if (order.stampsRedeemed > 0) {
+        this.ledger.push({ userId: order.customerId, orderId: order.id, delta: -order.stampsRedeemed, reason: "redeem" });
+      }
+      const drinks = order.lines.reduce((sum, l) => sum + l.quantity, 0);
+      if (drinks > 0) this.ledger.push({ userId: order.customerId, orderId: order.id, delta: drinks, reason: "purchase" });
+    }
     return { orderId: order.id, confirmedNow: true };
   }
 
@@ -180,7 +193,15 @@ export class MemoryOrderRepository implements OrderRepository {
     if (!order) return "not_found";
     if (!canStaffMove(order.status, next, order.fulfilment)) return "invalid_transition";
     this.orders[index] = { ...order, status: next, events: [...order.events, { status: next, at: new Date() }] };
+    if ((next === "cancelled" || next === "refunded") && order.customerId) {
+      const net = this.ledger.filter((e) => e.orderId === order.id).reduce((sum, e) => sum + e.delta, 0);
+      if (net !== 0) this.ledger.push({ userId: order.customerId, orderId: order.id, delta: -net, reason: "refund" });
+    }
     return "advanced";
+  }
+
+  async balance(userId: UserId): Promise<number> {
+    return this.ledger.filter((e) => e.userId === userId).reduce((sum, e) => sum + e.delta, 0);
   }
 
   async board(from: Date, to: Date): Promise<BoardCard[]> {

@@ -122,7 +122,12 @@ export function Header({ address, instagram }: Props) {
     return () => window.clearTimeout(timer);
   }, [open]);
 
-  const headerClass = ["site-header fixed inset-x-0 top-0 z-50 h-[var(--nav-h)]", scrolled && "is-scrolled", hidden && !open && "is-hidden"]
+  const headerClass = [
+    "site-header fixed inset-x-0 top-0 z-50 h-[var(--nav-h)]",
+    scrolled && "is-scrolled",
+    hidden && !open && "is-hidden",
+    !scrolled && !open && pathname === "/" && "keep-light",
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -193,7 +198,7 @@ export function Header({ address, instagram }: Props) {
         id="mobile-menu"
         ref={menuRef}
         className={cx(
-          "mobile-menu fixed inset-0 z-40 flex flex-col justify-between bg-forest px-[var(--gutter)] pt-[calc(var(--nav-h)+32px)] pb-8 text-cream lg:hidden",
+          "mobile-menu on-dark fixed inset-0 z-40 flex flex-col justify-between bg-forest px-[var(--gutter)] pt-[calc(var(--nav-h)+32px)] pb-8 text-cream lg:hidden",
           entered && "is-open",
         )}
         hidden={!open && !menuMounted}

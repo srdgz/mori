@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { StoredCoupon } from "@/core/application/ports/checkout";
-import type { CartLine } from "@/core/domain/cart/cart";
+import type { UserId } from "@/core/domain/access/actor";
+import { lineKey, type CartLine } from "@/core/domain/cart/cart";
 import type { OptionId } from "@/core/domain/catalog/options";
 import type { ProductId } from "@/core/domain/catalog/product";
 import { money } from "@/core/domain/shared/money";
@@ -77,6 +78,7 @@ function deps() {
     settings,
     orders,
     coupons: couponRepo,
+    loyalty: orders,
     clock: new FixedClock(now),
     identity,
     payments,
@@ -165,6 +167,50 @@ describe("QuoteCheckout", () => {
       email: null,
     });
     expect(quote.coupon).toMatchObject({ ok: true });
+    expect(quote.loyalty).toMatchObject({ card: { stamps: 0, required: 8, canRedeem: false }, redemption: null, error: null });
+  });
+
+  it("only shows the stamp card to customers", async () => {
+    const guest = await makeQuoteCheckout(deps())({ cart, fulfilment: { kind: "pickup", slotStart: null }, couponCode: null, email: null });
+    expect(guest.loyalty).toBeNull();
+    identity.signInAs(identity.addUser({ email: "barista@example.com" }, "staff"));
+    const staff = await makeQuoteCheckout(deps())({ cart, fulfilment: { kind: "pickup", slotStart: null }, couponCode: null, email: null });
+    expect(staff.loyalty).toBeNull();
+  });
+
+  it("gives the chosen drink for free with a full card and applies coupons to the rest", async () => {
+    const user = identity.addUser({ email: "ana@example.com" });
+    identity.signInAs(user);
+    orders.ledger.push({ userId: user.id as UserId, orderId: null, delta: 9, reason: "adjustment" });
+    const quote = await makeQuoteCheckout(deps())({
+      cart,
+      fulfilment: { kind: "pickup", slotStart: null },
+      couponCode: "BIENVENIDA10",
+      email: null,
+      redeemLine: lineKey(cart[0]!),
+    });
+    expect(quote.loyalty).toEqual({
+      card: { stamps: 9, required: 8, filled: 8, missing: 0, canRedeem: true },
+      redemption: { line: lineKey(cart[0]!), discount: money(580) },
+      error: null,
+    });
+    expect(quote.coupon).toMatchObject({ ok: true, discount: money(110) });
+    expect(quote.totals).toMatchObject({ discount: money(690), total: money(990) });
+  });
+
+  it("explains why a free drink can't be used", async () => {
+    const user = identity.addUser({ email: "ana@example.com" });
+    identity.signInAs(user);
+    orders.ledger.push({ userId: user.id as UserId, orderId: null, delta: 5, reason: "adjustment" });
+    const quote = await makeQuoteCheckout(deps())({
+      cart,
+      fulfilment: { kind: "pickup", slotStart: null },
+      couponCode: null,
+      email: null,
+      redeemLine: lineKey(cart[0]!),
+    });
+    expect(quote.loyalty).toMatchObject({ redemption: null, error: "not_enough_stamps" });
+    expect(quote.totals.discount).toEqual(money(0));
   });
 });
 
@@ -186,6 +232,16 @@ describe("PlaceOrder", () => {
     ]);
     expect(stored.lines[0]?.options.map((o) => o.code)).toEqual(["large", "iced", "oat", "regular"]);
     expect(payments.intents).toEqual([{ id: "pi_1", orderId: "order-1", amountCents: 1680 }]);
+  });
+
+  it("records the redeemed stamps and refuses a free drink without a full card", async () => {
+    const user = identity.addUser({ email: "ana@example.com" });
+    identity.signInAs(user);
+    expect(await makePlaceOrder(deps())(order({ redeemLine: lineKey(cart[1]!) }))).toEqual({ ok: false, error: "loyalty_unavailable" });
+    orders.ledger.push({ userId: user.id as UserId, orderId: null, delta: 8, reason: "adjustment" });
+    const result = await makePlaceOrder(deps())(order({ redeemLine: lineKey(cart[1]!) }));
+    expect(result).toMatchObject({ ok: true, total: money(1160) });
+    expect(orders.orders[0]).toMatchObject({ stampsRedeemed: 8, discount: money(520) });
   });
 
   it("links the order to the signed-in customer", async () => {

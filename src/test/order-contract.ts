@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
-import type { NewOrder, OrderRepository } from "@/core/application/ports/checkout";
+import type { LoyaltyRepository, NewOrder, OrderRepository } from "@/core/application/ports/checkout";
 import type { UserId } from "@/core/domain/access/actor";
 import { money } from "@/core/domain/shared/money";
 
-export type OrderSetup = { orders: OrderRepository; customerId: UserId; setCapacity(capacity: number): Promise<void> };
+export type OrderSetup = {
+  orders: OrderRepository;
+  loyalty: LoyaltyRepository;
+  customerId: UserId;
+  setCapacity(capacity: number): Promise<void>;
+};
 
 const slot = new Date("2030-01-07T10:00:00Z");
 let sequence = 0;
@@ -193,6 +198,39 @@ export function orderRepositoryContract(name: string, setup: () => Promise<Order
       await orders.recordRefund(view!.id, money(500));
       await orders.recordRefund(view!.id, money(180));
       expect((await orders.byId(view!.id))?.refunded).toEqual(money(680));
+    });
+
+    it("earns a stamp per paid drink, spends redeemed stamps and gives them back on cancellation", async () => {
+      const { orders, loyalty, customerId } = await setup();
+      const start = await loyalty.balance(customerId);
+      const pay = async (overrides: Parameters<typeof newOrder>[0]) => {
+        const input = newOrder({ customerId, slotStart: new Date("2031-05-05T10:00:00Z"), ...overrides });
+        const created = await orders.create(input);
+        if (typeof created === "string") throw new Error(created);
+        await orders.attachPayment(created.id, `pi_${input.code}`);
+        await orders.confirmPayment(`pi_${input.code}`);
+        await orders.confirmPayment(`pi_${input.code}`);
+        return created.id;
+      };
+
+      await pay({});
+      expect(await loyalty.balance(customerId)).toBe(start + 3);
+      const unpaid = newOrder({ customerId, slotStart: new Date("2031-05-05T10:15:00Z") });
+      await orders.create(unpaid);
+      expect(await loyalty.balance(customerId)).toBe(start + 3);
+
+      const redeemed = await pay({ stampsRedeemed: 2 });
+      expect(await loyalty.balance(customerId)).toBe(start + 4);
+      expect(await orders.advance(redeemed, "cancelled", null)).toBe("advanced");
+      expect(await loyalty.balance(customerId)).toBe(start + 3);
+
+      const guest = newOrder({ slotStart: new Date("2031-05-05T10:30:00Z") });
+      const created = await orders.create(guest);
+      if (typeof created === "string") throw new Error(created);
+      await orders.attachPayment(created.id, `pi_${guest.code}`);
+      await orders.confirmPayment(`pi_${guest.code}`);
+      expect(await loyalty.balance(customerId)).toBe(start + 3);
+      expect(await loyalty.balance("00000000-0000-4000-8000-00000000abcd" as UserId)).toBe(0);
     });
   });
 }

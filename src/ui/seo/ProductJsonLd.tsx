@@ -1,11 +1,12 @@
 import type { Product } from "@/core/domain/catalog/product";
+import type { RatingSummary } from "@/core/domain/catalog/review";
 import { localize, type Locale } from "@/core/domain/shared/locale";
 import { productPhoto } from "@/ui/brand/photos";
 import { localizedUrl, siteUrl } from "./metadata";
 
-type Props = { product: Product; locale: Locale; menuName: string };
+type Props = { product: Product; locale: Locale; menuName: string; rating?: RatingSummary };
 
-export function ProductJsonLd({ product, locale, menuName }: Props) {
+export function ProductJsonLd({ product, locale, menuName, rating }: Props) {
   const url = localizedUrl(locale, { pathname: "/menu/[slug]", params: { slug: product.slug } });
   const data = [
     {
@@ -15,6 +16,17 @@ export function ProductJsonLd({ product, locale, menuName }: Props) {
       description: localize(product.description, locale),
       image: new URL(productPhoto(product.imageKey).src, siteUrl).href,
       brand: { "@type": "Brand", name: "MŌRI" },
+      ...(rating && rating.count > 0
+        ? {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: rating.average,
+              reviewCount: rating.count,
+              bestRating: 5,
+              worstRating: 1,
+            },
+          }
+        : {}),
       url,
       offers: {
         "@type": "Offer",

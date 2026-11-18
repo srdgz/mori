@@ -138,7 +138,31 @@ create table loyalty_ledger (
 );
 create view loyalty_balance as
   select user_id, sum(delta)::int as stamps from loyalty_ledger group by user_id;
+
+create table reviews (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references products on delete cascade,
+  user_id uuid not null references users on delete cascade,
+  rating smallint not null check (rating between 1 and 5),
+  body text check (char_length(body) <= 280),
+  is_hidden boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (product_id, user_id)
+);
+
+create table push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references orders on delete cascade,
+  endpoint text not null,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now(),
+  unique (order_id, endpoint)
+);
 ```
+
+`users.theme` (`system`, `light` o `dark`) guarda la apariencia elegida en el perfil.
 
 ## Catálogo
 

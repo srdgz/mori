@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { checkout } from "@/composition/checkout";
+import type { SubmitReviewResult } from "@/core/application/catalog/reviews";
 import type { Reorder } from "@/core/domain/ordering/reorder";
 import { redirect } from "@/i18n/navigation";
 import { locales, type AppLocale } from "@/i18n/routing";
@@ -26,4 +27,16 @@ export async function claimOrderAction(formData: FormData): Promise<void> {
   if (outcome === "claimed") {
     redirect({ href: { pathname: "/account/orders/[code]", params: { code: code.data.toUpperCase() }, query: { saved: "1" } }, locale });
   }
+}
+
+const reviewSchema = z.object({
+  productId: z.string().uuid(),
+  rating: z.number().int(),
+  body: z.string().max(1000).nullable(),
+});
+
+export async function submitReviewAction(input: { productId: string; rating: number; body: string | null }): Promise<SubmitReviewResult> {
+  const parsed = reviewSchema.safeParse(input);
+  if (!parsed.success) return { status: "invalid", errors: { rating: "range" } };
+  return checkout().submitReview(parsed.data);
 }

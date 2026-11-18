@@ -8,6 +8,7 @@ orderRepositoryContract("MemoryOrderRepository", async () => {
   Object.defineProperty(orders, "capacity", { get: () => capacity });
   return {
     orders,
+    loyalty: orders,
     customerId: "customer-1" as UserId,
     setCapacity: async (value) => {
       capacity = value;

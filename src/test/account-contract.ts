@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AddressRepository, FavouriteRepository } from "@/core/application/ports/account-repositories";
+import type { AddressRepository, FavouriteRepository, PreferenceRepository } from "@/core/application/ports/account-repositories";
 import type { UserId } from "@/core/domain/access/actor";
 import type { AddressDraft } from "@/core/domain/account/address";
 import type { ProductId } from "@/core/domain/catalog/product";
@@ -14,7 +14,13 @@ const draft: AddressDraft = {
   isDefault: false,
 };
 
-type Setup = { users: [UserId, UserId]; addresses: AddressRepository; favourites: FavouriteRepository; products: [ProductId, ProductId] };
+type Setup = {
+  preferences: PreferenceRepository;
+  users: [UserId, UserId];
+  addresses: AddressRepository;
+  favourites: FavouriteRepository;
+  products: [ProductId, ProductId];
+};
 
 export function accountRepositoriesContract(name: string, setup: () => Promise<Setup>) {
   describe(`${name} (account repositories contract)`, () => {
@@ -53,6 +59,14 @@ export function accountRepositoriesContract(name: string, setup: () => Promise<S
       expect(await favourites.forUser(users[1])).toEqual([]);
       await favourites.remove(users[0], products[0]);
       expect(await favourites.forUser(users[0])).toEqual([products[1]]);
+    });
+
+    it("remembers each customer's appearance and defaults to the system one", async () => {
+      const { users, preferences } = await setup();
+      expect(await preferences.theme(users[0])).toBe("system");
+      await preferences.setTheme(users[0], "dark");
+      expect(await preferences.theme(users[0])).toBe("dark");
+      expect(await preferences.theme(users[1])).toBe("system");
     });
   });
 }

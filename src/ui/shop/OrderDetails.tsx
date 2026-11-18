@@ -121,8 +121,14 @@ export async function OrderDetails({ tracking, locale, token, signedIn, reorderA
               </li>
             ))}
           </ol>
-          {order.fulfilment === "pickup" && (order.status === "received" || order.status === "preparing") && (
-            <NotifyButton label={t("timeline.notify")} enabledLabel={t("timeline.notifyOn")} />
+          {(order.status === "received" || order.status === "preparing") && (
+            <NotifyButton
+              label={t(order.fulfilment === "pickup" ? "timeline.notify" : "timeline.notifyDelivery")}
+              enabledLabel={t("timeline.notifyOn")}
+              failedLabel={t("timeline.notifyFailed")}
+              code={order.code}
+              token={token}
+            />
           )}
         </section>
       )}

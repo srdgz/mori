@@ -9,6 +9,7 @@ const items = [
   { href: "/admin/orders", key: "orders", adminOnly: false },
   { href: "/admin/products", key: "products", adminOnly: true },
   { href: "/admin/coupons", key: "coupons", adminOnly: true },
+  { href: "/admin/reviews", key: "reviews", adminOnly: false },
   { href: "/admin/customers", key: "customers", adminOnly: true },
   { href: "/admin/settings", key: "settings", adminOnly: true },
 ] as const;

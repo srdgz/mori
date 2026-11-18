@@ -3,7 +3,12 @@ import { eq } from "drizzle-orm";
 import type { UserId } from "@/core/domain/access/actor";
 import { money } from "@/core/domain/shared/money";
 import { newOrder, orderRepositoryContract } from "@/test/order-contract";
-import { DrizzleCouponRepository, DrizzleOrderRepository, DrizzleSettingsRepository } from "./drizzle-checkout-repositories";
+import {
+  DrizzleCouponRepository,
+  DrizzleLoyaltyRepository,
+  DrizzleOrderRepository,
+  DrizzleSettingsRepository,
+} from "./drizzle-checkout-repositories";
 import { closures, orders, storeSettings, users } from "./schema";
 import { createTestDatabase, type TestDatabase } from "./testing";
 
@@ -22,6 +27,7 @@ afterAll(async () => {
 
 orderRepositoryContract("DrizzleOrderRepository", async () => ({
   orders: new DrizzleOrderRepository(test.db),
+  loyalty: new DrizzleLoyaltyRepository(test.db),
   customerId,
   setCapacity: async (capacity) => {
     await test.db.update(storeSettings).set({ slotCapacity: capacity }).where(eq(storeSettings.id, 1));

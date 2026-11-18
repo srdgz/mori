@@ -36,6 +36,20 @@
       "when": 1794846721551,
       "tag": "0004_confirm_payment_result",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795003305980,
+      "tag": "0005_loyalty_refunds",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795003573384,
+      "tag": "0006_reviews_push_theme",
+      "breakpoints": true
     }
   ]
 }

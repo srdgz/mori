@@ -44,7 +44,13 @@ export async function syncCartAction(lines: Cart, owner: string | null): Promise
   return checkout().syncCart(cart, typeof owner === "string" ? owner : null);
 }
 
-export type QuoteInput = { cart: Cart; fulfilment: z.infer<typeof fulfilmentSchema>; couponCode: string | null; email: string | null };
+export type QuoteInput = {
+  cart: Cart;
+  fulfilment: z.infer<typeof fulfilmentSchema>;
+  couponCode: string | null;
+  email: string | null;
+  redeemLine: string | null;
+};
 
 export async function quoteAction(input: QuoteInput): Promise<CheckoutQuote | null> {
   const cart = toCart(input.cart);
@@ -55,6 +61,7 @@ export async function quoteAction(input: QuoteInput): Promise<CheckoutQuote | nu
     fulfilment: toFulfilment(fulfilment.data),
     couponCode: input.couponCode?.slice(0, 40) || null,
     email: input.email?.slice(0, 200) || null,
+    redeemLine: typeof input.redeemLine === "string" ? input.redeemLine.slice(0, 600) : null,
   });
 }
 
@@ -64,6 +71,7 @@ const placeSchema = z.object({
   fulfilment: fulfilmentSchema,
   notes: z.string().max(300),
   couponCode: z.string().max(40).nullable(),
+  redeemLine: z.string().max(600).nullable(),
   locale: z.string().max(5),
 });
 

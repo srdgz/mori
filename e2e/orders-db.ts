@@ -102,3 +102,10 @@ export async function setRole(email: string, role: "customer" | "staff" | "admin
 export async function orderStatus(code: string): Promise<string> {
   return (await pool.query<{ status: string }>(`select status from orders where code = $1`, [code])).rows[0]!.status;
 }
+
+export async function addStamps(email: string, stamps: number): Promise<void> {
+  await pool.query(`insert into loyalty_ledger (user_id, delta, reason) select id, $2, 'adjustment' from users where email = $1`, [
+    email,
+    stamps,
+  ]);
+}
