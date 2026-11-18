@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore, useTransition } from "react"
 import type { TrackingSnapshot } from "@/core/application/checkout/tracking";
 import type { Reorder } from "@/core/domain/ordering/reorder";
 import { SUBSCRIBED_SAFETY_MS, subscribeLive } from "@/ui/live/subscribe";
+import { subscribeToPush } from "@/ui/pwa/PwaClient";
 import { Icon } from "@/ui/primitives/Icon";
 import { cart } from "./cart-store";
 
@@ -113,14 +114,44 @@ export function LiveOrder({
 
 const noSubscription = () => () => undefined;
 
-export function NotifyButton({ label, enabledLabel }: { label: string; enabledLabel: string }) {
+const PUSH_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+
+function pushSupported(): boolean {
+  return Boolean(PUSH_KEY) && "serviceWorker" in navigator && "PushManager" in window;
+}
+
+export function NotifyButton({
+  label,
+  enabledLabel,
+  failedLabel,
+  code,
+  token,
+}: {
+  label: string;
+  enabledLabel: string;
+  failedLabel: string;
+  code: string;
+  token: string | null;
+}) {
   const current = useSyncExternalStore(
     noSubscription,
     () => ("Notification" in window ? Notification.permission : "unsupported"),
     () => "unsupported",
   );
-  const [asked, setAsked] = useState<NotificationPermission | null>(null);
+  const [asked, setAsked] = useState<NotificationPermission | "failed" | null>(null);
   const state = asked ?? current;
+
+  async function enable() {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted" || !pushSupported()) {
+      setAsked(permission);
+      return;
+    }
+    const ok = await subscribeToPush(PUSH_KEY, code, token).catch(() => false);
+    setAsked(ok ? "granted" : "failed");
+  }
+
+  if (state === "failed") return <p className="text-sm text-ink-soft">{failedLabel}</p>;
 
   if (state === "unsupported" || state === "denied") return null;
   if (state === "granted") {
@@ -132,7 +163,7 @@ export function NotifyButton({ label, enabledLabel }: { label: string; enabledLa
     );
   }
   return (
-    <button type="button" className="link-u w-fit text-sm text-forest" onClick={() => void Notification.requestPermission().then(setAsked)}>
+    <button type="button" className="link-u w-fit text-sm text-forest" onClick={() => void enable()}>
       {label}
     </button>
   );

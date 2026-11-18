@@ -12,6 +12,7 @@ import { productPhoto } from "@/ui/brand/photos";
 import { Icon } from "@/ui/primitives/Icon";
 import { cssVar } from "@/ui/primitives/style";
 import { ProductJsonLd } from "@/ui/seo/ProductJsonLd";
+import { ProductReviews } from "@/ui/shop/ProductReviews";
 import { pageMetadata } from "@/ui/seo/metadata";
 import { DrinkConfigurator, type ConfiguratorLabels } from "@/ui/shop/DrinkConfigurator";
 import { FavouriteButton } from "@/ui/account/FavouriteButton";
@@ -70,6 +71,7 @@ export default async function ProductPage({ params }: Props) {
   ]);
   if (!page) notFound();
   const { product, related } = page;
+  const reviews = await container().getProductReviews(product.id);
 
   const labels: ConfiguratorLabels = {
     configure: t("configure"),
@@ -85,7 +87,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <ProductJsonLd product={product} locale={locale} menuName={t("menu")} />
+      <ProductJsonLd product={product} locale={locale} menuName={t("menu")} rating={reviews.summary} />
 
       <section className="pt-[calc(var(--nav-h)+clamp(24px,5vw,64px))] pb-[clamp(64px,9vw,128px)]">
         <div className="wrap grid items-start gap-[clamp(28px,5vw,80px)] md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
@@ -163,6 +165,8 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      <ProductReviews data={reviews} locale={locale} />
 
       {related.length > 0 && (
         <section className="bg-cream py-[clamp(64px,9vw,128px)]" aria-labelledby="related-h">

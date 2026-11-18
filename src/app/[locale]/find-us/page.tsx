@@ -37,7 +37,7 @@ export default async function FindUsPage({ params }: Props) {
 
       <section className="pb-[clamp(80px,12vw,170px)]">
         <div className="wrap grid items-start gap-[clamp(28px,5vw,80px)] lg:grid-cols-[1.2fr_1fr]">
-          <figure className="map relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-forest" data-anim="clip">
+          <figure className="map on-dark relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-forest" data-anim="clip">
             <svg viewBox="0 0 600 600" className="block size-full" role="img" aria-label={t("mapLabel")}>
               <g className="blocks">
                 <rect x="40" y="40" width="150" height="120" rx="8" />

@@ -12,13 +12,20 @@ import { Header } from "@/ui/brand/Header";
 import { LogoSprite } from "@/ui/brand/LogoSprite";
 import { MotionRoot } from "@/ui/motion/MotionRoot";
 import { CartProvider } from "@/ui/shop/CartProvider";
+import { themeScript } from "@/ui/theme/theme";
+import { ServiceWorkerRegister } from "@/ui/pwa/PwaClient";
 import { syncCartAction } from "./checkout/actions";
 import "@/styles/globals.css";
 
 const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk", display: "swap" });
 const body = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", display: "swap" });
 
-export const viewport: Viewport = { themeColor: "#183D2B" };
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#183D2B" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E1813" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -47,6 +54,9 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <LogoSprite />
         <NextIntlClientProvider messages={clientMessages}>
@@ -69,6 +79,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             )}
           </CartProvider>
           <MotionRoot />
+          <ServiceWorkerRegister />
         </NextIntlClientProvider>
       </body>
     </html>

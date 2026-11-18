@@ -62,7 +62,11 @@ export default async function HomePage({ params }: Props) {
   return (
     <>
       <SiteJsonLd locale={locale} description={t("description")} />
-      <section className="hero relative grid min-h-svh overflow-hidden bg-[#d8d5ce] text-forest" data-hero aria-labelledby="hero-title">
+      <section
+        className="hero keep-light relative grid min-h-svh overflow-hidden bg-[#d8d5ce] text-forest"
+        data-hero
+        aria-labelledby="hero-title"
+      >
         <div className="hero-zoom absolute inset-0 overflow-hidden" data-hero-media>
           <Image
             src={photos.hero}

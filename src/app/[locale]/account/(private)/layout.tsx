@@ -6,6 +6,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { AccountNav } from "@/ui/account/AccountNav";
 import { Avatar } from "@/ui/account/Avatar";
 import { SignOutButton } from "@/ui/account/AccountForms";
+import { ThemeSync } from "@/ui/theme/ThemeClient";
 import { signOutAction } from "../actions";
 
 type Props = { children: ReactNode; params: Promise<{ locale: string }> };
@@ -15,10 +16,11 @@ export default async function PrivateAccountLayout({ children, params }: Props) 
   setRequestLocale(locale);
   const { user } = await account().currentActor();
   if (!user) redirect({ href: "/account/sign-in", locale });
-  const t = await getTranslations("account");
+  const [t, theme] = await Promise.all([getTranslations("account"), account().getTheme()]);
 
   return (
     <section className="pt-[calc(var(--nav-h)+clamp(24px,5vw,64px))] pb-[clamp(64px,9vw,128px)]">
+      {theme && <ThemeSync saved={theme} />}
       <div className="wrap account-shell">
         <aside className="account-shell__side">
           <p className="eyebrow text-forest">{t("nav.account")}</p>

@@ -42,6 +42,7 @@ export const routing = defineRouting({
     "/admin/products/[id]": { es: "/admin/productos/[id]", en: "/admin/products/[id]" },
     "/admin/coupons": { es: "/admin/cupones", en: "/admin/coupons" },
     "/admin/customers": { es: "/admin/clientes", en: "/admin/customers" },
+    "/admin/reviews": { es: "/admin/resenas", en: "/admin/reviews" },
     "/admin/settings": { es: "/admin/ajustes", en: "/admin/settings" },
   },
 });

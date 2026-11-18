@@ -7,6 +7,7 @@ import { formatMoney } from "@/core/domain/shared/money";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { productPhoto } from "@/ui/brand/photos";
+import { LoyaltyCard } from "@/ui/account/LoyaltyCard";
 import { Icon } from "@/ui/primitives/Icon";
 import { isInProgress, OrderCard } from "@/ui/shop/OrderList";
 import { reorderAction } from "../../order/actions";
@@ -30,12 +31,13 @@ export default async function AccountOverviewPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const services = account();
-  const [t, { user }, favourites, addresses, history] = await Promise.all([
+  const [t, { user }, favourites, addresses, history, loyalty] = await Promise.all([
     getTranslations("account.overview"),
     services.currentActor(),
     services.listFavourites(),
     services.listAddresses(),
     checkout().listOrders(null),
+    services.getLoyaltyCard(),
   ]);
   const latest = history?.orders[0] ?? null;
   const firstName = user?.name.split(" ")[0] ?? "";
@@ -55,6 +57,8 @@ export default async function AccountOverviewPage({ params }: Props) {
           <p className="mt-2 max-w-[60ch] text-ink-soft">{t("demoText")}</p>
         </section>
       )}
+
+      {loyalty && <LoyaltyCard card={loyalty} />}
 
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="account-card grid content-start gap-4 bg-matcha" aria-labelledby="orders-h">

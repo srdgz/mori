@@ -11,7 +11,7 @@ export function Marquee({ items, pauseLabel, playLabel }: Props) {
   const [paused, setPaused] = useState(false);
 
   return (
-    <div className={cx("marquee relative overflow-hidden bg-forest py-[22px] text-cream", paused && "is-paused")}>
+    <div className={cx("marquee on-dark relative overflow-hidden bg-forest py-[22px] text-cream", paused && "is-paused")}>
       <p className="sr-only">{items.join(". ")}.</p>
       <div className="marquee__track flex w-max" aria-hidden="true">
         {[0, 1].map((copy) => (

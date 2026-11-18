@@ -137,3 +137,8 @@ export async function editZoneAction(change: "add" | "remove", postalCode: strin
   if (change !== "add" && change !== "remove") return false;
   return admin().editZones(change, String(postalCode));
 }
+
+export async function setReviewVisibleAction(id: string, visible: boolean): Promise<boolean> {
+  if (typeof id !== "string" || id.length > 64) return false;
+  return (await admin().setReviewHidden(id, visible !== true)) === "done";
+}

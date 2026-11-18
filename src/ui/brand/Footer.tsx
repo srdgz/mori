@@ -3,6 +3,7 @@ import type { StoreInfo } from "@/core/domain/store/store-info";
 import { Link } from "@/i18n/navigation";
 import { legalItems, navItems } from "@/i18n/routing";
 import { Icon } from "@/ui/primitives/Icon";
+import { InstallButton } from "@/ui/pwa/PwaClient";
 import { Mark, Wordmark } from "./Mark";
 
 type Props = { store: StoreInfo };
@@ -102,6 +103,7 @@ export async function Footer({ store }: Props) {
               ))}
             </ul>
           </nav>
+          <InstallButton label={t("install")} className="install-button" />
           <span>{t("note")}</span>
         </div>
       </div>

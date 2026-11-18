@@ -198,3 +198,7 @@ export async function toggleFavouriteAction(slug: string): Promise<FavouriteStat
     throw error;
   }
 }
+
+export async function setThemeAction(theme: string): Promise<boolean> {
+  return account().setTheme(theme);
+}

@@ -3,7 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { account } from "@/composition/container";
 import type { AppLocale } from "@/i18n/routing";
 import { ProfileForm } from "@/ui/account/AccountForms";
-import { updateProfileAction } from "../../actions";
+import { ThemePicker } from "@/ui/theme/ThemeClient";
+import { setThemeAction, updateProfileAction } from "../../actions";
 import { accountMetadata } from "../../shared";
 
 type Props = { params: Promise<{ locale: AppLocale }> };
@@ -15,7 +16,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfilePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, { user }] = await Promise.all([getTranslations("account.profile"), account().currentActor()]);
+  const [t, a, { user }, theme] = await Promise.all([
+    getTranslations("account.profile"),
+    getTranslations("account.appearance"),
+    account().currentActor(),
+    account().getTheme(),
+  ]);
   if (!user) return null;
   return (
     <div className="grid gap-8">
@@ -29,6 +35,15 @@ export default async function ProfilePage({ params }: Props) {
           profile={{ name: user.name, email: user.email, phone: user.phone, locale: user.locale, marketingOptIn: user.marketingOptIn }}
         />
       </div>
+      <section className="account-card grid gap-4" aria-labelledby="appearance-h">
+        <div>
+          <h2 id="appearance-h" className="font-semibold text-forest">
+            {a("title")}
+          </h2>
+          <p className="mt-2 text-ink-soft">{a("lede")}</p>
+        </div>
+        <ThemePicker saved={theme ?? "system"} save={setThemeAction} />
+      </section>
     </div>
   );
 }

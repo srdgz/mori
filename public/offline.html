@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#183d2b" />
+    <title>MŌRI — Sin conexión · Offline</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        display: grid;
+        min-height: 100svh;
+        margin: 0;
+        place-items: center;
+        padding: 24px;
+        background: #f3efe7;
+        color: #183d2b;
+        font-family: "DM Sans", system-ui, sans-serif;
+        text-align: center;
+      }
+      img {
+        width: 72px;
+        height: 72px;
+        border-radius: 18px;
+      }
+      h1 {
+        margin: 24px 0 8px;
+        font-size: clamp(1.8rem, 6vw, 2.6rem);
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+      }
+      p {
+        max-width: 34ch;
+        margin: 0 auto 12px;
+        color: #4a4e49;
+        line-height: 1.5;
+      }
+      button {
+        margin-top: 16px;
+        padding: 12px 22px;
+        border: 0;
+        border-radius: 999px;
+        background: #183d2b;
+        color: #e8e1d4;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0e1813;
+          color: #d9e6c4;
+        }
+        p {
+          color: #b4bdb0;
+        }
+        button {
+          background: #b6d66b;
+          color: #10291d;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="MŌRI" />
+      <h1>Sin conexión</h1>
+      <p>No hay internet ahora mismo. En cuanto vuelva, tu pedido seguirá aquí.</p>
+      <p lang="en">You're offline. As soon as you're back, your order will still be here.</p>
+      <button type="button" onclick="location.reload()">Reintentar · <span lang="en">Try again</span></button>
+    </main>
+  </body>
+</html>
