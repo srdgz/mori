@@ -1,4 +1,5 @@
-import type { AddressRepository, FavouriteRepository } from "@/core/application/ports/account-repositories";
+import type { AddressRepository, FavouriteRepository, PreferenceRepository } from "@/core/application/ports/account-repositories";
+import type { Theme } from "@/core/domain/account/account";
 import type { UserId } from "@/core/domain/access/actor";
 import { withDefault, type Address, type AddressDraft, type AddressId } from "@/core/domain/account/address";
 import type { ProductId } from "@/core/domain/catalog/product";
@@ -60,5 +61,17 @@ export class MemoryFavouriteRepository implements FavouriteRepository {
       userId,
       (this.rows.get(userId) ?? []).filter((id) => id !== productId),
     );
+  }
+}
+
+export class MemoryPreferenceRepository implements PreferenceRepository {
+  readonly themes = new Map<UserId, Theme>();
+
+  async theme(userId: UserId): Promise<Theme> {
+    return this.themes.get(userId) ?? "system";
+  }
+
+  async setTheme(userId: UserId, theme: Theme): Promise<void> {
+    this.themes.set(userId, theme);
   }
 }

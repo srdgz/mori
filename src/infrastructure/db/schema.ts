@@ -42,6 +42,9 @@ export const users = pgTable("users", {
   phone: text("phone"),
   locale: text("locale").notNull().default("es"),
   marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
+  theme: text("theme", { enum: ["system", "light", "dark"] })
+    .notNull()
+    .default("system"),
   role: appRole("role").notNull().default("customer"),
   isDemo: boolean("is_demo").notNull().default(false),
   stripeCustomerId: text("stripe_customer_id").unique(),
@@ -295,6 +298,45 @@ export const favourites = pgTable(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.productId] })],
+);
+
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    rating: smallint("rating").notNull(),
+    body: text("body"),
+    isHidden: boolean("is_hidden").notNull().default(false),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    unique("reviews_product_user").on(t.productId, t.userId),
+    index("reviews_product").on(t.productId),
+    check("reviews_rating", sql`${t.rating} between 1 and 5`),
+    check("reviews_body_length", sql`char_length(${t.body}) <= 280`),
+  ],
+);
+
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [unique("push_subscriptions_order_endpoint").on(t.orderId, t.endpoint)],
 );
 
 export const carts = pgTable("carts", {

@@ -1,16 +1,18 @@
-import { actorFor, GUEST, type Actor, type UserId } from "@/core/domain/access/actor";
+import { actorFor, can, GUEST, type Actor, type UserId } from "@/core/domain/access/actor";
 import { priceCart, type Cart, type PricedCart } from "@/core/domain/cart/cart";
 import { quoteDelivery, type DeliveryQuote } from "@/core/domain/fulfilment/delivery";
 import { findSlot, pickupDays, type PickupDay } from "@/core/domain/fulfilment/pickup-slots";
 import { checkoutTotals, pickupCode, type Totals } from "@/core/domain/ordering/checkout";
 import { applyCoupon, normaliseCode, type CouponResult } from "@/core/domain/promotions/coupon";
+import { loyaltyCard, redeemFreeDrink, type LoyaltyCard, type Redemption, type RedemptionResult } from "@/core/domain/promotions/loyalty";
 import { isLocale, type Locale } from "@/core/domain/shared/locale";
-import { ZERO } from "@/core/domain/shared/money";
+import { add, subtract, ZERO } from "@/core/domain/shared/money";
 import { addDays, localDate, weekdayOf, zonedInstant } from "@/core/domain/shared/zoned-time";
 import type { CatalogRepository } from "../ports/catalog-repository";
 import type {
   CouponRepository,
   DeliveryAddress,
+  LoyaltyRepository,
   OrderLineSnapshot,
   OrderRepository,
   PaymentGateway,
@@ -37,6 +39,11 @@ export type CheckoutQuote = Readonly<{
   totals: Totals;
   delivery: DeliveryQuote | null;
   coupon: (CouponResult & { code: string }) | null;
+  loyalty: Readonly<{
+    card: LoyaltyCard;
+    redemption: Redemption | null;
+    error: Extract<RedemptionResult, { ok: false }>["error"] | null;
+  }> | null;
 }>;
 
 type Dependencies = {
@@ -44,6 +51,7 @@ type Dependencies = {
   settings: SettingsRepository;
   orders: OrderRepository;
   coupons: CouponRepository;
+  loyalty: LoyaltyRepository;
   clock: Clock;
 };
 
@@ -82,10 +90,26 @@ export function makeGetCheckoutOptions({ settings, orders, clock }: Pick<Depende
 async function quote(
   deps: Dependencies,
   shop: ShopSettings,
-  input: { cart: Cart; fulfilment: Fulfilment; couponCode: string | null; email: string | null; customerId: UserId | null },
+  input: {
+    cart: Cart;
+    fulfilment: Fulfilment;
+    couponCode: string | null;
+    email: string | null;
+    customerId: UserId | null;
+    collectsStamps: boolean;
+    redeemLine: string | null;
+  },
 ): Promise<CheckoutQuote & { couponId: string | null }> {
   const now = deps.clock.now();
   const cart = priceCart(input.cart, await deps.catalog.all());
+
+  let loyalty: CheckoutQuote["loyalty"] = null;
+  if (input.customerId && input.collectsStamps) {
+    const card = loyaltyCard(await deps.loyalty.balance(input.customerId), shop.loyaltyStampsRequired);
+    const result = input.redeemLine ? redeemFreeDrink(card, cart, input.redeemLine) : null;
+    loyalty = { card, redemption: result?.ok ? result.redemption : null, error: result && !result.ok ? result.error : null };
+  }
+  const loyaltyDiscount = loyalty?.redemption?.discount ?? ZERO;
 
   const delivery =
     input.fulfilment.kind === "delivery"
@@ -110,7 +134,7 @@ async function quote(
       const uses = await deps.coupons.uses(stored.id, email);
       const paid = email || input.customerId ? await deps.orders.paidOrderCount(email, input.customerId) : 0;
       const result = applyCoupon(stored, {
-        subtotal: cart.subtotal,
+        subtotal: subtract(cart.subtotal, loyaltyDiscount),
         now,
         totalUses: uses.total,
         customerUses: uses.customer,
@@ -123,22 +147,31 @@ async function quote(
 
   const totals = checkoutTotals({
     subtotal: cart.subtotal,
-    discount: coupon?.ok ? coupon.discount : ZERO,
+    discount: add(loyaltyDiscount, coupon?.ok ? coupon.discount : ZERO),
     deliveryFee: delivery?.ok ? delivery.fee : ZERO,
     vatRateBasisPoints: shop.vatRateBasisPoints,
   });
-  return { cart, totals, delivery, coupon, couponId };
+  return { cart, totals, delivery, coupon, loyalty, couponId };
 }
 
 export function makeQuoteCheckout(deps: Dependencies & { identity: Identity }) {
-  return async (input: { cart: Cart; fulfilment: Fulfilment; couponCode: string | null; email: string | null }): Promise<CheckoutQuote> => {
+  return async (input: {
+    cart: Cart;
+    fulfilment: Fulfilment;
+    couponCode: string | null;
+    email: string | null;
+    redeemLine?: string | null;
+  }): Promise<CheckoutQuote> => {
     const user = await deps.identity.currentUser();
+    const actor: Actor = user ? actorFor(user) : GUEST;
     const result = await quote(deps, await deps.settings.load(), {
       ...input,
       email: input.email ?? user?.email ?? null,
       customerId: user?.id ?? null,
+      collectsStamps: can(actor, "loyalty.redeem"),
+      redeemLine: input.redeemLine ?? null,
     });
-    return { cart: result.cart, totals: result.totals, delivery: result.delivery, coupon: result.coupon };
+    return { cart: result.cart, totals: result.totals, delivery: result.delivery, coupon: result.coupon, loyalty: result.loyalty };
   };
 }
 
@@ -148,6 +181,7 @@ export type PlaceOrderInput = Readonly<{
   fulfilment: Fulfilment;
   notes: string;
   couponCode: string | null;
+  redeemLine?: string | null;
   locale: string;
   clientKey: string;
 }>;
@@ -161,7 +195,8 @@ export type PlaceOrderError =
   | "slot_unavailable"
   | "slot_full"
   | "delivery_unavailable"
-  | "coupon_invalid";
+  | "coupon_invalid"
+  | "loyalty_unavailable";
 
 export type PlaceOrderResult =
   | Readonly<{ ok: true; code: string; trackingToken: string; clientSecret: string; total: Totals["total"] }>
@@ -206,7 +241,10 @@ export function makePlaceOrder(
       couponCode: input.couponCode,
       email: contact.email,
       customerId,
+      collectsStamps: can(actor, "loyalty.redeem"),
+      redeemLine: input.redeemLine ?? null,
     });
+    if (input.redeemLine && !result.loyalty?.redemption) return { ok: false, error: "loyalty_unavailable" };
     if (result.cart.issues.length > 0 || result.cart.lines.length === 0) return { ok: false, error: "cart_changed" };
     if (input.couponCode && !result.coupon?.ok) return { ok: false, error: "coupon_invalid" };
 
@@ -233,6 +271,7 @@ export function makePlaceOrder(
         notes,
         ...result.totals,
         couponId: result.couponId,
+        stampsRedeemed: result.loyalty?.redemption ? result.loyalty.card.required : 0,
         lines: snapshot(result.cart),
       });
       if (created === "slot_full") return { ok: false, error: "slot_full" };

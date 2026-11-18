@@ -17,6 +17,7 @@ export type ShopSettings = Readonly<{
   ordersPaused: boolean;
   unpaidHoldMinutes: number;
   vatRateBasisPoints: number;
+  loyaltyStampsRequired: number;
   schedule: WeeklySchedule;
   closures: readonly LocalDate[];
   delivery: Readonly<{
@@ -30,6 +31,10 @@ export type ShopSettings = Readonly<{
     etaMax: number;
   }>;
 }>;
+
+export interface LoyaltyRepository {
+  balance(userId: UserId): Promise<number>;
+}
 
 export interface SettingsRepository {
   load(): Promise<ShopSettings>;
@@ -74,6 +79,7 @@ export type NewOrder = Readonly<{
   total: Money;
   vat: Money;
   couponId: string | null;
+  stampsRedeemed?: number;
   lines: readonly OrderLineSnapshot[];
   isDemo?: boolean;
 }>;

@@ -8,6 +8,7 @@ import type { AdvanceResult, OrderRepository, OrderSummary, OrderView } from "..
 import type { Identity } from "../ports/identity";
 import type { LiveQuerySealer, SealedQuery } from "../ports/live";
 import type { Mailer } from "../ports/mailer";
+import { notifyOrder, pushMessage, type PushDeps } from "./push";
 
 export type OrderTracking = Readonly<{
   order: OrderView;
@@ -103,6 +104,7 @@ export function makeAdvanceOrderStatus(deps: {
   identity: Identity;
   mailer: Mailer;
   trackingUrl: (code: string, token: string, locale: Locale) => string;
+  push?: PushDeps | null;
 }) {
   return async (code: string, next: OrderStatus): Promise<AdvanceResult | "forbidden"> => {
     const actor = await currentActor(deps.identity);
@@ -121,6 +123,9 @@ export function makeAdvanceOrderStatus(deps: {
         code: order.code,
         url: deps.trackingUrl(order.code, order.trackingToken, order.locale),
       });
+      if (deps.push) {
+        await notifyOrder(deps.push, order.id, pushMessage(kind, order, deps.trackingUrl(order.code, order.trackingToken, order.locale)));
+      }
     }
     return result;
   };

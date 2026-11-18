@@ -3,6 +3,7 @@ import type {
   AdvanceResult,
   BoardCard,
   CouponRepository,
+  LoyaltyRepository,
   NewOrder,
   OrderRepository,
   OrderSummary,
@@ -71,6 +72,7 @@ export class DrizzleSettingsRepository implements SettingsRepository {
       ordersPaused: settings.ordersPaused,
       unpaidHoldMinutes: settings.unpaidHoldMinutes,
       vatRateBasisPoints: settings.vatRateBp,
+      loyaltyStampsRequired: settings.loyaltyStampsRequired,
       schedule,
       closures: days.map((d) => d.day as LocalDate),
       delivery: {
@@ -84,6 +86,15 @@ export class DrizzleSettingsRepository implements SettingsRepository {
         etaMax: settings.deliveryEtaMax,
       },
     };
+  }
+}
+
+export class DrizzleLoyaltyRepository implements LoyaltyRepository {
+  constructor(private readonly db: Database) {}
+
+  async balance(userId: UserId): Promise<number> {
+    const [row] = await rows<{ stamps: number | null }>(this.db, sql`select stamps from loyalty_balance where user_id = ${userId}`);
+    return row?.stamps ?? 0;
   }
 }
 
@@ -155,6 +166,7 @@ export class DrizzleOrderRepository implements OrderRepository {
       total_cents: order.total.cents,
       vat_cents: order.vat.cents,
       coupon_id: order.couponId,
+      stamps_redeemed: order.stampsRedeemed ?? 0,
       is_demo: order.isDemo ?? false,
     };
     const items = order.lines.map((l) => ({

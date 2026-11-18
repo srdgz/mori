@@ -12,6 +12,7 @@ import {
   coupons,
   deliveryZones,
   favourites,
+  loyaltyLedger,
   openingHours,
   optionGroups,
   options,
@@ -110,6 +111,16 @@ async function seedDemoCustomer(db: Database): Promise<void> {
   });
 }
 
+async function seedDemoStamps(db: Database): Promise<void> {
+  const [existing] = await db
+    .select({ id: loyaltyLedger.id })
+    .from(loyaltyLedger)
+    .where(eq(loyaltyLedger.userId, demoCustomer.id))
+    .limit(1);
+  if (existing) return;
+  await db.insert(loyaltyLedger).values({ userId: demoCustomer.id, delta: 5, reason: "adjustment" });
+}
+
 async function seedDemoStaff(db: Database): Promise<void> {
   const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, demoStaff.email));
   if (existing) return;
@@ -131,4 +142,5 @@ export async function seedDatabase(db: Database): Promise<void> {
   await seedShop(db);
   await seedDemoCustomer(db);
   await seedDemoStaff(db);
+  await seedDemoStamps(db);
 }

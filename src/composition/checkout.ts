@@ -23,7 +23,9 @@ import {
   makeSaveStoreSettings,
   makeSetCouponActive,
 } from "@/core/application/admin/store";
+import { makeGetOrderReviews, makeListReviewsForStaff, makeSetReviewHidden, makeSubmitReview } from "@/core/application/catalog/reviews";
 import { makeConfirmPayment, makeGetCheckoutOptions, makePlaceOrder, makeQuoteCheckout } from "@/core/application/checkout/checkout";
+import { makeSubscribeToOrder, type PushDeps } from "@/core/application/checkout/push";
 import { makeGetOrder, makeSyncCart } from "@/core/application/checkout/orders";
 import {
   makeAdvanceOrderStatus,
@@ -48,10 +50,14 @@ import {
 import { DrizzleCatalogRepository } from "@/infrastructure/db/drizzle-catalog-repository";
 import {
   DrizzleCouponRepository,
+  DrizzleLoyaltyRepository,
   DrizzleOrderRepository,
   DrizzleSettingsRepository,
 } from "@/infrastructure/db/drizzle-checkout-repositories";
 import { DrizzleRateLimiter } from "@/infrastructure/db/drizzle-rate-limiter";
+import { DrizzlePushSubscriptions } from "@/infrastructure/db/drizzle-push";
+import { DrizzleReviewRepository } from "@/infrastructure/db/drizzle-reviews";
+import { WebPushSender } from "@/infrastructure/push/web-push-sender";
 import { DrizzleSavedCartRepository } from "@/infrastructure/db/drizzle-saved-carts";
 import { NeonLiveQuerySealer } from "@/infrastructure/realtime/neon-live-queries";
 import { StripePaymentGateway } from "@/infrastructure/stripe/stripe-gateway";
@@ -92,6 +98,7 @@ function build() {
     settings: new DrizzleSettingsRepository(db),
     orders: new DrizzleOrderRepository(db),
     coupons: new DrizzleCouponRepository(db),
+    loyalty: new DrizzleLoyaltyRepository(db),
     clock: systemClock,
     identity,
   };
@@ -108,13 +115,21 @@ function build() {
     confirmPayment: (...args: Parameters<ReturnType<typeof makeConfirmPayment>>) =>
       makeConfirmPayment({ orders: deps.orders, payments: payments(), mailer: getMailer(), trackingUrl })(...args),
     getOrder: makeGetOrder(deps.orders, identity),
+    getOrderReviews: makeGetOrderReviews({ orders: deps.orders, identity, reviews: new DrizzleReviewRepository(db) }),
+    submitReview: makeSubmitReview({
+      identity,
+      reviews: new DrizzleReviewRepository(db),
+      catalog: deps.catalog,
+      onChange: () => refreshSite(),
+    }),
     syncCart: makeSyncCart(new DrizzleSavedCartRepository(db), identity),
     trackOrder: makeTrackOrder(deps.orders, identity),
     listOrders: makeListOrders(deps.orders, identity),
     claimOrder: makeClaimOrder(deps.orders, identity),
     reorder: makeReorder(deps),
     sealOrderQuery: makeSealOrderQuery(deps.orders, identity, sealer(db)),
-    advanceOrderStatus: makeAdvanceOrderStatus({ orders: deps.orders, identity, mailer: getMailer(), trackingUrl }),
+    advanceOrderStatus: makeAdvanceOrderStatus({ orders: deps.orders, identity, mailer: getMailer(), trackingUrl, push: pushDeps(db) }),
+    subscribeToOrder: makeSubscribeToOrder({ orders: deps.orders, identity, subscriptions: new DrizzlePushSubscriptions(db) }),
   };
 }
 
@@ -132,6 +147,16 @@ function refreshSite() {
 
 export const uploadsEnabled = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
+export const pushPublicKey = () => (process.env.VAPID_PRIVATE_KEY && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) || null;
+
+function pushDeps(db: ReturnType<typeof getDatabase>): PushDeps | null {
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (!publicKey || !privateKey) return null;
+  const subject = process.env.VAPID_SUBJECT || "mailto:hola@mori.example";
+  return { subscriptions: new DrizzlePushSubscriptions(db), sender: new WebPushSender({ subject, publicKey, privateKey }) };
+}
+
 function buildAdmin() {
   const db = getDatabase();
   const identity = getIdentity();
@@ -143,7 +168,7 @@ function buildAdmin() {
   return {
     getBoard: makeGetBoard({ orders, identity, clock: systemClock, timeZone }),
     getStaffOrder: makeGetStaffOrder({ orders, identity }),
-    advanceOrderStatus: makeAdvanceOrderStatus({ orders, identity, mailer: getMailer(), trackingUrl }),
+    advanceOrderStatus: makeAdvanceOrderStatus({ orders, identity, mailer: getMailer(), trackingUrl, push: pushDeps(db) }),
     cancelOrder: makeCancelOrder({ orders, identity, payments: lazyPayments }),
     refundOrder: makeRefundOrder({ orders, identity, payments: lazyPayments }),
     sealBoardQuery: makeSealBoardQuery({ identity, sealer: sealer(db), timeZone }),
@@ -161,6 +186,13 @@ function buildAdmin() {
     editZones: makeEditZones(settingsDeps),
     listCustomers: makeListCustomers({ customers: new DrizzleCustomerDirectory(db), identity }),
     getDashboard: makeGetDashboard({ reports: new DrizzleSalesReports(db), identity, clock: systemClock, timeZone }),
+    listReviews: makeListReviewsForStaff({ identity, reviews: new DrizzleReviewRepository(db) }),
+    setReviewHidden: makeSetReviewHidden({
+      identity,
+      reviews: new DrizzleReviewRepository(db),
+      catalog: new DrizzleCatalogRepository(db),
+      onChange: () => refreshSite(),
+    }),
   };
 }
 

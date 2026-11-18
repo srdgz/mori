@@ -1,4 +1,6 @@
-import { validateNewPassword, validateProfile, type ProfileInput } from "@/core/domain/account/account";
+import type { UserId } from "@/core/domain/access/actor";
+import { isTheme, validateNewPassword, validateProfile, type ProfileInput, type Theme } from "@/core/domain/account/account";
+import type { PreferenceRepository } from "../ports/account-repositories";
 import type { Identity } from "../ports/identity";
 import type { Mailer } from "../ports/mailer";
 import { requireUser, type FormResult } from "./session";
@@ -34,5 +36,21 @@ export function makeDeleteAccount(identity: Identity) {
     if (!words.includes(confirmation.trim())) return { status: "invalid", errors: { confirmation: "mismatch" } };
     const outcome = await identity.deleteAccount(user.hasPassword ? password : null);
     return outcome === "deleted" ? { status: "ok" } : { status: "invalid", errors: { password: "wrong" } };
+  };
+}
+
+export function makeGetTheme(identity: Identity, preferences: PreferenceRepository) {
+  return async (): Promise<Theme | null> => {
+    const user = await identity.currentUser();
+    return user ? preferences.theme(user.id as UserId) : null;
+  };
+}
+
+export function makeSetTheme(identity: Identity, preferences: PreferenceRepository) {
+  return async (theme: unknown): Promise<boolean> => {
+    if (!isTheme(theme)) return false;
+    const user = await requireUser(identity, "account.manage");
+    await preferences.setTheme(user.id as UserId, theme);
+    return true;
   };
 }

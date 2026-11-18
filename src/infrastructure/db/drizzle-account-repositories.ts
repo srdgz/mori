@@ -1,10 +1,11 @@
 import { and, asc, eq, sql } from "drizzle-orm";
-import type { AddressRepository, FavouriteRepository } from "@/core/application/ports/account-repositories";
+import type { AddressRepository, FavouriteRepository, PreferenceRepository } from "@/core/application/ports/account-repositories";
+import type { Theme } from "@/core/domain/account/account";
 import type { UserId } from "@/core/domain/access/actor";
 import type { Address, AddressDraft, AddressId } from "@/core/domain/account/address";
 import type { ProductId } from "@/core/domain/catalog/product";
 import type { Database } from "./database";
-import { addresses, favourites } from "./schema";
+import { addresses, favourites, users } from "./schema";
 
 type Row = typeof addresses.$inferSelect;
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
@@ -98,5 +99,18 @@ export class DrizzleFavouriteRepository implements FavouriteRepository {
 
   async remove(userId: UserId, productId: ProductId): Promise<void> {
     await this.db.delete(favourites).where(and(eq(favourites.userId, userId), eq(favourites.productId, productId)));
+  }
+}
+
+export class DrizzlePreferenceRepository implements PreferenceRepository {
+  constructor(private readonly db: Database) {}
+
+  async theme(userId: UserId): Promise<Theme> {
+    const [row] = await this.db.select({ theme: users.theme }).from(users).where(eq(users.id, userId));
+    return row?.theme ?? "system";
+  }
+
+  async setTheme(userId: UserId, theme: Theme): Promise<void> {
+    await this.db.update(users).set({ theme }).where(eq(users.id, userId));
   }
 }

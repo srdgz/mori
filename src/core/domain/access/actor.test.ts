@@ -23,6 +23,8 @@ const all: Permission[] = [
   "account.manage",
   "account.credentials",
   "loyalty.redeem",
+  "reviews.write",
+  "reviews.moderate",
   "orders.board",
   "orders.advance",
   "orders.refund",
@@ -50,19 +52,19 @@ describe("can", () => {
     expect(allowed(GUEST)).toEqual([]);
   });
 
-  it("lets a customer manage their account and redeem stamps", () => {
-    expect(allowed(customer)).toEqual(["account.manage", "account.credentials", "loyalty.redeem"]);
+  it("lets a customer manage their account, redeem stamps and write reviews", () => {
+    expect(allowed(customer)).toEqual(["account.manage", "account.credentials", "loyalty.redeem", "reviews.write"]);
   });
 
   it("lets staff work the order board but not run the shop", () => {
-    expect(allowed(staff)).toEqual(["account.manage", "account.credentials", "orders.board", "orders.advance"]);
+    expect(allowed(staff)).toEqual(["account.manage", "account.credentials", "reviews.moderate", "orders.board", "orders.advance"]);
   });
 
-  it("stops the shared demo staff account from changing its own credentials", () => {
+  it("stops the shared demo staff account from changing its own credentials or hiding reviews", () => {
     expect(allowed(demoStaff)).toEqual(["account.manage", "orders.board", "orders.advance"]);
   });
 
-  it("lets the shared demo customer use the account but not change its credentials", () => {
+  it("lets the shared demo customer use the account but not change its credentials or publish reviews", () => {
     expect(allowed(demoCustomer)).toEqual(["account.manage", "loyalty.redeem"]);
   });
 
@@ -71,7 +73,7 @@ describe("can", () => {
   });
 
   it("lets an admin run the whole shop, without the customer loyalty card", () => {
-    expect(allowed(admin)).toEqual(all.filter((p) => p !== "loyalty.redeem"));
+    expect(allowed(admin)).toEqual(all.filter((p) => p !== "loyalty.redeem" && p !== "reviews.write"));
   });
 });
 

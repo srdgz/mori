@@ -93,3 +93,11 @@ export function initials(name: string): string {
   const letter = (word: string) => [...word.normalize("NFC")].find((c) => /\p{L}/u.test(c))!;
   return (letter(first) + (last ? letter(last) : "")).toLocaleUpperCase("es");
 }
+
+export const THEMES = ["system", "light", "dark"] as const;
+
+export type Theme = (typeof THEMES)[number];
+
+export function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && (THEMES as readonly string[]).includes(value);
+}
