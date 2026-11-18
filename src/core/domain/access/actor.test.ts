@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { actorFor, authorize, can, canViewOrder, GUEST, isDemo, type Actor, type Permission, type UserId } from "./actor";
+import {
+  actorFor,
+  authorize,
+  can,
+  canHandleOrder,
+  canViewOrder,
+  GUEST,
+  isDemo,
+  isStaff,
+  type Actor,
+  type Permission,
+  type UserId,
+} from "./actor";
 
 const customer = actorFor({ id: "c1", role: "customer", isDemo: false });
 const staff = actorFor({ id: "s1", role: "staff", isDemo: false });
@@ -97,5 +109,31 @@ describe("canViewOrder", () => {
   it("lets staff and admins see every order", () => {
     expect(canViewOrder(demoStaff, guestOrder)).toBe(true);
     expect(canViewOrder(admin, order)).toBe(true);
+  });
+});
+
+describe("canHandleOrder", () => {
+  const staff = actorFor({ id: "s", role: "staff", isDemo: false });
+  const demoStaff = actorFor({ id: "d", role: "staff", isDemo: true });
+  const admin = actorFor({ id: "a", role: "admin", isDemo: false });
+  const customer = actorFor({ id: "c", role: "customer", isDemo: false });
+
+  it("lets staff move any order and the demo staff only example orders", () => {
+    expect(canHandleOrder(staff, "orders.advance", { isDemo: false })).toBe(true);
+    expect(canHandleOrder(demoStaff, "orders.advance", { isDemo: true })).toBe(true);
+    expect(canHandleOrder(demoStaff, "orders.advance", { isDemo: false })).toBe(false);
+    expect(canHandleOrder(customer, "orders.advance", { isDemo: true })).toBe(false);
+  });
+
+  it("keeps refunds for admins", () => {
+    expect(canHandleOrder(admin, "orders.refund", { isDemo: false })).toBe(true);
+    expect(canHandleOrder(staff, "orders.refund", { isDemo: false })).toBe(false);
+  });
+
+  it("knows who works in the shop", () => {
+    expect(isStaff(staff)).toBe(true);
+    expect(isStaff(admin)).toBe(true);
+    expect(isStaff(customer)).toBe(false);
+    expect(isStaff(GUEST)).toBe(false);
   });
 });

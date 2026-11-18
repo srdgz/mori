@@ -2,9 +2,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import type { UserId } from "@/core/domain/access/actor";
 import { money } from "@/core/domain/shared/money";
-import { orderRepositoryContract } from "@/test/order-contract";
+import { newOrder, orderRepositoryContract } from "@/test/order-contract";
 import { DrizzleCouponRepository, DrizzleOrderRepository, DrizzleSettingsRepository } from "./drizzle-checkout-repositories";
-import { closures, storeSettings, users } from "./schema";
+import { closures, orders, storeSettings, users } from "./schema";
 import { createTestDatabase, type TestDatabase } from "./testing";
 
 let test: TestDatabase;
@@ -64,5 +64,22 @@ describe("DrizzleCouponRepository", () => {
     });
     expect(await repository.byCode("NOPE")).toBeNull();
     expect(await repository.uses(coupon!.id, "ana@example.com")).toEqual({ total: 0, customer: 0 });
+  });
+});
+
+describe("DrizzleOrderRepository.expireUnpaid", () => {
+  it("expires unpaid orders older than the hold time and leaves recent ones", async () => {
+    const repository = new DrizzleOrderRepository(test.db);
+    const old = newOrder({ slotStart: new Date("2031-05-05T10:00:00Z") });
+    const recent = newOrder({ slotStart: new Date("2031-05-05T10:15:00Z") });
+    await repository.create(old);
+    await repository.create(recent);
+    await test.db
+      .update(orders)
+      .set({ createdAt: new Date(Date.now() - 45 * 60_000) })
+      .where(eq(orders.code, old.code));
+    expect(await repository.expireUnpaid()).toBeGreaterThanOrEqual(1);
+    expect((await repository.byCode(old.code))?.status).toBe("expired");
+    expect((await repository.byCode(recent.code))?.status).toBe("pending_payment");
   });
 });

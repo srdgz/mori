@@ -64,6 +64,11 @@ export default async function LocaleLayout({ children, params }: Props) {
               {children}
             </main>
             <Footer store={store} />
+            {settings.ordersPaused && (
+              <p role="status" className="paused-banner">
+                {messages.shop.pausedBanner}
+              </p>
+            )}
           </CartProvider>
           <MotionRoot />
         </NextIntlClientProvider>

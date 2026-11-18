@@ -1,4 +1,4 @@
-import { actorFor, can, canViewOrder, GUEST, type Actor, type UserId } from "@/core/domain/access/actor";
+import { actorFor, can, canHandleOrder, canViewOrder, GUEST, type Actor, type UserId } from "@/core/domain/access/actor";
 import type { OrderStatus } from "@/core/domain/ordering/order-status";
 import { reorderLines, type Reorder } from "@/core/domain/ordering/reorder";
 import { orderTimeline, type Timeline } from "@/core/domain/ordering/timeline";
@@ -40,7 +40,7 @@ export type OrderHistory = Readonly<{ orders: readonly OrderSummary[]; next: Dat
 
 export const HISTORY_PAGE = 10;
 
-async function currentActor(identity: Identity): Promise<Actor> {
+export async function currentActor(identity: Identity): Promise<Actor> {
   const user = await identity.currentUser();
   return user ? actorFor(user) : GUEST;
 }
@@ -109,6 +109,7 @@ export function makeAdvanceOrderStatus(deps: {
     if (!can(actor, "orders.advance")) return "forbidden";
     const order = await deps.orders.byCode(code.toUpperCase());
     if (!order) return "not_found";
+    if (!canHandleOrder(actor, "orders.advance", order)) return "forbidden";
     const result = await deps.orders.advance(order.id, next, actor.kind === "guest" ? null : (actor.id as UserId));
     const kind = NOTIFY[next];
     if (result === "advanced" && kind) {

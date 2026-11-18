@@ -24,6 +24,13 @@ export class StripePaymentGateway implements PaymentGateway {
     return { id: intent.id, clientSecret: intent.client_secret };
   }
 
+  async refund(input: { orderId: string; paymentIntentId: string; amount: Money }): Promise<void> {
+    await this.stripe.refunds.create(
+      { payment_intent: input.paymentIntentId, amount: input.amount.cents, metadata: { orderId: input.orderId } },
+      { idempotencyKey: `refund-${input.orderId}-${input.amount.cents}` },
+    );
+  }
+
   parseWebhook(rawBody: string, signature: string): PaymentEvent {
     if (!this.webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET is not set");
     const event = this.stripe.webhooks.constructEvent(rawBody, signature, this.webhookSecret);

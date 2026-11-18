@@ -35,3 +35,17 @@ export function applyCoupon(coupon: Coupon, context: CouponContext): CouponResul
   const raw = coupon.kind === "percent" ? Math.round((context.subtotal.cents * coupon.value) / 100) : coupon.value;
   return { ok: true, discount: money(Math.min(raw, context.subtotal.cents)) };
 }
+
+export type CouponField = "code" | "value" | "maxUses" | "perCustomerLimit" | "dates";
+
+export function couponErrors(coupon: Coupon): CouponField[] {
+  const errors: CouponField[] = [];
+  if (!/^[A-Z0-9]{3,20}$/.test(normaliseCode(coupon.code))) errors.push("code");
+  const maxValue = coupon.kind === "percent" ? 100 : 5000;
+  if (!Number.isInteger(coupon.value) || coupon.value < 1 || coupon.value > maxValue) errors.push("value");
+  if (coupon.maxUses !== null && (!Number.isInteger(coupon.maxUses) || coupon.maxUses < 1)) errors.push("maxUses");
+  if (coupon.perCustomerLimit !== null && (!Number.isInteger(coupon.perCustomerLimit) || coupon.perCustomerLimit < 1))
+    errors.push("perCustomerLimit");
+  if (coupon.startsAt && coupon.endsAt && coupon.endsAt <= coupon.startsAt) errors.push("dates");
+  return errors;
+}

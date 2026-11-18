@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, formatMinutes, localDate, localMinutes, weekdayOf, zonedInstant } from "./zoned-time";
+import { addDays, formatMinutes, isLocalDate, localDate, localMinutes, weekdayOf, zonedInstant } from "./zoned-time";
 
 const MADRID = "Europe/Madrid";
 
@@ -33,5 +33,14 @@ describe("zoned time", () => {
   it("formats minutes as a clock time", () => {
     expect(formatMinutes(9 * 60 + 5)).toBe("09:05");
     expect(formatMinutes(20 * 60)).toBe("20:00");
+  });
+});
+
+describe("isLocalDate", () => {
+  it("accepts real calendar days only", () => {
+    expect(isLocalDate("2030-01-07")).toBe(true);
+    expect(isLocalDate("2030-02-30")).toBe(false);
+    expect(isLocalDate("2030-1-7")).toBe(false);
+    expect(isLocalDate("today")).toBe(false);
   });
 });

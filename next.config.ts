@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
     deviceSizes: [390, 640, 828, 1080, 1280, 1672],
     imageSizes: [96, 160, 240, 320, 480],
     qualities: [75, 80],
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/products/**" }],
   },
   async redirects() {
     return [{ source: "/favicon.ico", destination: "/favicon.svg", permanent: true }];

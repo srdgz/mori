@@ -30,6 +30,15 @@ export const routing = defineRouting({
     "/account/addresses": { es: "/cuenta/direcciones", en: "/account/addresses" },
     "/account/favourites": { es: "/cuenta/favoritos", en: "/account/favourites" },
     "/account/security": { es: "/cuenta/seguridad", en: "/account/security" },
+    "/admin": { es: "/admin", en: "/admin" },
+    "/admin/orders": { es: "/admin/pedidos", en: "/admin/orders" },
+    "/admin/orders/[code]": { es: "/admin/pedidos/[code]", en: "/admin/orders/[code]" },
+    "/admin/products": { es: "/admin/productos", en: "/admin/products" },
+    "/admin/products/new": { es: "/admin/productos/nuevo", en: "/admin/products/new" },
+    "/admin/products/[id]": { es: "/admin/productos/[id]", en: "/admin/products/[id]" },
+    "/admin/coupons": { es: "/admin/cupones", en: "/admin/coupons" },
+    "/admin/customers": { es: "/admin/clientes", en: "/admin/customers" },
+    "/admin/settings": { es: "/admin/ajustes", en: "/admin/settings" },
   },
 });
 
@@ -45,12 +54,14 @@ export const publicAccountPathnames = [
 ] as const satisfies readonly AppPathname[];
 
 export const privatePathnames = Object.keys(routing.pathnames).filter(
-  (p) => p.startsWith("/account") && !(publicAccountPathnames as readonly string[]).includes(p),
+  (p) => (p.startsWith("/account") && !(publicAccountPathnames as readonly string[]).includes(p)) || p.startsWith("/admin"),
 ) as AppPathname[];
 
 export const staticPathnames = Object.keys(routing.pathnames).filter((p) => !p.includes("[")) as StaticPathname[];
 
-export const indexablePathnames = staticPathnames.filter((p) => !p.startsWith("/account") && p !== "/cart" && p !== "/checkout");
+export const indexablePathnames = staticPathnames.filter(
+  (p) => !p.startsWith("/account") && !p.startsWith("/admin") && p !== "/cart" && p !== "/checkout",
+);
 
 export const navItems = [
   { href: "/story", key: "story" },

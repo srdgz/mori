@@ -39,7 +39,8 @@ test("the tracking endpoint needs the link and answers 304 when nothing changed"
 
 test("the live query endpoint only seals queries it knows for people who can see them", async ({ request }) => {
   const order = await placePaidOrder({ email: uniqueEmail("live") });
-  expect((await request.post("/api/live/board", { data: {} })).status()).toBe(404);
+  expect((await request.post("/api/live/unknown", { data: {} })).status()).toBe(404);
+  expect((await request.post("/api/live/board", { data: { day: "2030-01-07" } })).status()).toBe(404);
   expect((await request.post("/api/live/order", { data: { code: order.code } })).status()).toBe(400);
   expect((await request.post("/api/live/order", { data: { code: order.code, token: null } })).status()).toBe(404);
 });

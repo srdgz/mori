@@ -50,13 +50,16 @@ export async function placePaidOrder(options: {
   customerEmail?: string;
   slug?: string;
   quantity?: number;
+  slotStart?: Date;
+  isDemo?: boolean;
+  notes?: string;
 }): Promise<Placed> {
   const item = await lineFor(options.slug ?? "classic-matcha", options.quantity ?? 2);
   const customer = options.customerEmail
     ? (await pool.query<{ id: string }>(`select id from users where email = $1`, [options.customerEmail])).rows[0]?.id
     : null;
   const total = item.line_total_cents;
-  const slot = new Date(Date.UTC(2030, 0, 1 + randomInt(0, 3000), 10, randomInt(0, 16) * 15));
+  const slot = options.slotStart ?? new Date(Date.UTC(2030, 0, 1 + randomInt(0, 3000), 10, randomInt(0, 16) * 15));
   const order = {
     code: code(),
     customer_id: customer ?? null,
@@ -66,7 +69,8 @@ export async function placePaidOrder(options: {
     locale: "es",
     fulfilment: "pickup",
     slot_start: slot.toISOString(),
-    notes: null,
+    notes: options.notes ?? null,
+    is_demo: options.isDemo ?? false,
     subtotal_cents: total,
     discount_cents: 0,
     delivery_fee_cents: 0,
@@ -89,4 +93,12 @@ export async function placePaidOrder(options: {
 
 export async function advanceOrder(id: string, next: string): Promise<void> {
   await pool.query(`select advance_order_status($1, $2, null)`, [id, next]);
+}
+
+export async function setRole(email: string, role: "customer" | "staff" | "admin"): Promise<void> {
+  await pool.query(`update users set role = $2 where email = $1`, [email, role]);
+}
+
+export async function orderStatus(code: string): Promise<string> {
+  return (await pool.query<{ status: string }>(`select status from orders where code = $1`, [code])).rows[0]!.status;
 }

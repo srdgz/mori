@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, gte, inArray, isNull, lt, not, sql, sum, type SQL } from "drizzle-orm";
 import type {
   AdvanceResult,
+  BoardCard,
   CouponRepository,
   NewOrder,
   OrderRepository,
@@ -14,7 +15,7 @@ import type { UserId } from "@/core/domain/access/actor";
 import type { OrderStatus } from "@/core/domain/ordering/order-status";
 import type { TimeOfDay, Weekday, WeeklySchedule } from "@/core/domain/fulfilment/opening-hours";
 import { isLocale } from "@/core/domain/shared/locale";
-import { money } from "@/core/domain/shared/money";
+import { money, type Money } from "@/core/domain/shared/money";
 import type { LocalDate } from "@/core/domain/shared/zoned-time";
 import type { Database } from "./database";
 import {
@@ -154,6 +155,7 @@ export class DrizzleOrderRepository implements OrderRepository {
       total_cents: order.total.cents,
       vat_cents: order.vat.cents,
       coupon_id: order.couponId,
+      is_demo: order.isDemo ?? false,
     };
     const items = order.lines.map((l) => ({
       product_id: l.productId,
@@ -204,6 +206,7 @@ export class DrizzleOrderRepository implements OrderRepository {
       trackingToken: order.trackingToken,
       contactName: order.contactName,
       contactEmail: order.contactEmail,
+      contactPhone: order.contactPhone,
       locale: isLocale(order.locale) ? order.locale : "es",
       fulfilment: order.fulfilment,
       slotStart: order.slotStart,
@@ -216,6 +219,10 @@ export class DrizzleOrderRepository implements OrderRepository {
             instructions: order.deliveryAddress.instructions ?? null,
           }
         : null,
+      notes: order.notes,
+      isDemo: order.isDemo,
+      paymentIntentId: order.paymentIntentId,
+      refunded: money(order.refundedCents),
       subtotal: money(order.subtotalCents),
       discount: money(order.discountCents),
       deliveryFee: money(order.deliveryFeeCents),
@@ -291,6 +298,57 @@ export class DrizzleOrderRepository implements OrderRepository {
       if (message.includes("invalid_transition")) return "invalid_transition";
       throw error;
     }
+  }
+
+  async board(from: Date, to: Date): Promise<BoardCard[]> {
+    const at = sql`coalesce(${orders.slotStart}, ${orders.createdAt})`;
+    const found = await this.db
+      .select()
+      .from(orders)
+      .where(
+        and(
+          not(inArray(orders.status, ["pending_payment", "expired"])),
+          sql`${at} >= ${from.toISOString()}`,
+          sql`${at} < ${to.toISOString()}`,
+        ),
+      )
+      .orderBy(at);
+    if (found.length === 0) return [];
+    const items = await this.db
+      .select({ orderId: orderItems.orderId, name: orderItems.productName, quantity: orderItems.quantity })
+      .from(orderItems)
+      .where(
+        inArray(
+          orderItems.orderId,
+          found.map((o) => o.id),
+        ),
+      )
+      .orderBy(desc(orderItems.lineTotalCents));
+    return found.map((o) => ({
+      id: o.id,
+      code: o.code,
+      status: o.status,
+      fulfilment: o.fulfilment,
+      slotStart: o.slotStart,
+      createdAt: o.createdAt,
+      isDemo: o.isDemo,
+      postalCode: o.deliveryAddress?.postalCode ?? null,
+      notes: o.notes,
+      lines: items.filter((i) => i.orderId === o.id).map(({ name, quantity }) => ({ name, quantity })),
+      total: money(o.totalCents),
+    }));
+  }
+
+  async expireUnpaid(): Promise<number> {
+    const [row] = await rows<{ expired: number }>(this.db, sql`select expire_unpaid_orders() as expired`);
+    return Number(row?.expired ?? 0);
+  }
+
+  async recordRefund(orderId: string, amount: Money): Promise<void> {
+    await this.db
+      .update(orders)
+      .set({ refundedCents: sql`${orders.refundedCents} + ${amount.cents}` })
+      .where(eq(orders.id, orderId));
   }
 
   async assignCustomer(orderId: string, customerId: UserId): Promise<boolean> {

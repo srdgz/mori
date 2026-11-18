@@ -6,6 +6,13 @@ export const demoCustomer = {
   phone: "+34 600 123 456",
 } as const;
 
+export const demoStaff = {
+  id: "60000000-0000-4000-8000-000000000002",
+  name: "Kai Barista",
+  email: "personal@demo.mori",
+  password: "matcha-staff-2026",
+} as const;
+
 export const demoAddress = {
   id: "61000000-0000-4000-8000-000000000001",
   label: "Casa",

@@ -3,4 +3,5 @@ export type SealedQuery = Readonly<{ capability: string; expiresAt: number; quer
 export interface LiveQuerySealer {
   readonly url: string;
   sealOrder(orderId: string): Promise<SealedQuery>;
+  sealBoard(from: Date, to: Date): Promise<SealedQuery>;
 }

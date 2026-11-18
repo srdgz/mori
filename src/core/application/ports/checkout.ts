@@ -75,6 +75,7 @@ export type NewOrder = Readonly<{
   vat: Money;
   couponId: string | null;
   lines: readonly OrderLineSnapshot[];
+  isDemo?: boolean;
 }>;
 
 export type OrderView = Readonly<{
@@ -85,10 +86,15 @@ export type OrderView = Readonly<{
   trackingToken: string;
   contactName: string;
   contactEmail: string;
+  contactPhone: string;
   locale: Locale;
   fulfilment: "pickup" | "delivery";
   slotStart: Date | null;
   deliveryAddress: DeliveryAddress | null;
+  notes: string | null;
+  isDemo: boolean;
+  paymentIntentId: string | null;
+  refunded: Money;
   subtotal: Money;
   discount: Money;
   deliveryFee: Money;
@@ -111,6 +117,20 @@ export type OrderSummary = Readonly<{
 
 export type AdvanceResult = "advanced" | "invalid_transition" | "not_found";
 
+export type BoardCard = Readonly<{
+  id: string;
+  code: string;
+  status: OrderStatus;
+  fulfilment: "pickup" | "delivery";
+  slotStart: Date | null;
+  createdAt: Date;
+  isDemo: boolean;
+  postalCode: string | null;
+  notes: string | null;
+  lines: readonly Readonly<{ name: string; quantity: number }>[];
+  total: Money;
+}>;
+
 export interface OrderRepository {
   slotLoad(from: Date, to: Date): Promise<Map<number, number>>;
   create(order: NewOrder): Promise<{ id: string; trackingToken: string } | "slot_full" | "code_taken">;
@@ -122,6 +142,9 @@ export interface OrderRepository {
   listByCustomer(customerId: UserId, limit: number, before: Date | null): Promise<OrderSummary[]>;
   advance(orderId: string, next: OrderStatus, actorId: UserId | null): Promise<AdvanceResult>;
   assignCustomer(orderId: string, customerId: UserId): Promise<boolean>;
+  board(from: Date, to: Date): Promise<BoardCard[]>;
+  recordRefund(orderId: string, amount: Money): Promise<void>;
+  expireUnpaid(): Promise<number>;
 }
 
 export type PaymentIntent = Readonly<{ id: string; clientSecret: string }>;
@@ -130,6 +153,7 @@ export type PaymentEvent = Readonly<{ type: "succeeded" | "failed" | "ignored"; 
 
 export interface PaymentGateway {
   createIntent(input: { orderId: string; code: string; amount: Money; email: string }): Promise<PaymentIntent>;
+  refund(input: { orderId: string; paymentIntentId: string; amount: Money }): Promise<void>;
   parseWebhook(rawBody: string, signature: string): PaymentEvent;
 }
 

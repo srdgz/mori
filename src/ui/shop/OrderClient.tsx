@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, useTransition } from "react";
-import type { SealedLiveQuery } from "@neon/realtime/client";
 import type { TrackingSnapshot } from "@/core/application/checkout/tracking";
 import type { Reorder } from "@/core/domain/ordering/reorder";
+import { SUBSCRIBED_SAFETY_MS, subscribeLive } from "@/ui/live/subscribe";
 import { Icon } from "@/ui/primitives/Icon";
 import { cart } from "./cart-store";
 
@@ -27,56 +27,6 @@ function notifyReady(notice: ReadyNotice) {
   try {
     if ("Notification" in window && Notification.permission === "granted") new Notification(notice.title, { body: notice.body });
   } catch {}
-}
-
-const SUBSCRIBED_SAFETY_MS = 60_000;
-
-type SealResponse = { url: string; sealed: SealedLiveQuery<unknown> };
-
-async function fetchSeal(code: string, token: string | null): Promise<SealResponse> {
-  const response = await fetch("/api/live/order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code, token }),
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error(`live_${response.status}`);
-  return (await response.json()) as SealResponse;
-}
-
-async function subscribeToOrder(
-  code: string,
-  token: string | null,
-  handlers: { onChange: () => void; onLive: (live: boolean) => void },
-): Promise<() => void> {
-  try {
-    const [{ createRealtimeClient, QueryRefreshController }, first] = await Promise.all([
-      import("@neon/realtime/client"),
-      fetchSeal(code, token),
-    ]);
-    const client = createRealtimeClient({ url: first.url });
-    const subscription = client.subscribe(first.sealed, { materialize: false });
-    const refresher = new QueryRefreshController({
-      query: first.sealed,
-      subscription,
-      refreshQuery: async () => (await fetchSeal(code, token)).sealed,
-      renewSubscription: (next) => subscription.renew(next),
-      onRefreshExhausted: () => handlers.onLive(false),
-    });
-    subscription.onUpdate(() => {
-      handlers.onChange();
-    });
-    subscription.onStateChange((state) => handlers.onLive(state.status === "live"));
-    refresher.start();
-    return () => {
-      refresher.stop();
-      subscription.unsubscribe();
-      client.close();
-    };
-  } catch {
-    handlers.onLive(false);
-    return () => undefined;
-  }
 }
 
 export function LiveOrder({
@@ -134,14 +84,18 @@ export function LiveOrder({
     timer = setTimeout(check, intervalMs);
     document.addEventListener("visibilitychange", onVisible);
     if (realtime) {
-      void subscribeToOrder(code, token, {
-        onChange: () => void check(),
-        onLive: (isLive) => {
-          const wasSubscribed = subscribed;
-          subscribed = isLive;
-          if (wasSubscribed && !isLive) void check();
+      void subscribeLive(
+        "/api/live/order",
+        { code, token },
+        {
+          onChange: () => void check(),
+          onLive: (isLive) => {
+            const wasSubscribed = subscribed;
+            subscribed = isLive;
+            if (wasSubscribed && !isLive) void check();
+          },
         },
-      }).then((close) => {
+      ).then((close) => {
         if (stopped) close();
         else closeRealtime = close;
       });

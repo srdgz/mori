@@ -61,7 +61,7 @@ Igual que la recogida, cambiando el paso de modalidad:
 - **Tablero:**
   - Columnas Nuevos · En preparación · Listos / En reparto · Completados (hoy), con tarjetas que muestran código, hora, modalidad, líneas resumidas y tiempo transcurrido.
   - El tablero se refresca cada 5 segundos. Al entrar un pedido nuevo, la tarjeta aparece con una animación y suena un aviso (activable).
-  - Se avanza de estado con un botón en la tarjeta o arrastrando entre columnas, con alternativa por teclado.
+  - Se avanza de estado con un botón en la tarjeta, que también funciona con teclado.
 - **Detalle:** datos del cliente, líneas con opciones, notas, historial, imprimir ticket (vista de impresión de 80 mm), cancelar y reembolsar total o parcial.
 - **Productos:** tabla con buscador. La disponibilidad se cambia con un interruptor directo («Agotado hoy»). La ficha de edición tiene vista previa de la tarjeta tal y como la verá el cliente.
 - **Ajustes:**

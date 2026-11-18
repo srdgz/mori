@@ -223,6 +223,7 @@ describe("SealOrderQuery", () => {
   const sealer = {
     url: "wss://realtime.test",
     sealOrder: async (orderId: string) => ({ capability: `cap-${orderId}`, expiresAt: 1, queryFingerprint: orderId }),
+    sealBoard: async () => ({ capability: "cap-board", expiresAt: 1, queryFingerprint: "board" }),
   };
 
   it("seals the live query only for people who can see the order", async () => {

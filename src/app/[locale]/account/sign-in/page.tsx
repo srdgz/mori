@@ -7,7 +7,7 @@ import { AuthShell } from "@/ui/account/AuthShell";
 import { SignInForm } from "@/ui/account/AuthForms";
 import { PendingButton } from "@/ui/account/form";
 import { Icon } from "@/ui/primitives/Icon";
-import { demoSignInAction, googleSignInAction, signInAction } from "../actions";
+import { demoSignInAction, googleSignInAction, signInAction, staffDemoSignInAction } from "../actions";
 import { accountMetadata } from "../shared";
 
 type Props = { params: Promise<{ locale: AppLocale }>; searchParams: Promise<{ next?: string; error?: string }> };
@@ -57,6 +57,14 @@ export default async function SignInPage({ params, searchParams }: Props) {
           <PendingButton className="btn--ghost" pendingLabel={t("demoPending")}>
             <Icon name="user" size={18} />
             {t("demo")}
+          </PendingButton>
+        </form>
+        <p className="mt-5 text-sm text-ink-soft">{t("staffDemoText")}</p>
+        <form action={staffDemoSignInAction} className="mt-3">
+          <input type="hidden" name="locale" value={locale} />
+          <PendingButton className="btn--ghost" pendingLabel={t("staffDemoPending")}>
+            <Icon name="cup" size={18} />
+            {t("staffDemo")}
           </PendingButton>
         </form>
       </section>
