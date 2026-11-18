@@ -64,3 +64,15 @@ export function canViewOrder(actor: Actor, order: OrderAccess, trackingToken?: s
   if (trackingToken !== undefined && trackingToken === order.trackingToken) return true;
   return actor.kind === "customer" && order.customerId === actor.id;
 }
+
+export function canHandleOrder(
+  actor: Actor,
+  permission: "orders.advance" | "orders.refund",
+  order: Readonly<{ isDemo: boolean }>,
+): boolean {
+  return can(actor, permission) && (!isDemo(actor) || order.isDemo);
+}
+
+export function isStaff(actor: Actor): boolean {
+  return can(actor, "orders.board");
+}

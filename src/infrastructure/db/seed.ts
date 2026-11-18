@@ -2,7 +2,7 @@ import { storeSeed } from "../memory/memory-store-repository";
 import { hashPassword } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
 import { categorySeed, optionGroupSeed, productGroupIds, productSeed } from "../seed/catalog";
-import { demoAddress, demoCustomer, demoFavouriteSlugs } from "../seed/demo";
+import { demoAddress, demoCustomer, demoFavouriteSlugs, demoStaff } from "../seed/demo";
 import { couponSeed, deliveryPostalCodes } from "../seed/shop";
 import type { Database } from "./database";
 import {
@@ -110,7 +110,25 @@ async function seedDemoCustomer(db: Database): Promise<void> {
   });
 }
 
+async function seedDemoStaff(db: Database): Promise<void> {
+  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, demoStaff.email));
+  if (existing) return;
+  const password = await hashPassword(demoStaff.password);
+  await db.transaction(async (tx) => {
+    await tx.insert(users).values({
+      id: demoStaff.id,
+      name: demoStaff.name,
+      email: demoStaff.email,
+      emailVerified: true,
+      role: "staff",
+      isDemo: true,
+    });
+    await tx.insert(accounts).values({ userId: demoStaff.id, accountId: demoStaff.id, providerId: "credential", password });
+  });
+}
+
 export async function seedDatabase(db: Database): Promise<void> {
   await seedShop(db);
   await seedDemoCustomer(db);
+  await seedDemoStaff(db);
 }

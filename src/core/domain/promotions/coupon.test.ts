@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { money } from "../shared/money";
-import { applyCoupon, normaliseCode, type Coupon, type CouponContext } from "./coupon";
+import { applyCoupon, couponErrors, normaliseCode, type Coupon, type CouponContext } from "./coupon";
 
 const welcome: Coupon = {
   code: "BIENVENIDA10",
@@ -61,5 +61,40 @@ describe("applyCoupon", () => {
 
   it("normalises what the customer types", () => {
     expect(normaliseCode("  matchamigo ")).toBe("MATCHAMIGO");
+  });
+});
+
+describe("couponErrors", () => {
+  const valid: Coupon = {
+    code: "verano25",
+    kind: "percent",
+    value: 25,
+    minSubtotal: money(1000),
+    firstOrderOnly: false,
+    maxUses: 100,
+    perCustomerLimit: 1,
+    startsAt: new Date("2030-06-01T00:00:00Z"),
+    endsAt: new Date("2030-09-01T00:00:00Z"),
+    isActive: true,
+  };
+
+  it("accepts a well-formed coupon", () => {
+    expect(couponErrors(valid)).toEqual([]);
+    expect(couponErrors({ ...valid, kind: "amount", value: 200, maxUses: null, perCustomerLimit: null, startsAt: null })).toEqual([]);
+  });
+
+  it("points at every wrong field", () => {
+    expect(
+      couponErrors({
+        ...valid,
+        code: "x!",
+        value: 120,
+        maxUses: 0,
+        perCustomerLimit: 0,
+        endsAt: new Date("2030-05-01T00:00:00Z"),
+      }),
+    ).toEqual(["code", "value", "maxUses", "perCustomerLimit", "dates"]);
+    expect(couponErrors({ ...valid, kind: "amount", value: 6000 })).toEqual(["value"]);
+    expect(couponErrors({ ...valid, value: 2.5 })).toEqual(["value"]);
   });
 });

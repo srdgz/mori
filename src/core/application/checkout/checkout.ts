@@ -46,7 +46,7 @@ type Dependencies = {
   clock: Clock;
 };
 
-async function loadDays(settings: ShopSettings, orders: OrderRepository, now: Date): Promise<PickupDay[]> {
+export async function loadDays(settings: ShopSettings, orders: OrderRepository, now: Date): Promise<PickupDay[]> {
   const today = localDate(now, settings.timeZone);
   const from = zonedInstant(today, 0, settings.timeZone);
   const to = zonedInstant(addDays(today, settings.daysAhead + 1), 0, settings.timeZone);
@@ -167,7 +167,7 @@ export type PlaceOrderResult =
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE = /^\+?[0-9 ]{9,16}$/;
 
-function snapshot(cart: PricedCart): OrderLineSnapshot[] {
+export function snapshot(cart: PricedCart): OrderLineSnapshot[] {
   return cart.lines.map(({ drink, line, total }) => ({
     productId: drink.product.id,
     productName: drink.product.name,

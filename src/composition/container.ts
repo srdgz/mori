@@ -57,7 +57,7 @@ function buildAccount() {
   };
 }
 
-export { demoCustomer } from "@/infrastructure/seed/demo";
+export { demoCustomer, demoStaff } from "@/infrastructure/seed/demo";
 
 export type Container = ReturnType<typeof build>;
 

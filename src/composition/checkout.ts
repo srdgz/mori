@@ -1,7 +1,28 @@
 import "server-only";
 import { randomInt } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { cache } from "react";
 import Stripe from "stripe";
+import { makeCancelOrder, makeGetBoard, makeGetStaffOrder, makeRefundOrder, makeSealBoardQuery } from "@/core/application/admin/orders";
+import {
+  makeGetProductDraft,
+  makeListAdminProducts,
+  makeSaveProduct,
+  makeSetOptionAvailability,
+  makeSetProductAvailability,
+} from "@/core/application/admin/catalog";
+import { makeExpireOrders, makeRunDemoOrders } from "@/core/application/admin/jobs";
+import {
+  makeCreateCoupon,
+  makeEditClosures,
+  makeEditZones,
+  makeGetDashboard,
+  makeGetStoreSettings,
+  makeListCoupons,
+  makeListCustomers,
+  makeSaveStoreSettings,
+  makeSetCouponActive,
+} from "@/core/application/admin/store";
 import { makeConfirmPayment, makeGetCheckoutOptions, makePlaceOrder, makeQuoteCheckout } from "@/core/application/checkout/checkout";
 import { makeGetOrder, makeSyncCart } from "@/core/application/checkout/orders";
 import {
@@ -17,6 +38,13 @@ import type { PaymentGateway } from "@/core/application/ports/checkout";
 import type { Locale } from "@/core/domain/shared/locale";
 import { systemClock } from "@/infrastructure/clock";
 import { getDatabase } from "@/infrastructure/db/client";
+import { DrizzleAdminCatalogRepository } from "@/infrastructure/db/drizzle-admin-catalog";
+import {
+  DrizzleAdminCouponRepository,
+  DrizzleAdminSettingsRepository,
+  DrizzleCustomerDirectory,
+  DrizzleSalesReports,
+} from "@/infrastructure/db/drizzle-admin-store";
 import { DrizzleCatalogRepository } from "@/infrastructure/db/drizzle-catalog-repository";
 import {
   DrizzleCouponRepository,
@@ -85,5 +113,72 @@ function build() {
 }
 
 export const checkout = cache(build);
+
+const lazyPayments: PaymentGateway = {
+  createIntent: (input) => payments().createIntent(input),
+  refund: (input) => payments().refund(input),
+  parseWebhook: (rawBody, signature) => payments().parseWebhook(rawBody, signature),
+};
+
+function refreshSite() {
+  revalidatePath("/", "layout");
+}
+
+export const uploadsEnabled = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+function buildAdmin() {
+  const db = getDatabase();
+  const identity = getIdentity();
+  const orders = new DrizzleOrderRepository(db);
+  const timeZone = "Europe/Madrid";
+  const catalogDeps = { catalog: new DrizzleAdminCatalogRepository(db), identity, onChange: refreshSite };
+  const couponDeps = { coupons: new DrizzleAdminCouponRepository(db), identity };
+  const settingsDeps = { settings: new DrizzleAdminSettingsRepository(db), identity, onChange: refreshSite };
+  return {
+    getBoard: makeGetBoard({ orders, identity, clock: systemClock, timeZone }),
+    getStaffOrder: makeGetStaffOrder({ orders, identity }),
+    advanceOrderStatus: makeAdvanceOrderStatus({ orders, identity, mailer: getMailer(), trackingUrl }),
+    cancelOrder: makeCancelOrder({ orders, identity, payments: lazyPayments }),
+    refundOrder: makeRefundOrder({ orders, identity, payments: lazyPayments }),
+    sealBoardQuery: makeSealBoardQuery({ identity, sealer: sealer(db), timeZone }),
+    listProducts: makeListAdminProducts(catalogDeps),
+    getProductDraft: makeGetProductDraft(catalogDeps),
+    saveProduct: makeSaveProduct(catalogDeps),
+    setProductAvailability: makeSetProductAvailability(catalogDeps),
+    setOptionAvailability: makeSetOptionAvailability(catalogDeps),
+    listCoupons: makeListCoupons(couponDeps),
+    createCoupon: makeCreateCoupon(couponDeps),
+    setCouponActive: makeSetCouponActive(couponDeps),
+    getStoreSettings: makeGetStoreSettings(settingsDeps),
+    saveStoreSettings: makeSaveStoreSettings(settingsDeps),
+    editClosures: makeEditClosures(settingsDeps),
+    editZones: makeEditZones(settingsDeps),
+    listCustomers: makeListCustomers({ customers: new DrizzleCustomerDirectory(db), identity }),
+    getDashboard: makeGetDashboard({ reports: new DrizzleSalesReports(db), identity, clock: systemClock, timeZone }),
+  };
+}
+
+export const admin = cache(buildAdmin);
+
+export function jobs() {
+  const db = getDatabase();
+  const orders = new DrizzleOrderRepository(db);
+  return {
+    expireOrders: makeExpireOrders(orders),
+    runDemoOrders: makeRunDemoOrders({
+      orders,
+      catalog: new DrizzleCatalogRepository(db),
+      settings: new DrizzleSettingsRepository(db),
+      clock: systemClock,
+      random: { next: () => randomInt(0, 1_000_000) / 1_000_000 },
+    }),
+  };
+}
+
+export function cronAuthorized(request: Request): boolean | null {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return null;
+  return request.headers.get("authorization") === `Bearer ${secret}`;
+}
 
 export const paymentsEnabled = () => Boolean(process.env.STRIPE_SECRET_KEY && process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);

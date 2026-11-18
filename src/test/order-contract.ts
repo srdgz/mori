@@ -158,5 +158,41 @@ export function orderRepositoryContract(name: string, setup: () => Promise<Order
       expect((await orders.byId(created.id))?.customerId).toBe(customerId);
       expect(await orders.assignCustomer(created.id, customerId)).toBe(false);
     });
+
+    it("lists a day's paid orders for the board and records refunds", async () => {
+      const { orders } = await setup();
+      const day = new Date("2031-03-03T00:00:00Z");
+      const paid = newOrder({ slotStart: new Date("2031-03-03T10:00:00Z"), notes: "sin hielo", isDemo: true });
+      const unpaid = newOrder({ slotStart: new Date("2031-03-03T09:00:00Z") });
+      const tomorrow = newOrder({ slotStart: new Date("2031-03-04T10:00:00Z") });
+      for (const input of [paid, unpaid, tomorrow]) await orders.create(input);
+      for (const input of [paid, tomorrow]) {
+        const view = await orders.byCode(input.code);
+        await orders.attachPayment(view!.id, `pi_${input.code}`);
+        await orders.confirmPayment(`pi_${input.code}`);
+      }
+
+      const board = await orders.board(day, new Date("2031-03-04T00:00:00Z"));
+      expect(board.map((c) => c.code)).toEqual([paid.code]);
+      expect(board[0]).toMatchObject({
+        status: "received",
+        fulfilment: "pickup",
+        isDemo: true,
+        notes: "sin hielo",
+        postalCode: null,
+        total: money(1680),
+        lines: [
+          { name: "Classic Matcha", quantity: 2 },
+          { name: "Vanilla Matcha", quantity: 1 },
+        ],
+      });
+      expect(await orders.board(new Date("2031-03-05T00:00:00Z"), new Date("2031-03-06T00:00:00Z"))).toEqual([]);
+
+      const view = await orders.byCode(paid.code);
+      expect(view).toMatchObject({ isDemo: true, notes: "sin hielo", contactPhone: "600000000", paymentIntentId: `pi_${paid.code}` });
+      await orders.recordRefund(view!.id, money(500));
+      await orders.recordRefund(view!.id, money(180));
+      expect((await orders.byId(view!.id))?.refunded).toEqual(money(680));
+    });
   });
 }

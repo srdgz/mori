@@ -24,5 +24,7 @@ describe("NeonLiveQuerySealer", () => {
     expect(sealed.expiresAt).toBeGreaterThan(Date.now());
     const other = await sealer.sealOrder("00000000-0000-4000-8000-000000000002");
     expect(other.queryFingerprint).not.toBe(sealed.queryFingerprint);
+    const board = await sealer.sealBoard(new Date("2030-01-06T23:00:00Z"), new Date("2030-01-07T23:00:00Z"));
+    expect(board.queryFingerprint).not.toBe(sealed.queryFingerprint);
   });
 });

@@ -1,5 +1,6 @@
 import type {
   AdvanceResult,
+  BoardCard,
   CouponRepository,
   NewOrder,
   OrderRepository,
@@ -15,7 +16,7 @@ import type {
 } from "@/core/application/ports/checkout";
 import type { UserId } from "@/core/domain/access/actor";
 import { canStaffMove, type OrderStatus } from "@/core/domain/ordering/order-status";
-import { money } from "@/core/domain/shared/money";
+import { money, type Money } from "@/core/domain/shared/money";
 import { deliveryPostalCodes } from "../seed/shop";
 import { storeSeed } from "./memory-store-repository";
 
@@ -65,7 +66,7 @@ export class MemoryCouponRepository implements CouponRepository {
   }
 }
 
-type StoredOrder = OrderView & { paymentIntentId: string | null; couponId: string | null };
+type StoredOrder = OrderView & { couponId: string | null };
 
 export class MemoryOrderRepository implements OrderRepository {
   readonly orders: StoredOrder[] = [];
@@ -101,10 +102,14 @@ export class MemoryOrderRepository implements OrderRepository {
       trackingToken: `token-${this.counter}`,
       contactName: order.contact.name,
       contactEmail: order.contact.email,
+      contactPhone: order.contact.phone,
       locale: order.locale,
       fulfilment: order.fulfilment,
       slotStart: order.slotStart,
       deliveryAddress: order.deliveryAddress,
+      notes: order.notes,
+      isDemo: order.isDemo ?? false,
+      refunded: money(0),
       subtotal: order.subtotal,
       discount: order.discount,
       deliveryFee: order.deliveryFee,
@@ -121,8 +126,9 @@ export class MemoryOrderRepository implements OrderRepository {
   }
 
   async attachPayment(orderId: string, paymentIntentId: string): Promise<void> {
-    const order = this.orders.find((o) => o.id === orderId);
-    if (order) order.paymentIntentId = paymentIntentId;
+    const index = this.orders.findIndex((o) => o.id === orderId);
+    const order = this.orders[index];
+    if (order) this.orders[index] = { ...order, paymentIntentId };
   }
 
   async confirmPayment(paymentIntentId: string): Promise<{ orderId: string; confirmedNow: boolean } | null> {
@@ -177,6 +183,46 @@ export class MemoryOrderRepository implements OrderRepository {
     return "advanced";
   }
 
+  async board(from: Date, to: Date): Promise<BoardCard[]> {
+    return this.orders
+      .filter((o) => o.status !== "pending_payment" && o.status !== "expired")
+      .filter((o) => {
+        const at = o.slotStart ?? o.createdAt;
+        return at >= from && at < to;
+      })
+      .sort((a, b) => (a.slotStart ?? a.createdAt).getTime() - (b.slotStart ?? b.createdAt).getTime())
+      .map((o) => ({
+        id: o.id,
+        code: o.code,
+        status: o.status,
+        fulfilment: o.fulfilment,
+        slotStart: o.slotStart,
+        createdAt: o.createdAt,
+        isDemo: o.isDemo,
+        postalCode: o.deliveryAddress?.postalCode ?? null,
+        notes: o.notes,
+        lines: o.lines.map((l) => ({ name: l.productName, quantity: l.quantity })),
+        total: o.total,
+      }));
+  }
+
+  async expireUnpaid(): Promise<number> {
+    const limit = Date.now() - 30 * 60_000;
+    let expired = 0;
+    this.orders.forEach((order, index) => {
+      if (order.status !== "pending_payment" || order.createdAt.getTime() > limit) return;
+      this.orders[index] = { ...order, status: "expired", events: [...order.events, { status: "expired", at: new Date() }] };
+      expired += 1;
+    });
+    return expired;
+  }
+
+  async recordRefund(orderId: string, amount: Money): Promise<void> {
+    const index = this.orders.findIndex((o) => o.id === orderId);
+    const order = this.orders[index];
+    if (order) this.orders[index] = { ...order, refunded: money(order.refunded.cents + amount.cents) };
+  }
+
   async assignCustomer(orderId: string, customerId: UserId): Promise<boolean> {
     const index = this.orders.findIndex((o) => o.id === orderId && o.customerId === null);
     const order = this.orders[index];
@@ -188,6 +234,11 @@ export class MemoryOrderRepository implements OrderRepository {
 
 export class MemoryPaymentGateway implements PaymentGateway {
   readonly intents: { id: string; orderId: string; amountCents: number }[] = [];
+  readonly refunds: { orderId: string; paymentIntentId: string; amountCents: number }[] = [];
+
+  async refund(input: { orderId: string; paymentIntentId: string; amount: Money }): Promise<void> {
+    this.refunds.push({ orderId: input.orderId, paymentIntentId: input.paymentIntentId, amountCents: input.amount.cents });
+  }
 
   async createIntent(input: { orderId: string; amount: { cents: number } }): Promise<PaymentIntent> {
     const id = `pi_${this.intents.length + 1}`;
