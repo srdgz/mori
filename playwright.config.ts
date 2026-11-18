@@ -28,6 +28,7 @@ export default defineConfig({
       MAIL_OUTBOX: outbox,
       CRON_SECRET: "e2e-cron-secret",
       DATABASE_APP_URL: "",
+      VAPID_PRIVATE_KEY: "",
       NEON_REALTIME_URL: "",
       NEON_REALTIME_SECRET: "",
       BLOB_READ_WRITE_TOKEN: "",
