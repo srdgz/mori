@@ -18,6 +18,7 @@ import { Icon } from "@/ui/primitives/Icon";
 import { cssVar, delay } from "@/ui/primitives/style";
 import { cx } from "@/ui/primitives/cx";
 import { pageMetadata } from "@/ui/seo/metadata";
+import { SiteJsonLd } from "@/ui/seo/SiteJsonLd";
 
 type Props = { params: Promise<{ locale: AppLocale }> };
 
@@ -60,12 +61,14 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <>
+      <SiteJsonLd locale={locale} description={t("description")} />
       <section className="hero relative grid min-h-svh overflow-hidden bg-[#d8d5ce] text-forest" data-hero aria-labelledby="hero-title">
         <div className="hero-zoom absolute inset-0 overflow-hidden" data-hero-media>
           <Image
             src={photos.hero}
             alt={t("heroAlt")}
-            priority
+            preload
+            fetchPriority="high"
             fill
             sizes="100vw"
             quality={80}

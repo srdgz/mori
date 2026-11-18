@@ -24,7 +24,8 @@
     "db:migrate": "tsx db/migrate.ts",
     "db:seed": "tsx db/seed.ts",
     "db:local": "pglite-server --extensions=citext --max-connections=100 --port=5433",
-    "vercel-build": "npm run db:migrate && npm run db:seed && npm run build"
+    "vercel-build": "npm run db:migrate && npm run db:seed && npm run build",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -55,6 +56,7 @@
     "@commitlint/config-conventional": "^21.2.4",
     "@electric-sql/pglite": "^0.5.16",
     "@electric-sql/pglite-socket": "^0.2.19",
+    "@lhci/cli": "0.16.0",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4.3.5",
     "@testing-library/jest-dom": "^7.0.1",

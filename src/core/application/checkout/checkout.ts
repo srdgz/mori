@@ -21,6 +21,7 @@ import type {
 import type { Clock } from "../ports/clock";
 import type { Identity } from "../ports/identity";
 import type { Mailer } from "../ports/mailer";
+import { RATE_RULES, type RateLimiter } from "../ports/rate-limiter";
 
 export type Fulfilment = { kind: "pickup"; slotStart: Date | null } | { kind: "delivery"; address: DeliveryAddress };
 
@@ -148,9 +149,11 @@ export type PlaceOrderInput = Readonly<{
   notes: string;
   couponCode: string | null;
   locale: string;
+  clientKey: string;
 }>;
 
 export type PlaceOrderError =
+  | "rate_limited"
   | "orders_paused"
   | "empty_cart"
   | "cart_changed"
@@ -180,7 +183,9 @@ export function snapshot(cart: PricedCart): OrderLineSnapshot[] {
   }));
 }
 
-export function makePlaceOrder(deps: Dependencies & { identity: Identity; payments: PaymentGateway; random: Random }) {
+export function makePlaceOrder(
+  deps: Dependencies & { identity: Identity; payments: PaymentGateway; random: Random; limiter: RateLimiter },
+) {
   return async (input: PlaceOrderInput): Promise<PlaceOrderResult> => {
     const shop = await deps.settings.load();
     if (shop.ordersPaused) return { ok: false, error: "orders_paused" };
@@ -190,6 +195,7 @@ export function makePlaceOrder(deps: Dependencies & { identity: Identity; paymen
     if (!contact.name || contact.name.length > 80 || !EMAIL.test(contact.email) || !PHONE.test(contact.phone)) {
       return { ok: false, error: "invalid_contact" };
     }
+    if (!(await deps.limiter.hit(`place-order:${input.clientKey}`, RATE_RULES.placeOrder))) return { ok: false, error: "rate_limited" };
 
     const user = await deps.identity.currentUser();
     const actor: Actor = user ? actorFor(user) : GUEST;

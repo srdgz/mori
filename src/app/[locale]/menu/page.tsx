@@ -51,7 +51,7 @@ export default async function MenuPage({ params }: Props) {
                     src={productPhoto(drink.imageKey)}
                     alt={localize(drink.alt, locale)}
                     sizes="(min-width: 54rem) 220px, 110px"
-                    priority={i < 2}
+                    preload={i < 2}
                     className="size-full object-cover"
                   />
                 </div>

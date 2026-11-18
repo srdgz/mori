@@ -6,6 +6,10 @@ export const pages = [
   { key: "culture", es: "/cultura-matcha", en: "/en/matcha-culture", h1: { es: /cultura matcha/i, en: /matcha culture/i } },
   { key: "findUs", es: "/donde-estamos", en: "/en/find-us", h1: { es: /dónde estamos/i, en: /find us/i } },
   { key: "contact", es: "/contacto", en: "/en/contact", h1: { es: /hablemos/i, en: /say hello/i } },
+  { key: "legalNotice", es: "/aviso-legal", en: "/en/legal-notice", h1: { es: /aviso legal/i, en: /legal notice/i } },
+  { key: "privacy", es: "/privacidad", en: "/en/privacy", h1: { es: /política de privacidad/i, en: /privacy policy/i } },
+  { key: "cookies", es: "/cookies", en: "/en/cookies", h1: { es: /política de cookies/i, en: /cookie policy/i } },
+  { key: "terms", es: "/condiciones-de-venta", en: "/en/terms-of-sale", h1: { es: /condiciones de venta/i, en: /terms of sale/i } },
 ] as const;
 
 export const locales = ["es", "en"] as const;

@@ -16,6 +16,7 @@ import {
 } from "@/infrastructure/memory/memory-checkout";
 import { MemoryIdentity } from "@/infrastructure/memory/memory-identity";
 import { MemoryMailer } from "@/infrastructure/memory/memory-mailer";
+import { MemoryRateLimiter } from "@/infrastructure/memory/memory-rate-limiter";
 import { catalogSeed } from "@/infrastructure/seed/catalog";
 import { makeConfirmPayment, makeGetCheckoutOptions, makePlaceOrder, makeQuoteCheckout, type PlaceOrderInput } from "./checkout";
 
@@ -80,6 +81,7 @@ function deps() {
     identity,
     payments,
     random: new SequenceRandom([0.1, 0.2, 0.3, 0.4]),
+    limiter: new MemoryRateLimiter(new FixedClock(now)),
   };
 }
 
@@ -91,6 +93,7 @@ function order(overrides: Partial<PlaceOrderInput> = {}): PlaceOrderInput {
     notes: "",
     couponCode: null,
     locale: "es",
+    clientKey: "203.0.113.7",
     ...overrides,
   };
 }
@@ -232,6 +235,14 @@ describe("PlaceOrder", () => {
     arrange();
     expect(await makePlaceOrder(deps())(input)).toEqual({ ok: false, error });
     expect(payments.intents).toEqual([]);
+  });
+
+  it("refuses more than ten orders in ten minutes from the same visitor", async () => {
+    const busy = Object.assign(Object.create(Object.getPrototypeOf(orders)), orders, { create: async () => "slot_full" as const });
+    const place = makePlaceOrder({ ...deps(), orders: busy });
+    for (let i = 0; i < 10; i++) expect(await place(order())).toEqual({ ok: false, error: "slot_full" });
+    expect(await place(order())).toEqual({ ok: false, error: "rate_limited" });
+    expect(await place(order({ clientKey: "198.51.100.4" }))).toEqual({ ok: false, error: "slot_full" });
   });
 
   it("refuses a slot that filled up while paying", async () => {

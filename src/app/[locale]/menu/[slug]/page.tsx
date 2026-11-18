@@ -95,7 +95,8 @@ export default async function ProductPage({ params }: Props) {
                 src={productPhoto(product.imageKey)}
                 alt={localize(product.alt, locale)}
                 sizes="(min-width: 48rem) 45vw, 100vw"
-                priority
+                preload
+                fetchPriority="high"
                 className="size-full object-cover"
               />
             </div>

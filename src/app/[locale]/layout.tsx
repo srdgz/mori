@@ -11,7 +11,6 @@ import { Footer } from "@/ui/brand/Footer";
 import { Header } from "@/ui/brand/Header";
 import { LogoSprite } from "@/ui/brand/LogoSprite";
 import { MotionRoot } from "@/ui/motion/MotionRoot";
-import { StoreJsonLd } from "@/ui/seo/StoreJsonLd";
 import { CartProvider } from "@/ui/shop/CartProvider";
 import { syncCartAction } from "./checkout/actions";
 import "@/styles/globals.css";
@@ -50,7 +49,6 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <body>
         <LogoSprite />
-        <StoreJsonLd store={store} />
         <NextIntlClientProvider messages={clientMessages}>
           <a
             href="#main"

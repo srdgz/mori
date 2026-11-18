@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { clientKey } from "@/app/client-key";
 import { checkout, paymentsEnabled } from "@/composition/checkout";
 import type { CheckoutQuote, PlaceOrderResult } from "@/core/application/checkout/checkout";
 import type { SyncedCart } from "@/core/application/checkout/orders";
@@ -74,6 +75,7 @@ export async function placeOrderAction(input: PlaceInput): Promise<PlaceOrderRes
   if (!parsed.success) return { ok: false, error: "generic" };
   return checkout().placeOrder({
     ...parsed.data,
+    clientKey: await clientKey(),
     cart: parsed.data.cart as unknown as CartLine[],
     fulfilment: toFulfilment(parsed.data.fulfilment),
   });

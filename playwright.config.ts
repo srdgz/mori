@@ -27,6 +27,7 @@ export default defineConfig({
       BETTER_AUTH_URL: `http://localhost:${port}`,
       MAIL_OUTBOX: outbox,
       CRON_SECRET: "e2e-cron-secret",
+      DATABASE_APP_URL: "",
       NEON_REALTIME_URL: "",
       NEON_REALTIME_SECRET: "",
       BLOB_READ_WRITE_TOKEN: "",
