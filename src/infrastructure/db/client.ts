@@ -9,7 +9,7 @@ let database: Database | undefined;
 
 export function getDatabase(): Database {
   if (database) return database;
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_APP_URL || process.env.DATABASE_URL;
   if (!connectionString) throw new Error("DATABASE_URL is not set. Add the Neon connection string to .env.local.");
   const pool = new Pool({ connectionString, max: 5, idleTimeoutMillis: 5_000 });
   attachDatabasePool(pool);

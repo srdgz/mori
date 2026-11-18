@@ -51,6 +51,7 @@ import {
   DrizzleOrderRepository,
   DrizzleSettingsRepository,
 } from "@/infrastructure/db/drizzle-checkout-repositories";
+import { DrizzleRateLimiter } from "@/infrastructure/db/drizzle-rate-limiter";
 import { DrizzleSavedCartRepository } from "@/infrastructure/db/drizzle-saved-carts";
 import { NeonLiveQuerySealer } from "@/infrastructure/realtime/neon-live-queries";
 import { StripePaymentGateway } from "@/infrastructure/stripe/stripe-gateway";
@@ -98,7 +99,12 @@ function build() {
     getCheckoutOptions: makeGetCheckoutOptions(deps),
     quoteCheckout: makeQuoteCheckout(deps),
     placeOrder: (...args: Parameters<ReturnType<typeof makePlaceOrder>>) =>
-      makePlaceOrder({ ...deps, payments: payments(), random: { next: () => randomInt(0, 1_000_000) / 1_000_000 } })(...args),
+      makePlaceOrder({
+        ...deps,
+        payments: payments(),
+        random: { next: () => randomInt(0, 1_000_000) / 1_000_000 },
+        limiter: new DrizzleRateLimiter(db, systemClock),
+      })(...args),
     confirmPayment: (...args: Parameters<ReturnType<typeof makeConfirmPayment>>) =>
       makeConfirmPayment({ orders: deps.orders, payments: payments(), mailer: getMailer(), trackingUrl })(...args),
     getOrder: makeGetOrder(deps.orders, identity),

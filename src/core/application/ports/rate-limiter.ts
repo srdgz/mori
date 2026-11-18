@@ -9,4 +9,5 @@ export const RATE_RULES = {
   signUp: { max: 5, windowSeconds: 600 },
   passwordReset: { max: 3, windowSeconds: 600 },
   coupon: { max: 10, windowSeconds: 600 },
+  placeOrder: { max: 10, windowSeconds: 600 },
 } as const satisfies Record<string, RateRule>;

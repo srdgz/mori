@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { clientKey } from "@/app/client-key";
 import { redirect as nextRedirect } from "next/navigation";
 import { z } from "zod";
 import { account, demoCustomer, demoStaff } from "@/composition/container";
@@ -17,11 +17,6 @@ const flag = z.literal("on").optional();
 function localeOf(formData: FormData): AppLocale {
   const value = formData.get("locale");
   return routing.locales.find((l) => l === value) ?? routing.defaultLocale;
-}
-
-async function clientKey(): Promise<string> {
-  const all = await headers();
-  return all.get("x-forwarded-for")?.split(",")[0]?.trim() || all.get("x-real-ip") || "local";
 }
 
 function safeNext(value: FormDataEntryValue | null): string | null {
