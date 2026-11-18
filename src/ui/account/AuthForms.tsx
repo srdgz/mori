@@ -101,6 +101,7 @@ export function SignUpForm({ action, next }: { action: FormAction; next?: string
   const signInHref = { pathname: "/account/sign-in" as const, query: next ? { next } : {} };
   const t = useTranslations("account.signUp");
   const p = useTranslations("account.pending");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const { state, formAction, pending, formRef } = useAccountForm(action);
   const [password, setPassword] = useState("");
@@ -137,7 +138,19 @@ export function SignUpForm({ action, next }: { action: FormAction; next?: string
           <StrengthMeter password={password} />
         </div>
         <div className="grid gap-1">
-          <Check name="privacy" label={t("privacy")} state={state} required />
+          <Check
+            name="privacy"
+            label={t.rich("privacy", {
+              link: (chunks) => (
+                <Link href="/privacy" className="link-u text-forest" target="_blank" rel="noopener">
+                  {chunks}
+                  <span className="sr-only"> {tc("newTab")}</span>
+                </Link>
+              ),
+            })}
+            state={state}
+            required
+          />
           <Check name="marketing" label={t("marketing")} state={state} />
         </div>
         <FormMessage state={state} />

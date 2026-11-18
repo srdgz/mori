@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { StoreInfo } from "@/core/domain/store/store-info";
 import { Link } from "@/i18n/navigation";
-import { navItems } from "@/i18n/routing";
+import { legalItems, navItems } from "@/i18n/routing";
 import { Icon } from "@/ui/primitives/Icon";
 import { Mark, Wordmark } from "./Mark";
 
@@ -10,6 +10,7 @@ type Props = { store: StoreInfo };
 export async function Footer({ store }: Props) {
   const t = await getTranslations("common");
   const nav = await getTranslations("nav");
+  const legal = await getTranslations("legal");
   const weekday = store.schedule[1];
   const weekend = store.schedule[6];
   const year = new Date().getFullYear();
@@ -90,6 +91,17 @@ export async function Footer({ store }: Props) {
           <span>
             © {year} {store.name}
           </span>
+          <nav aria-label={t("legalNav")}>
+            <ul className="flex flex-wrap gap-x-5 gap-y-2">
+              {legalItems.map((item) => (
+                <li key={item.href}>
+                  <Link className="underline-offset-4 transition-colors hover:text-cream hover:underline" href={item.href}>
+                    {legal(`nav.${item.key}`)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
           <span>{t("note")}</span>
         </div>
       </div>

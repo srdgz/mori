@@ -31,7 +31,12 @@
     "newTab": "(opens in a new tab)",
     "email": "Email",
     "closed": "Closed",
-    "account": "Your account"
+    "account": "Your account",
+    "errorTitle": "We spilled something",
+    "errorText": "Something went wrong on our side. Your cart is safe: try again in a moment.",
+    "retry": "Try again",
+    "errorRef": "Error reference: {ref}",
+    "legalNav": "Legal information"
   },
   "nav": {
     "home": "Home",
@@ -507,7 +512,7 @@
       "passwordHint": "At least 8 characters. A phrase beats a word.",
       "strength": "Password strength: {level}",
       "levels": ["very weak", "weak", "fair", "good", "strong"],
-      "privacy": "I have read and accept the privacy policy",
+      "privacy": "I have read and accept the <link>privacy policy</link>",
       "marketing": "Send me news and offers from MŌRI",
       "submit": "Create account",
       "hasAccount": "Already have an account?",
@@ -775,7 +780,7 @@
         "already_used": "You’ve already used this coupon."
       },
       "paymentTitle": "Payment",
-      "testCard": "Test mode: pay with card 4242 4242 4242 4242, any future date and any CVC.",
+      "testCard": "Test mode: nothing is charged. Pay with card 4242 4242 4242 4242, any future date and any CVC.",
       "pay": "Pay {amount}",
       "paying": "Processing your payment…",
       "summary": "Summary",
@@ -790,6 +795,7 @@
       "total": "Total",
       "vat": "VAT (10 %) included: {amount}",
       "errors": {
+        "rate_limited": "You've placed a lot of orders in a row. Wait a few minutes and try again.",
         "orders_paused": "We’re not taking online orders right now.",
         "empty_cart": "Your order is empty.",
         "cart_changed": "Something in your order changed. Check it before paying.",
@@ -803,7 +809,9 @@
         "unavailable": "Online payments aren’t set up in this environment."
       },
       "paused": "We’re not taking online orders right now. Come back in a while or visit the shop.",
-      "emptyTitle": "Your order is empty"
+      "emptyTitle": "Your order is empty",
+      "copyCard": "Copy card number",
+      "cardCopied": "Number copied"
     },
     "order": {
       "title": "Order {code}",
@@ -1129,6 +1137,165 @@
       "topItem": "{name} · {count}",
       "empty": "No sales in this period yet.",
       "includesDemo": "Includes the demo’s example orders."
+    }
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "notice": "MŌRI is a fictional brand made for a portfolio project. It isn't a real business: there's no shop, no drink is made and nothing is charged.",
+    "toc": "On this page",
+    "updated": "Last updated: {date}",
+    "updatedOn": "2026-11-18",
+    "owner": "A portfolio project by srdgz",
+    "nav": {
+      "legalNotice": "Legal notice",
+      "privacy": "Privacy",
+      "cookies": "Cookies",
+      "terms": "Terms of sale"
+    },
+    "legalNotice": {
+      "title": "Legal notice",
+      "description": "Who is behind MŌRI, why this site exists and the terms for using it.",
+      "sections": [
+        {
+          "title": "Who is behind it",
+          "body": [
+            "This site is a portfolio project by srdgz, a web developer. You can see the code and other projects at github.com/srdgz.",
+            "MŌRI Matcha Bar & Culture isn't a company, has no tax ID or registered address and offers no real products or services. The Malasaña address, opening hours and prices are made up."
+          ]
+        },
+        {
+          "title": "Why it exists",
+          "body": [
+            "It shows how a complete online shop is designed and built: menu, accounts, cart, payment, order tracking and a store panel.",
+            "Everything works like a real shop, but payments run in Stripe's test mode and no order is ever made or delivered."
+          ]
+        },
+        {
+          "title": "Using the site",
+          "body": [
+            "Feel free to browse, create an account and place test orders. Please don't enter real card details or sensitive information: you don't need to.",
+            "Test accounts and orders may be deleted at any time without notice."
+          ]
+        },
+        {
+          "title": "Intellectual property",
+          "body": [
+            "MŌRI's code, design, logo and copy are the work of the project's author. Photos come from free-to-use stock libraries.",
+            "You're welcome to take inspiration from the project, but not to pass it off as a real business."
+          ]
+        },
+        {
+          "title": "Contact",
+          "body": [
+            "If you have any questions about the project, write to us from the contact page or open an issue in the GitHub repository."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "What data this demo shop keeps, what it's used for and how to delete it.",
+      "sections": [
+        {
+          "title": "Who handles your data",
+          "body": [
+            "The controller is the author of the portfolio project (srdgz). There's no company behind it and data isn't used for any commercial purpose."
+          ]
+        },
+        {
+          "title": "What we keep",
+          "body": [
+            "If you create an account: your name, email, hashed password and, if you add them, your addresses and favourite drinks.",
+            "If you place an order: the contact and delivery details you enter, the drinks and the order status.",
+            "Card details never reach our servers: Stripe collects them in test mode."
+          ]
+        },
+        {
+          "title": "What we use it for",
+          "body": [
+            "Only to make the demo work: signing in, building your order summary, showing its tracking and sending order and account emails.",
+            "We don't send marketing, build profiles, or sell or share data with anyone."
+          ]
+        },
+        {
+          "title": "Who else sees it",
+          "body": [
+            "The services that run the site: Vercel (hosting), Neon (database in Frankfurt), Stripe (test payments) and the email provider that sends messages. Each one only uses it to provide its service.",
+            "If you sign in with Google, Google shares your name and email with us."
+          ]
+        },
+        {
+          "title": "How long",
+          "body": [
+            "For as long as your account exists or until the demo database is cleaned, whichever comes first. Unpaid orders expire after 30 minutes."
+          ]
+        },
+        {
+          "title": "Your rights",
+          "body": [
+            "You can see and change your data in your account and delete it entirely from “Security”. For anything else, write to us from the contact page.",
+            "We suggest using a test email: the demo works just the same."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie policy",
+      "description": "The only cookies and data this site keeps in your browser and what they're for.",
+      "sections": [
+        {
+          "title": "Only what's needed",
+          "body": ["This site uses no analytics, advertising or social media cookies. That's why there's no consent banner."]
+        },
+        {
+          "title": "What we keep",
+          "body": [
+            "A Better Auth session cookie when you sign in, to remember who you are. It expires when you sign out or after a few days.",
+            "Your cart in the browser's local storage, so you don't lose it when you reload.",
+            "Stripe may set its own technical cookies on the payment step to prevent fraud."
+          ]
+        },
+        {
+          "title": "How to delete them",
+          "body": ["You can delete them from your browser settings. If you do, you'll be signed out and your cart will be emptied."]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of sale",
+      "description": "How MŌRI's test orders work: payment, pickup, delivery, cancellation and refunds.",
+      "sections": [
+        {
+          "title": "A test shop",
+          "body": [
+            "No order placed on this site is a real purchase. Payment uses Stripe's test mode: no money is taken and no drink is made or delivered.",
+            "To try the payment, use card 4242 4242 4242 4242 with any future date and any CVC."
+          ]
+        },
+        {
+          "title": "Prices",
+          "body": ["Prices are in euros and include 10 % hospitality VAT, shown separately in the order summary."]
+        },
+        {
+          "title": "Pickup and delivery",
+          "body": [
+            "You can pick a slot to collect in store or ask for “Envío MŌRI” delivery to postcodes in the delivery area. Delivery has a minimum order and a flat fee, and it's free above a certain amount; you'll see it before paying."
+          ]
+        },
+        {
+          "title": "Cancellations and refunds",
+          "body": [
+            "The shop can cancel an order until it starts being made; in that case the full amount is refunded.",
+            "Once made, drinks can't be returned as they're perishable, unless we got something wrong, in which case we refund it."
+          ]
+        },
+        {
+          "title": "Tracking",
+          "body": [
+            "After paying you get a link to follow the order live. If you have an account, you'll also see it under “Orders” in your account."
+          ]
+        }
+      ]
     }
   }
 }

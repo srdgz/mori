@@ -16,6 +16,10 @@ export const routing = defineRouting({
     "/culture": { es: "/cultura-matcha", en: "/matcha-culture" },
     "/find-us": { es: "/donde-estamos", en: "/find-us" },
     "/contact": { es: "/contacto", en: "/contact" },
+    "/legal-notice": { es: "/aviso-legal", en: "/legal-notice" },
+    "/privacy": { es: "/privacidad", en: "/privacy" },
+    "/cookies": { es: "/cookies", en: "/cookies" },
+    "/terms-of-sale": { es: "/condiciones-de-venta", en: "/terms-of-sale" },
     "/cart": { es: "/carrito", en: "/cart" },
     "/checkout": { es: "/checkout", en: "/checkout" },
     "/order/[code]": { es: "/pedido/[code]", en: "/order/[code]" },
@@ -62,6 +66,13 @@ export const staticPathnames = Object.keys(routing.pathnames).filter((p) => !p.i
 export const indexablePathnames = staticPathnames.filter(
   (p) => !p.startsWith("/account") && !p.startsWith("/admin") && p !== "/cart" && p !== "/checkout",
 );
+
+export const legalItems = [
+  { href: "/legal-notice", key: "legalNotice" },
+  { href: "/privacy", key: "privacy" },
+  { href: "/cookies", key: "cookies" },
+  { href: "/terms-of-sale", key: "terms" },
+] as const satisfies ReadonlyArray<{ href: AppPathname; key: string }>;
 
 export const navItems = [
   { href: "/story", key: "story" },

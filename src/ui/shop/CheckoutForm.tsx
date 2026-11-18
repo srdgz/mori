@@ -13,6 +13,7 @@ import { formatMoney, type Money } from "@/core/domain/shared/money";
 import { getPathname, Link } from "@/i18n/navigation";
 import { Submit } from "@/ui/account/form";
 import { cx } from "@/ui/primitives/cx";
+import { Icon } from "@/ui/primitives/Icon";
 import { CartIssues, CartLines } from "./CartLines";
 import { FreeDeliveryBar, useCartContext } from "./CartProvider";
 import { useCart } from "./cart-store";
@@ -415,7 +416,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
           <h2 id="payment-h" className="font-semibold text-forest">
             3 · {t("paymentTitle")}
           </h2>
-          <p className="form-note is-ok">{t("testCard")}</p>
+          <TestCard />
           {publishableKey ? <PaymentElement options={{ layout: "tabs" }} /> : <p className="form-note">{t("errors.unavailable")}</p>}
           <p role="alert" className={cx("form-note", !error && "is-empty")}>
             {error}
@@ -509,5 +510,34 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
       <StripeBridge onChange={setBridge} />
       {form}
     </Elements>
+  );
+}
+
+const TEST_CARD = "4242424242424242";
+
+function TestCard() {
+  const t = useTranslations("shop.checkout");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  return (
+    <div className="test-card">
+      <p>{t("testCard")}</p>
+      <button
+        type="button"
+        className="test-card__copy"
+        onClick={() => {
+          void navigator.clipboard?.writeText(TEST_CARD).then(() => setCopied(true));
+        }}
+      >
+        <Icon name={copied ? "check" : "copy"} size={16} />
+        <span aria-live="polite">{copied ? t("cardCopied") : t("copyCard")}</span>
+      </button>
+    </div>
   );
 }

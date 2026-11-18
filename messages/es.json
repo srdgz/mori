@@ -31,7 +31,12 @@
     "newTab": "(abre en una pestaña nueva)",
     "email": "Correo electrónico",
     "closed": "Cerrado",
-    "account": "Tu cuenta"
+    "account": "Tu cuenta",
+    "errorTitle": "Se nos ha derramado algo",
+    "errorText": "Algo ha fallado de nuestro lado. Tu carrito sigue a salvo: vuelve a intentarlo en un momento.",
+    "retry": "Reintentar",
+    "errorRef": "Referencia del error: {ref}",
+    "legalNav": "Información legal"
   },
   "nav": {
     "home": "Inicio",
@@ -507,7 +512,7 @@
       "passwordHint": "Mínimo 8 caracteres. Mejor una frase que una palabra.",
       "strength": "Seguridad de la contraseña: {level}",
       "levels": ["muy baja", "baja", "aceptable", "buena", "muy buena"],
-      "privacy": "He leído y acepto la política de privacidad",
+      "privacy": "He leído y acepto la <link>política de privacidad</link>",
       "marketing": "Quiero recibir novedades y promociones de MŌRI",
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
@@ -775,7 +780,7 @@
         "already_used": "Ya has usado este cupón."
       },
       "paymentTitle": "Pago",
-      "testCard": "Modo de prueba: paga con la tarjeta 4242 4242 4242 4242, cualquier fecha futura y cualquier CVC.",
+      "testCard": "Modo de prueba: no se cobra nada. Paga con la tarjeta 4242 4242 4242 4242, cualquier fecha futura y cualquier CVC.",
       "pay": "Pagar {amount}",
       "paying": "Procesando el pago…",
       "summary": "Resumen",
@@ -790,6 +795,7 @@
       "total": "Total",
       "vat": "IVA (10 %) incluido: {amount}",
       "errors": {
+        "rate_limited": "Has hecho muchos pedidos seguidos. Espera unos minutos y vuelve a intentarlo.",
         "orders_paused": "Ahora mismo no aceptamos pedidos online.",
         "empty_cart": "Tu pedido está vacío.",
         "cart_changed": "Algo de tu pedido ha cambiado. Revísalo antes de pagar.",
@@ -803,7 +809,9 @@
         "unavailable": "Los pagos online no están configurados en este entorno."
       },
       "paused": "Ahora mismo no aceptamos pedidos online. Vuelve en un rato o pásate por la tienda.",
-      "emptyTitle": "Tu pedido está vacío"
+      "emptyTitle": "Tu pedido está vacío",
+      "copyCard": "Copiar número de tarjeta",
+      "cardCopied": "Número copiado"
     },
     "order": {
       "title": "Pedido {code}",
@@ -1129,6 +1137,167 @@
       "topItem": "{name} · {count}",
       "empty": "Aún no hay ventas en este periodo.",
       "includesDemo": "Incluye los pedidos de ejemplo de la demo."
+    }
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "notice": "MŌRI es una marca ficticia creada para un proyecto de portfolio. No es un negocio real: no hay local, no se prepara ninguna bebida y no se cobra nada.",
+    "toc": "En esta página",
+    "updated": "Última actualización: {date}",
+    "updatedOn": "2026-11-18",
+    "owner": "Proyecto de portfolio de srdgz",
+    "nav": {
+      "legalNotice": "Aviso legal",
+      "privacy": "Privacidad",
+      "cookies": "Cookies",
+      "terms": "Condiciones de venta"
+    },
+    "legalNotice": {
+      "title": "Aviso legal",
+      "description": "Quién está detrás de MŌRI, para qué existe esta web y en qué condiciones puedes usarla.",
+      "sections": [
+        {
+          "title": "Quién está detrás",
+          "body": [
+            "Esta web es un proyecto de portfolio de srdgz, desarrollador web. Puedes ver el código y el resto de proyectos en github.com/srdgz.",
+            "MŌRI Matcha Bar & Culture no es una empresa, no tiene NIF ni domicilio social y no ofrece productos ni servicios reales. La dirección de Malasaña, los horarios y los precios son inventados."
+          ]
+        },
+        {
+          "title": "Para qué existe",
+          "body": [
+            "Sirve para enseñar cómo se diseña y se construye una tienda online completa: carta, cuentas, carrito, pago, seguimiento de pedidos y panel de tienda.",
+            "Todo funciona como en una tienda de verdad, pero los pagos van en el modo de prueba de Stripe y ningún pedido se prepara ni se entrega."
+          ]
+        },
+        {
+          "title": "Uso de la web",
+          "body": [
+            "Puedes navegar, crear una cuenta y hacer pedidos de prueba libremente. Te pedimos que no introduzcas datos reales de tarjetas ni información sensible: no hace falta.",
+            "Las cuentas y los pedidos de prueba pueden borrarse en cualquier momento sin aviso."
+          ]
+        },
+        {
+          "title": "Propiedad intelectual",
+          "body": [
+            "El código, el diseño, el logotipo y los textos de MŌRI son obra del autor del proyecto. Las fotografías proceden de bancos de imágenes con licencia de uso libre.",
+            "Puedes inspirarte en el proyecto, pero no hacerlo pasar por un negocio real."
+          ]
+        },
+        {
+          "title": "Contacto",
+          "body": [
+            "Si tienes cualquier duda sobre el proyecto, escríbenos desde la página de contacto o abre una incidencia en el repositorio de GitHub."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "description": "Qué datos guarda esta tienda de demostración, para qué los usa y cómo puedes borrarlos.",
+      "sections": [
+        {
+          "title": "Quién trata tus datos",
+          "body": [
+            "El responsable es el autor del proyecto de portfolio (srdgz). No hay ninguna empresa detrás y los datos no se usan con fines comerciales."
+          ]
+        },
+        {
+          "title": "Qué datos guardamos",
+          "body": [
+            "Si creas una cuenta: tu nombre, tu email, tu contraseña cifrada y, si las añades, tus direcciones y bebidas favoritas.",
+            "Si haces un pedido: los datos de contacto y de entrega que escribas, las bebidas y el estado del pedido.",
+            "Los datos de tarjeta no pasan por nuestros servidores: los recoge Stripe en modo de prueba."
+          ]
+        },
+        {
+          "title": "Para qué los usamos",
+          "body": [
+            "Solo para que la demostración funcione: iniciar sesión, preparar el resumen del pedido, enseñarte su seguimiento y enviarte los emails del pedido o de tu cuenta.",
+            "No enviamos publicidad, no hacemos perfiles y no vendemos ni cedemos datos a nadie."
+          ]
+        },
+        {
+          "title": "Quién más los ve",
+          "body": [
+            "Los servicios que hacen funcionar la web: Vercel (alojamiento), Neon (base de datos en Fráncfort), Stripe (pagos de prueba) y el proveedor de email que envía los mensajes. Cada uno los trata solo para prestar su servicio.",
+            "Si entras con Google, Google nos comparte tu nombre y tu email."
+          ]
+        },
+        {
+          "title": "Cuánto tiempo",
+          "body": [
+            "Mientras exista tu cuenta o hasta que se limpie la base de datos de la demo, lo que ocurra antes. Los pedidos sin pagar caducan a los 30 minutos."
+          ]
+        },
+        {
+          "title": "Tus derechos",
+          "body": [
+            "Puedes ver y cambiar tus datos en tu cuenta y borrarla del todo desde «Seguridad». Para cualquier otra petición, escríbenos desde la página de contacto.",
+            "Te recomendamos usar un email de prueba: la demo funciona igual."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Política de cookies",
+      "description": "Las únicas cookies y datos que esta web guarda en tu navegador y para qué sirven.",
+      "sections": [
+        {
+          "title": "Solo lo necesario",
+          "body": [
+            "Esta web no usa cookies de analítica, de publicidad ni de redes sociales. Por eso no te mostramos un banner de consentimiento."
+          ]
+        },
+        {
+          "title": "Qué guardamos",
+          "body": [
+            "Una cookie de sesión de Better Auth cuando inicias sesión, para recordar quién eres. Caduca al cerrar sesión o a los pocos días.",
+            "Tu carrito en el almacenamiento local del navegador, para que no lo pierdas al recargar.",
+            "Stripe puede guardar sus propias cookies técnicas en el paso de pago para prevenir el fraude."
+          ]
+        },
+        {
+          "title": "Cómo borrarlas",
+          "body": ["Puedes borrarlas desde los ajustes de tu navegador. Si lo haces, se cerrará tu sesión y se vaciará el carrito."]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Condiciones de venta",
+      "description": "Cómo funcionan los pedidos de prueba de MŌRI: pago, recogida, envío, cancelación y reembolso.",
+      "sections": [
+        {
+          "title": "Una tienda de prueba",
+          "body": [
+            "Ningún pedido hecho en esta web es una compra real. El pago usa el modo de prueba de Stripe: no se cobra dinero y ninguna bebida se prepara ni se entrega.",
+            "Para probar el pago, usa la tarjeta 4242 4242 4242 4242 con cualquier fecha futura y cualquier CVC."
+          ]
+        },
+        {
+          "title": "Precios",
+          "body": ["Los precios están en euros e incluyen el IVA del 10 % de hostelería, que aparece desglosado en el resumen del pedido."]
+        },
+        {
+          "title": "Recogida y envío",
+          "body": [
+            "Puedes elegir una franja para recoger en el local o pedir el «Envío MŌRI» a los códigos postales de la zona de reparto. El envío tiene un pedido mínimo, un coste fijo y es gratis a partir de cierto importe; lo verás antes de pagar."
+          ]
+        },
+        {
+          "title": "Cancelación y reembolso",
+          "body": [
+            "El local puede cancelar un pedido mientras no se haya empezado a preparar; en ese caso se devuelve el importe completo.",
+            "Una vez preparado, las bebidas no admiten devolución por ser productos perecederos, salvo error nuestro, en cuyo caso se reembolsa."
+          ]
+        },
+        {
+          "title": "Seguimiento",
+          "body": [
+            "Después de pagar recibes un enlace para seguir el pedido en directo. Si tienes cuenta, también lo verás en «Pedidos», dentro de tu cuenta."
+          ]
+        }
+      ]
     }
   }
 }
