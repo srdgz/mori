@@ -94,7 +94,7 @@ e2e/                   Tests de Playwright y axe
 Decisiones clave (la lista completa está en [`docs/00-decisiones.md`](docs/00-decisiones.md)):
 
 - **Primero el servidor.** Las páginas de marca y la carta son Server Components estáticos que se regeneran cuando el panel cambia el catálogo. Solo la interacción y el movimiento van en el cliente.
-- **Tres capas de permisos.** Las políticas de dominio se comprueban en cada caso de uso (con tests al 100 %). Las operaciones críticas (crear pedido, confirmar pago, cambiar de estado) son funciones SQL que validan por sí mismas las transiciones y la capacidad. En producción, la app se conecta con un rol de Postgres que solo puede leer y escribir filas.
+- **Tres capas de permisos.** Las políticas de dominio se comprueban en cada caso de uso (con tests al 100 %). Las operaciones críticas (crear pedido, confirmar pago, cambiar de estado) son funciones SQL que validan por sí mismas las transiciones y la capacidad. La app está preparada para conectarse con un rol de Postgres que solo puede leer y escribir filas (`db/app-role.sql`).
 - **El navegador nunca habla con la base de datos.** Las Server Actions validan la entrada con zod y llaman a los casos de uso. Un invitado solo llega a su pedido con el token de seguimiento.
 - **Tiempo real sin dependencia.** Las consultas selladas de Neon Realtime avisan al tablero y al seguimiento. Si Realtime está apagado, las mismas pantallas sondean con `ETag` y respuestas `304`.
 - **Trabajos programados en GitHub Actions** cada 15 minutos, porque el cron de Vercel Hobby solo se ejecuta una vez al día.

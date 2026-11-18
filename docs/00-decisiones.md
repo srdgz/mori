@@ -216,7 +216,7 @@ Sustituye a la antigua «D-20 · Supabase».
 - **Permisos:** como el navegador nunca habla con la base de datos, no hace falta RLS.
   - **Primera capa:** las políticas de dominio, comprobadas en cada caso de uso y cubiertas al 100 % por tests.
   - **Segunda capa:** las operaciones críticas (crear pedido, confirmar pago, cambiar estado) son funciones SQL que validan por sí mismas la transición y la capacidad.
-  - **Tercera capa (Fase 7):** en producción la app se conecta con el rol `mori_app` (`DATABASE_APP_URL`), que solo puede leer y escribir filas y ejecutar las funciones. No puede cambiar el esquema ni borrar tablas. Las migraciones y el seed siguen usando el rol dueño (`DATABASE_URL_UNPOOLED`). El SQL está en `db/app-role.sql`.
+  - **Tercera capa (Fase 7, opcional):** la app puede conectarse con el rol `mori_app` (`DATABASE_APP_URL`), que solo puede leer y escribir filas y ejecutar las funciones. No puede cambiar el esquema ni borrar tablas. Las migraciones y el seed siguen usando el rol dueño (`DATABASE_URL_UNPOOLED`). El SQL está en `db/app-role.sql`.
 - **Funciones SQL** para las operaciones que deben ser atómicas: reservar franja, crear pedido, confirmar pago y sumar sellos. Cada llamada es una sola sentencia, así que es atómica sin transacciones abiertas desde la app.
 - **Vercel Blob:** fotos subidas desde el panel. El navegador sube directo a Blob con un permiso de un solo uso que firma el servidor tras comprobar que el usuario es admin.
 - **Secretos:** solo en el servidor (variables de entorno de Vercel), nunca en el navegador.
