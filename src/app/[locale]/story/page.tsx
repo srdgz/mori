@@ -34,7 +34,7 @@ export default async function StoryPage({ params }: Props) {
       <div className="wrap">
         <div className="media aspect-[4/3] md:aspect-[21/9]" data-anim="clip">
           <div className="absolute inset-[-9%_0]" data-parallax="7">
-            <Image src={photos.scene} alt={t("bannerAlt")} fill priority sizes="100vw" className="object-cover" />
+            <Image src={photos.scene} alt={t("bannerAlt")} fill preload fetchPriority="high" sizes="100vw" className="object-cover" />
           </div>
         </div>
       </div>

@@ -7,6 +7,19 @@ import { useEffect, useRef, useState } from "react";
 
 type MotionModule = typeof import("./setup-motion");
 
+function whenLoadedAndIdle(callback: () => void): () => void {
+  let cancel = () => {};
+  const start = () => {
+    cancel = whenIdle(callback);
+  };
+  if (document.readyState === "complete") start();
+  else {
+    window.addEventListener("load", start, { once: true });
+    cancel = () => window.removeEventListener("load", start);
+  }
+  return () => cancel();
+}
+
 function whenIdle(callback: () => void): () => void {
   if ("requestIdleCallback" in window) {
     const id = window.requestIdleCallback(callback, { timeout: 1200 });
@@ -24,7 +37,7 @@ export function MotionRoot() {
   useEffect(() => {
     let cancelled = false;
     let teardown = () => {};
-    const cancelIdle = whenIdle(async () => {
+    const cancelIdle = whenLoadedAndIdle(async () => {
       const [mod, { default: LenisClass }, { gsap }] = await Promise.all([import("./setup-motion"), import("lenis"), import("gsap")]);
       if (cancelled) return;
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
