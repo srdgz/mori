@@ -98,6 +98,11 @@ Roles `customer`, `staff` y `admin`.
 - **Panel de datos (admin):** ventas de hoy y de la semana, ticket medio, bebidas más vendidas, reparto frente a recogida y ventas por hora.
 - **Cupones (admin):** código, porcentaje o importe, mínimo, caducidad y usos.
 - **Reembolsos (admin).**
+- **Implementación (18/11/2026):**
+  - Cancelar (staff, solo pedidos «recibidos») y reembolsar (admin) devuelven en Stripe lo que queda por devolver. Los reembolsos son totales; los parciales quedan fuera.
+  - El tablero se mueve con botones (y teclado) en cada tarjeta, sin arrastrar.
+  - Cambiar productos o ajustes regenera la carta y las páginas estáticas al momento (`revalidatePath`).
+  - Las fotos nuevas se suben a Vercel Blob desde el navegador con un permiso que solo pide el admin (`/api/uploads`).
 
 ### D-09 · Cuenta de cliente — Aprobada (revisada el 16/11/2026)
 - **Acceso:**
@@ -127,7 +132,7 @@ Es una pieza muy visual para el portfolio (tarjeta con sellos animados) y típic
 
 ### D-13 · Modo demo para quien revise el portfolio — Aprobada
 - **Cliente de demostración (desde la Fase 3):** la pantalla de entrar ofrece el botón **«Entrar en modo demo»**, que entra con un clic en la cuenta `cliente@demo.mori` sin escribir nada. Tiene dirección y favoritos de ejemplo y puede usar todo el área de cliente, pero no cambiar su contraseña ni eliminarse. Se crea con el seed.
-- **Panel de tienda:** la portada y el README ofrecen **«Ver el panel de tienda (demo)»**. Entra con una cuenta `staff` de demostración que ve pedidos reales de prueba, pero no puede cambiar ajustes ni productos. Las acciones de admin se muestran deshabilitadas con una explicación.
+- **Panel de tienda:** la portada y el README ofrecen **«Ver el panel de tienda (demo)»**. Entra con una cuenta `staff` de demostración que ve pedidos reales de prueba, pero no puede cambiar ajustes ni productos. Las acciones de admin se muestran deshabilitadas con una explicación. El staff de demo ve todos los pedidos, pero solo puede mover los de ejemplo (`is_demo`): los reales son de solo lectura. Los pedidos de ejemplo nunca pasan por Stripe.
 - **Pedidos de ejemplo:** un trabajo programado genera algunos cada día para que el tablero nunca esté vacío.
 - **Pagos:** cualquiera puede pagar con la tarjeta de prueba `4242 4242 4242 4242`. Un aviso fijo en el checkout lo explica.
 - **Por qué:** la compra como invitado ya permite probar la parte del cliente, pero el panel de tienda solo lo ve el personal. Sin una cuenta de demostración, la pieza más completa del proyecto quedaría oculta para quien revise el portfolio. Se mantiene en su versión ligera: una cuenta `staff` de solo tablero y pedidos de ejemplo.

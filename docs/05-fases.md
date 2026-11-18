@@ -60,14 +60,14 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
 - «Guardar en mi cuenta» para pedidos de invitado abiertos con su enlace.
 - **Criterio de hecho:** E2E en el que el staff avanza un pedido y el cliente lo ve cambiar sin recargar. Hasta el panel de la fase 6, el test avanza el pedido con la misma función `advance_order_status` que usará el panel.
 
-## Fase 6 · Panel de tienda (`feat/admin`)
+## Fase 6 · Panel de tienda (`feat/admin`) — Hecha
 - Tablero en directo con aviso sonoro, detalle, ticket imprimible, cancelación y reembolso.
 - Productos con subida de foto a Vercel Blob y regeneración de la carta.
 - Cupones, ajustes, clientes y panel de datos con gráficos.
 - Modo demo con la cuenta `staff` restringida.
 - Workflow programado de GitHub Actions que caduca pedidos sin pagar y genera los pedidos de ejemplo.
 - **Criterio de hecho:**
-  - E2E de flujo completo: cliente paga → staff prepara → listo → completado.
+  - E2E de flujo completo: cliente paga → staff prepara → listo → completado, con el cliente viéndolo sin recargar. El pago se simula en la base de datos, porque CI no tiene claves de Stripe.
   - Un cambio de disponibilidad se refleja en la carta.
   - El staff de demo no puede editar productos ni ajustes.
 
