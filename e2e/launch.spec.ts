@@ -81,5 +81,6 @@ test("the site sends a content security policy", async ({ request }) => {
   expect(policy).toContain("default-src 'self'");
   expect(policy).toContain("frame-ancestors 'none'");
   expect(policy).toContain("https://js.stripe.com");
+  expect(policy).toContain("https://lh3.googleusercontent.com");
   expect(response.headers()["strict-transport-security"]).toContain("max-age=");
 });
