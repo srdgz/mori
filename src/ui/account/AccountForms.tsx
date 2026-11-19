@@ -58,7 +58,7 @@ export function ProfileForm({ action, profile }: ProfileProps) {
       </div>
       <div className="grid gap-4 sm:col-span-2">
         <FormMessage state={state} success={t("saved")} />
-        <Submit pending={pending} className="w-fit">
+        <Submit pending={pending} className="btn--matcha-forest w-fit">
           {t("save")}
         </Submit>
       </div>

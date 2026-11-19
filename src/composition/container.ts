@@ -3,7 +3,7 @@ import { cache } from "react";
 import { makeGetLoyaltyCard } from "@/core/application/account/loyalty";
 import { makeListAddresses, makeRemoveAddress, makeSaveAddress } from "@/core/application/account/addresses";
 import { makeListFavourites, makeToggleFavourite } from "@/core/application/account/favourites";
-import { makeChangePassword, makeDeleteAccount, makeGetTheme, makeSetTheme, makeUpdateProfile } from "@/core/application/account/profile";
+import { makeChangePassword, makeDeleteAccount, makeUpdateProfile } from "@/core/application/account/profile";
 import { currentActor, makeRequestPasswordReset, makeResetPassword, makeSignIn, makeSignUp } from "@/core/application/account/session";
 import { makeGetMenu } from "@/core/application/catalog/get-menu";
 import { makeGetProduct } from "@/core/application/catalog/get-product";
@@ -12,11 +12,7 @@ import { makeSubmitContactMessage } from "@/core/application/contact/submit-cont
 import { makeGetStoreInfo } from "@/core/application/store/get-store-info";
 import { systemClock } from "@/infrastructure/clock";
 import { getDatabase } from "@/infrastructure/db/client";
-import {
-  DrizzleAddressRepository,
-  DrizzleFavouriteRepository,
-  DrizzlePreferenceRepository,
-} from "@/infrastructure/db/drizzle-account-repositories";
+import { DrizzleAddressRepository, DrizzleFavouriteRepository } from "@/infrastructure/db/drizzle-account-repositories";
 import { DrizzleCatalogRepository } from "@/infrastructure/db/drizzle-catalog-repository";
 import { DrizzleLoyaltyRepository, DrizzleSettingsRepository } from "@/infrastructure/db/drizzle-checkout-repositories";
 import { DrizzleRateLimiter } from "@/infrastructure/db/drizzle-rate-limiter";
@@ -62,8 +58,6 @@ function buildAccount() {
     removeAddress: makeRemoveAddress(identity, addresses),
     listFavourites: makeListFavourites(identity, favourites, catalog),
     toggleFavourite: makeToggleFavourite(identity, favourites, catalog),
-    getTheme: makeGetTheme(identity, new DrizzlePreferenceRepository(db)),
-    setTheme: makeSetTheme(identity, new DrizzlePreferenceRepository(db)),
     getLoyaltyCard: makeGetLoyaltyCard({
       identity,
       loyalty: new DrizzleLoyaltyRepository(db),

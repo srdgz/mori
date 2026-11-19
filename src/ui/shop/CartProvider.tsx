@@ -93,7 +93,7 @@ function CartDrawer({ priced, catalog, freeFrom }: { priced: PricedCart; catalog
           <div className="grid justify-items-start gap-3 py-6">
             <p className="font-semibold text-forest">{t("empty")}</p>
             <p className="text-ink-soft">{t("emptyText")}</p>
-            <Link href="/menu" className="btn mt-2" onClick={() => cart.close()}>
+            <Link href="/menu" className="btn btn--matcha-forest mt-2" onClick={() => cart.close()}>
               {t("emptyCta")}
               <Icon name="arrow" />
             </Link>
@@ -110,7 +110,7 @@ function CartDrawer({ priced, catalog, freeFrom }: { priced: PricedCart; catalog
                 <span className="text-ink-soft">{t("subtotal")}</span>
                 <span className="font-display text-xl font-semibold text-forest">{formatMoney(priced.subtotal, locale)}</span>
               </p>
-              <Link href="/checkout" className="btn btn--matcha w-full" onClick={() => cart.close()}>
+              <Link href="/checkout" className="btn btn--matcha-forest w-full" onClick={() => cart.close()}>
                 {t("checkout")}
               </Link>
               <Link href="/cart" className="link-u mx-auto text-sm text-forest" onClick={() => cart.close()}>

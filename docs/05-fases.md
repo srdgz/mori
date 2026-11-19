@@ -84,4 +84,3 @@ Cada fase se hace en su propia rama, termina con tests en verde y la web revisad
 - **Tarjeta MŌRI (D-10):** sellos por bebida pagada, tarjeta animada en la cuenta y canje en el checkout. El modelo de datos ya la contempla desde la Fase 2.
 - **Opcionales:** web instalable como app (PWA) y notificaciones push de «Tu pedido está listo».
 - Reseñas de bebidas por clientes que las han comprado.
-- Modo oscuro.

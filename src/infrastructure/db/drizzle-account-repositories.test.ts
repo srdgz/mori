@@ -3,7 +3,7 @@ import type { UserId } from "@/core/domain/access/actor";
 import type { ProductId } from "@/core/domain/catalog/product";
 import { accountRepositoriesContract } from "@/test/account-contract";
 import { productSeed } from "../seed/catalog";
-import { DrizzleAddressRepository, DrizzleFavouriteRepository, DrizzlePreferenceRepository } from "./drizzle-account-repositories";
+import { DrizzleAddressRepository, DrizzleFavouriteRepository } from "./drizzle-account-repositories";
 import { users } from "./schema";
 import { createTestDatabase, type TestDatabase } from "./testing";
 
@@ -30,7 +30,6 @@ accountRepositoriesContract("Drizzle", async () => {
     users: [created[0]!.id as UserId, created[1]!.id as UserId],
     addresses: new DrizzleAddressRepository(test.db),
     favourites: new DrizzleFavouriteRepository(test.db),
-    preferences: new DrizzlePreferenceRepository(test.db),
     products: [productSeed[0]!.id as ProductId, productSeed[1]!.id as ProductId],
   };
 });

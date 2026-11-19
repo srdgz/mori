@@ -42,9 +42,6 @@ export const users = pgTable("users", {
   phone: text("phone"),
   locale: text("locale").notNull().default("es"),
   marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
-  theme: text("theme", { enum: ["system", "light", "dark"] })
-    .notNull()
-    .default("system"),
   role: appRole("role").notNull().default("customer"),
   isDemo: boolean("is_demo").notNull().default(false),
   stripeCustomerId: text("stripe_customer_id").unique(),

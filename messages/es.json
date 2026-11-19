@@ -42,7 +42,7 @@
   "nav": {
     "home": "Inicio",
     "story": "Nuestra historia",
-    "menu": "La carta",
+    "menu": "Carta",
     "culture": "Cultura matcha",
     "findUs": "Dónde estamos",
     "contact": "Contacto"
@@ -742,18 +742,6 @@
         "body": "El texto puede tener como mucho 280 caracteres.",
         "forbidden": "No puedes valorar esta bebida desde esta cuenta."
       }
-    },
-    "appearance": {
-      "title": "Apariencia",
-      "lede": "Elige cómo quieres ver MŌRI. Se guarda en tu cuenta y se aplica en todos tus dispositivos.",
-      "system": "Sistema",
-      "systemHint": "Sigue el ajuste de tu dispositivo",
-      "light": "Claro",
-      "lightHint": "Crema y verde bosque",
-      "dark": "Oscuro",
-      "darkHint": "Bosque de noche, más suave a la vista",
-      "saved": "Apariencia guardada.",
-      "error": "No hemos podido guardarla. Inténtalo de nuevo."
     }
   },
   "shop": {
