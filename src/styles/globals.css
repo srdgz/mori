@@ -320,9 +320,9 @@
   animation: hero-zoom 2.4s var(--ease-out-expo) both;
 }
 @keyframes line-up {
+  /* Transform only: fading the hero heading in delays LCP until the animation ends. */
   from {
     transform: translateY(70%);
-    opacity: 0;
   }
 }
 @keyframes fade-up {
