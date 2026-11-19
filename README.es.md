@@ -54,7 +54,6 @@ Todo funciona como en una tienda de verdad, pero no se cobra nada y no se prepar
 - **Tarjeta MŌRI:** cada bebida pagada suma un sello. Con 8, el cliente elige qué bebida de su pedido le invitamos, con sus extras. Si se cancela el pedido, los sellos vuelven.
 - **Reseñas:** los clientes valoran las bebidas que han recibido desde el detalle del pedido, y aparecen en la ficha como compra verificada.
 - **App instalable y avisos push:** PWA con página sin conexión y avisos Web Push cuando el pedido está listo o va de camino.
-- **Modo oscuro:** sigue al sistema por defecto o se elige en el perfil. La marca, la tienda y el panel tienen su versión oscura.
 
 ### Para la tienda
 

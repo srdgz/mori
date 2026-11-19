@@ -16,7 +16,6 @@ import { getPathname, Link } from "@/i18n/navigation";
 import { Submit } from "@/ui/account/form";
 import { cx } from "@/ui/primitives/cx";
 import { Icon } from "@/ui/primitives/Icon";
-import { useIsDark } from "@/ui/theme/ThemeClient";
 import { CartIssues, CartLines } from "./CartLines";
 import { FreeDeliveryBar, useCartContext } from "./CartProvider";
 import { useCart } from "./cart-store";
@@ -55,20 +54,6 @@ type Props = {
   addresses: readonly Address[];
   publishableKey: string | null;
   actions: CheckoutActions;
-};
-
-const darkAppearance: Appearance = {
-  theme: "night",
-  variables: {
-    colorPrimary: "#b6d66b",
-    colorBackground: "#1d2f24",
-    colorText: "#e8e1d4",
-    colorDanger: "#f29a85",
-    fontFamily: "DM Sans, system-ui, sans-serif",
-    borderRadius: "12px",
-    spacingUnit: "4px",
-  },
-  rules: { ".Input": { boxShadow: "inset 0 0 0 1.5px rgba(232,225,212,.28)" }, ".Input:focus": { boxShadow: "inset 0 0 0 2px #b6d66b" } },
 };
 
 const appearance: Appearance = {
@@ -122,7 +107,6 @@ function stripeFor(key: string): Promise<Stripe | null> {
 export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKey, actions }: Props) {
   const t = useTranslations("shop.checkout");
   const locale = useLocale() as Locale;
-  const dark = useIsDark();
   const { lines, ready } = useCart();
   const { priced, catalog, freeFrom } = useCartContext();
 
@@ -445,7 +429,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
             {error}
           </p>
           {publishableKey && (
-            <div className="buy-bar">
+            <div className="buy-bar buy-bar--static">
               <Submit pending={paying} pendingLabel={t("paying")} className="btn--matcha w-full">
                 {t("pay", { amount: formatMoney(total, locale) })}
               </Submit>
@@ -533,7 +517,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
         mode: "payment",
         amount: Math.max(total.cents, 50),
         currency: "eur",
-        appearance: dark ? darkAppearance : appearance,
+        appearance,
         locale: locale === "es" ? "es" : "en-GB",
       }}
     >

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openLanguageSwitch } from "./header";
 import { locales, pages } from "./pages";
 
 for (const locale of locales) {
@@ -17,9 +18,11 @@ for (const locale of locales) {
 
 test("the language switch keeps the visitor on the same page", async ({ page }) => {
   await page.goto("/historia");
+  await openLanguageSwitch(page);
   await page.getByRole("group", { name: "Idioma" }).getByRole("link", { name: "English" }).click();
   await expect(page).toHaveURL(/\/en\/story$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/our story/i);
+  await openLanguageSwitch(page);
   await page.getByRole("group", { name: "Language" }).getByRole("link", { name: "Español" }).click();
   await expect(page).toHaveURL(/\/historia$/);
 });

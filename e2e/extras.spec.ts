@@ -108,32 +108,13 @@ test("the team hides a review from the panel", async ({ page }) => {
     .toBe(0);
 });
 
-test("the appearance setting switches the whole site to dark and stays accessible", async ({ page }) => {
-  await signUpNew(page, uniqueEmail("dark"));
-  await page.goto("/cuenta/perfil");
-  await page.getByText("Oscuro", { exact: true }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(page.getByText("Apariencia guardada.")).toBeVisible();
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  for (const path of ["/cuenta", "/cuenta/perfil", "/carta", "/carta/classic-matcha", "/historia"]) {
-    await page.goto(path);
-    await expectNoAxeViolations(page);
-  }
-  await addDrink(page, "classic-matcha");
-  await page.goto("/checkout");
-  await expectNoAxeViolations(page);
-  await page.goto("/cuenta/perfil");
-  await page.getByText("Sistema", { exact: true }).click();
-  await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
-});
-
-test("visitors with a dark system get the dark site", async ({ page }) => {
+test("the site stays light when the system prefers dark and remains accessible", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
   for (const path of ["/", "/carta", "/cultura-matcha", "/privacidad"]) {
     await page.goto(path);
     const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(background).toBe("rgb(14, 24, 19)");
+    expect(background).toBe("rgb(243, 239, 231)");
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
     await expectNoAxeViolations(page);
   }
 });

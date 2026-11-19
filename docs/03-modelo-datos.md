@@ -162,8 +162,6 @@ create table push_subscriptions (
 );
 ```
 
-`users.theme` (`system`, `light` o `dark`) guarda la apariencia elegida en el perfil.
-
 ## Catálogo
 
 ```sql

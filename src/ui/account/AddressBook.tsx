@@ -70,7 +70,9 @@ function AddressForm({ address, save, onDone }: { address: Address | null; save:
       <div className="grid gap-4 sm:col-span-2">
         <FormMessage state={state} />
         <div className="flex flex-wrap gap-3">
-          <Submit pending={pending}>{t("save")}</Submit>
+          <Submit pending={pending} className="btn--matcha-forest">
+            {t("save")}
+          </Submit>
           <button type="button" className="btn btn--ghost" onClick={onDone}>
             {t("cancel")}
           </button>

@@ -742,18 +742,6 @@
         "body": "The text can be 280 characters at most.",
         "forbidden": "You can't review this drink from this account."
       }
-    },
-    "appearance": {
-      "title": "Appearance",
-      "lede": "Choose how you see MŌRI. It's saved to your account and applies on all your devices.",
-      "system": "System",
-      "systemHint": "Follows your device setting",
-      "light": "Light",
-      "lightHint": "Cream and forest green",
-      "dark": "Dark",
-      "darkHint": "Forest at night, easier on the eyes",
-      "saved": "Appearance saved.",
-      "error": "We couldn't save it. Try again."
     }
   },
   "shop": {

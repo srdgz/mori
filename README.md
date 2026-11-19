@@ -54,7 +54,6 @@ Everything works like a real shop, but nothing is charged and no drink is made.
 - **MŌRI card:** every paid drink earns a stamp. With 8, the customer picks which drink in the order is on us, extras included. Cancellations give the stamps back.
 - **Reviews:** customers rate the drinks they've received, from the order page. Reviews show on the drink page as verified purchases.
 - **Installable app and push alerts:** a PWA with an offline page, and Web Push alerts when the order is ready or on its way.
-- **Dark mode:** follows the system by default, or set it in your profile. The brand, the shop and the panel all have a dark version.
 
 ### For the store
 

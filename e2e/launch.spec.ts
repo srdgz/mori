@@ -57,6 +57,24 @@ test("a visitor reaches checkout with the keyboard alone", async ({ page }, info
   await expect(page.getByRole("complementary", { name: "Resumen" })).toContainText("4,50 €");
 });
 
+test("the mobile menu keeps the burger in view and moves the language switch inside", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "Mobile layout");
+  await page.goto("/");
+  const burger = page.getByRole("button", { name: "Abrir menú" });
+  const viewport = page.viewportSize()!;
+  const box = await burger.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+  await expect(page.locator("header").getByRole("group", { name: "Idioma" })).toBeHidden();
+  await burger.click();
+  const menu = page.locator("#mobile-menu");
+  const languages = menu.getByRole("group", { name: "Idioma" });
+  await expect(languages).toBeVisible();
+  await languages.getByRole("link", { name: "English" }).click();
+  await expect(page).toHaveURL(/\/en$/);
+});
+
 test("the site sends a content security policy", async ({ request }) => {
   const response = await request.get("/");
   const policy = response.headers()["content-security-policy"] ?? "";

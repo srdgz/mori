@@ -12,7 +12,6 @@ import { Header } from "@/ui/brand/Header";
 import { LogoSprite } from "@/ui/brand/LogoSprite";
 import { MotionRoot } from "@/ui/motion/MotionRoot";
 import { CartProvider } from "@/ui/shop/CartProvider";
-import { themeScript } from "@/ui/theme/theme";
 import { ServiceWorkerRegister } from "@/ui/pwa/PwaClient";
 import { syncCartAction } from "./checkout/actions";
 import "@/styles/globals.css";
@@ -21,10 +20,7 @@ const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grot
 const body = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", display: "swap" });
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#183D2B" },
-    { media: "(prefers-color-scheme: dark)", color: "#0E1813" },
-  ],
+  themeColor: "#183D2B",
 };
 
 export const metadata: Metadata = {
@@ -53,10 +49,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const clientMessages = { common: messages.common, nav: messages.nav, shop: { cart: messages.shop.cart } };
 
   return (
-    <html lang={locale} className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html lang={locale} className={`${display.variable} ${body.variable}`}>
       <body>
         <LogoSprite />
         <NextIntlClientProvider messages={clientMessages}>

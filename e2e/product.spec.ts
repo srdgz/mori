@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openLanguageSwitch } from "./header";
 
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -57,6 +58,7 @@ test("adding puts the drink in the order", async ({ page }) => {
 
 test("the language switch keeps the same drink", async ({ page }) => {
   await page.goto("/en/menu/coconut-matcha");
+  await openLanguageSwitch(page);
   await page.getByRole("group", { name: "Language" }).getByRole("link", { name: "Español" }).click();
   await expect(page).toHaveURL(/\/carta\/coconut-matcha$/);
 });

@@ -62,11 +62,7 @@ export default async function HomePage({ params }: Props) {
   return (
     <>
       <SiteJsonLd locale={locale} description={t("description")} />
-      <section
-        className="hero keep-light relative grid min-h-svh overflow-hidden bg-[#d8d5ce] text-forest"
-        data-hero
-        aria-labelledby="hero-title"
-      >
+      <section className="hero relative grid min-h-svh overflow-hidden bg-[#d8d5ce] text-forest" data-hero aria-labelledby="hero-title">
         <div className="hero-zoom absolute inset-0 overflow-hidden" data-hero-media>
           <Image
             src={photos.hero}
@@ -119,7 +115,7 @@ export default async function HomePage({ params }: Props) {
               style={delay(0.7)}
               aria-hidden="true"
             >
-              <i className="relative h-[46px] w-[1.5px] overflow-hidden bg-forest/20 after:absolute after:inset-x-0 after:-top-[40%] after:h-[40%] after:[animation:drip_2.2s_cubic-bezier(.65,0,.35,1)_infinite] after:bg-forest" />
+              <i className="relative h-11.5 w-[1.5px] overflow-hidden bg-forest/20 after:absolute after:inset-x-0 after:-top-[40%] after:h-[40%] after:[animation:drip_2.2s_cubic-bezier(.65,0,.35,1)_infinite] after:bg-forest" />
               {t("scroll")}
             </span>
           </div>

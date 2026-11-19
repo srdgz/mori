@@ -83,11 +83,9 @@ export function Header({ address, instagram }: Props) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenu(false);
       if (e.key !== "Tab") return;
-      const focusables = [
-        burgerRef.current,
-        ...Array.from(menuRef.current?.querySelectorAll<HTMLElement>("a") ?? []),
-        ...Array.from(headerRef.current?.querySelectorAll<HTMLElement>(".lang a") ?? []),
-      ].filter((el): el is HTMLElement => !!el);
+      const focusables = [burgerRef.current, ...Array.from(menuRef.current?.querySelectorAll<HTMLElement>("a") ?? [])].filter(
+        (el): el is HTMLElement => !!el,
+      );
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
       if (!first || !last) return;
@@ -122,25 +120,44 @@ export function Header({ address, instagram }: Props) {
     return () => window.clearTimeout(timer);
   }, [open]);
 
-  const headerClass = [
-    "site-header fixed inset-x-0 top-0 z-50 h-[var(--nav-h)]",
-    scrolled && "is-scrolled",
-    hidden && !open && "is-hidden",
-    !scrolled && !open && pathname === "/" && "keep-light",
-  ]
+  const headerClass = ["site-header fixed inset-x-0 top-0 z-50 h-[var(--nav-h)]", scrolled && "is-scrolled", hidden && !open && "is-hidden"]
     .filter(Boolean)
     .join(" ");
+
+  const localeSwitch = (className: string) => (
+    <div
+      className={cx("lang relative z-10 rounded-full p-0.75 text-xs font-semibold tracking-[.08em]", className)}
+      role="group"
+      aria-label={t("langLabel")}
+    >
+      {routing.locales.map((l) => (
+        <Link
+          key={l}
+          href={here}
+          locale={l}
+          hrefLang={l}
+          lang={l}
+          className="rounded-full px-2.5 py-1.5"
+          aria-current={locale === l ? "true" : undefined}
+          onClick={() => setMenu(false, false)}
+        >
+          <span className="sr-only">{l === "es" ? "Español" : "English"}</span>
+          <span aria-hidden="true">{l.toUpperCase()}</span>
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
     <>
       <header ref={headerRef} className={headerClass} onFocus={() => setHidden(false)}>
-        <div className="wrap flex h-full items-center justify-between gap-6">
-          <Link href="/" className="brand relative z-10 inline-flex items-center gap-3 text-forest">
+        <div className="wrap flex h-full items-center justify-between gap-3 sm:gap-6">
+          <Link href="/" className="brand relative z-10 inline-flex items-center gap-2 text-forest sm:gap-3">
             <Mark className="size-9" />
             <Wordmark className="h-5 w-auto" />
             <span className="sr-only">{t("home")}</span>
           </Link>
-          <div className="flex items-center gap-4 lg:gap-8">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-8">
             <nav aria-label={t("navLabel")} className="hidden lg:block">
               <ul className="flex gap-7">
                 {navItems.map((item) => (
@@ -156,26 +173,7 @@ export function Header({ address, instagram }: Props) {
                 ))}
               </ul>
             </nav>
-            <div
-              className="lang relative z-10 inline-flex rounded-full p-[3px] text-xs font-semibold tracking-[.08em]"
-              role="group"
-              aria-label={t("langLabel")}
-            >
-              {routing.locales.map((l) => (
-                <Link
-                  key={l}
-                  href={here}
-                  locale={l}
-                  hrefLang={l}
-                  lang={l}
-                  className="rounded-full px-2.5 py-1.5"
-                  aria-current={locale === l ? "true" : undefined}
-                >
-                  <span className="sr-only">{l === "es" ? "Español" : "English"}</span>
-                  <span aria-hidden="true">{l.toUpperCase()}</span>
-                </Link>
-              ))}
-            </div>
+            {localeSwitch("hidden lg:inline-flex")}
             <AccountLink label={t("account")} />
             <CartButton />
             <button
@@ -187,8 +185,8 @@ export function Header({ address, instagram }: Props) {
               onClick={() => setMenu(!open)}
             >
               <span className="sr-only">{open ? t("menuClose") : t("menuOpen")}</span>
-              <span className="burger__bar top-[18px]" aria-hidden="true" />
-              <span className="burger__bar top-[25px]" aria-hidden="true" />
+              <span className="burger__bar top-4.5" aria-hidden="true" />
+              <span className="burger__bar top-6.25" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -198,7 +196,7 @@ export function Header({ address, instagram }: Props) {
         id="mobile-menu"
         ref={menuRef}
         className={cx(
-          "mobile-menu on-dark fixed inset-0 z-40 flex flex-col justify-between bg-forest px-[var(--gutter)] pt-[calc(var(--nav-h)+32px)] pb-8 text-cream lg:hidden",
+          "mobile-menu on-dark fixed inset-0 z-40 flex flex-col justify-between bg-forest px-(--gutter) pt-[calc(var(--nav-h)+32px)] pb-8 text-cream lg:hidden",
           entered && "is-open",
         )}
         hidden={!open && !menuMounted}
@@ -222,9 +220,12 @@ export function Header({ address, instagram }: Props) {
             ))}
           </ol>
         </nav>
-        <div className="flex flex-col gap-2 text-sm text-sage xs:flex-row xs:justify-between">
-          <span>{address} · Madrid</span>
-          <span>{instagram}</span>
+        <div className="flex flex-col gap-4">
+          {localeSwitch("self-start")}
+          <div className="flex flex-col gap-2 text-sm text-sage xs:flex-row xs:justify-between">
+            <span>{address} · Madrid</span>
+            <span>{instagram}</span>
+          </div>
         </div>
       </div>
     </>

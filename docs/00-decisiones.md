@@ -286,11 +286,10 @@ Sustituye a la antigua «D-20 · Supabase».
 - **Push:** en el seguimiento, «Avísame cuando esté listo» suscribe el navegador con Web Push (VAPID) a ese pedido. Al pasar a «listo» o «en reparto», el servidor envía el aviso en el idioma del pedido y olvida las suscripciones caducadas. En iPhone solo funciona con la web instalada.
 - **Sin claves VAPID:** el botón vuelve al aviso del navegador mientras la página está abierta, como antes.
 
-### D-29 · Modo oscuro — Aprobada (18/11/2026)
-- **Tokens:** los colores de marca se redefinen en oscuro (bosque casi negro, crema para el texto y matcha para el acento). Las secciones de marca oscuras (`.on-dark`) y la foto de portada (`.keep-light`) mantienen sus colores originales.
-- **Preferencia:** por defecto sigue al sistema. En «Perfil → Apariencia» se elige Sistema, Claro u Oscuro; se guarda en la cuenta y en una cookie, y un script en `<head>` la aplica antes de pintar para que no parpadee.
-- **Stripe:** el Payment Element usa su tema `night` con los colores de MŌRI cuando la web está en oscuro.
-- **Accesibilidad:** axe revisa las páginas públicas, la cuenta y el checkout también en oscuro.
+### D-29 · Modo oscuro — Retirada (19/11/2026)
+- **Decisión:** la web se queda en su versión clara. El modo oscuro añadía una segunda capa de tokens, pruebas y ajustes de terceros sin ser prioritario para la marca.
+- **Limpieza:** se retiran el selector de «Perfil → Apariencia», la cookie, la columna `users.theme` y el tema `night` del Payment Element de Stripe.
+- **Accesibilidad:** axe sigue revisando las páginas públicas, la cuenta y el checkout en la versión clara.
 
 ## Lo que necesito de ti, y cuándo
 

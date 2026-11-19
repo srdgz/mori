@@ -20,7 +20,7 @@ export function CartPage() {
       <div className="grid justify-items-start gap-3">
         <p className="font-semibold text-forest">{t("empty")}</p>
         <p className="text-ink-soft">{t("emptyText")}</p>
-        <Link href="/menu" className="btn mt-2">
+        <Link href="/menu" className="btn btn--matcha-forest mt-2">
           {t("emptyCta")}
           <Icon name="arrow" />
         </Link>
@@ -40,7 +40,7 @@ export function CartPage() {
           <span className="text-ink-soft">{t("subtotal")}</span>
           <span className="font-display text-2xl font-semibold text-forest">{formatMoney(priced.subtotal, locale)}</span>
         </p>
-        <Link href="/checkout" className="btn btn--matcha w-full">
+        <Link href="/checkout" className="btn btn--matcha-forest w-full">
           {t("checkout")}
         </Link>
       </aside>
