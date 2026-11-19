@@ -17,7 +17,7 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.js.stripe.com${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://*.stripe.com https://*.link.com",
+  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://*.stripe.com https://*.link.com https://lh3.googleusercontent.com",
   "font-src 'self'",
   `connect-src 'self' https://api.stripe.com https://link.com https://*.link.com https://vercel.com https://*.vercel-storage.com ${realtimeOrigin}`.trim(),
   "frame-src https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://link.com https://*.link.com",
@@ -45,7 +45,18 @@ const nextConfig: NextConfig = {
     deviceSizes: [390, 640, 828, 1080, 1280, 1672],
     imageSizes: [96, 160, 240, 320, 480],
     qualities: [75, 80],
-    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/products/**" }],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+        pathname: "/products/**",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
+    ],
   },
   async redirects() {
     return [{ source: "/favicon.ico", destination: "/favicon.svg", permanent: true }];
