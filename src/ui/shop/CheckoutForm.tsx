@@ -458,12 +458,10 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
               <Icon name="check" size={18} />
               <span>{t("freeNote")}</span>
             </p>
-          ) : !publishableKey ? (
-            <p className="form-note">{t("errors.unavailable")}</p>
           ) : (
             <>
               <TestCard />
-              <PaymentElement options={{ layout: "tabs" }} />
+              {publishableKey ? <PaymentElement options={{ layout: "tabs" }} /> : <p className="form-note">{t("errors.unavailable")}</p>}
             </>
           )}
           {mode === "below_card_minimum" && !error && <p className="form-note">{t("errors.below_card_minimum")}</p>}
