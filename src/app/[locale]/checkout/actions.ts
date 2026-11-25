@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { clientKey } from "@/app/client-key";
-import { checkout, paymentsEnabled } from "@/composition/checkout";
+import { checkout } from "@/composition/checkout";
 import type { CheckoutQuote, PlaceOrderResult } from "@/core/application/checkout/checkout";
 import type { SyncedCart } from "@/core/application/checkout/orders";
 import type { Cart, CartLine } from "@/core/domain/cart/cart";
@@ -78,7 +78,6 @@ const placeSchema = z.object({
 export type PlaceInput = Omit<z.infer<typeof placeSchema>, "cart"> & { cart: Cart };
 
 export async function placeOrderAction(input: PlaceInput): Promise<PlaceOrderResult | { ok: false; error: "unavailable" | "generic" }> {
-  if (!paymentsEnabled()) return { ok: false, error: "unavailable" };
   const parsed = placeSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "generic" };
   return checkout().placeOrder({

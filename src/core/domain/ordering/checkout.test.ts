@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { money } from "../shared/money";
-import { checkoutTotals, isPickupCode, pickupCode } from "./checkout";
+import { checkoutTotals, isPickupCode, paymentMode, pickupCode } from "./checkout";
+
+describe("paymentMode", () => {
+  it("skips the card for free orders and refuses amounts the card network can't charge", () => {
+    expect(paymentMode(money(0))).toBe("free");
+    expect(paymentMode(money(1))).toBe("below_card_minimum");
+    expect(paymentMode(money(49))).toBe("below_card_minimum");
+    expect(paymentMode(money(50))).toBe("card");
+  });
+});
 
 describe("checkoutTotals", () => {
   it("adds delivery, takes the discount off and shows the 10 % VAT included", () => {

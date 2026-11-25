@@ -46,7 +46,7 @@ export default async function AccountOrderPage({ params, searchParams }: Props) 
         realtime={realtimeEnabled()}
         notice={saved ? s("claimed") : null}
       />
-      {reviewables && reviewables.length > 0 && (
+      {reviewables?.status === "open" && reviewables.items.length > 0 && (
         <section className="account-card grid gap-6" aria-labelledby="review-h">
           <div>
             <h2 id="review-h" className="h-md text-forest">
@@ -54,9 +54,20 @@ export default async function AccountOrderPage({ params, searchParams }: Props) 
             </h2>
             <p className="mt-2 text-ink-soft">{r("lede")}</p>
           </div>
-          {reviewables.map((item) => (
+          {reviewables.items.map((item) => (
             <ReviewForm key={item.productId} item={item} action={submitReviewAction} />
           ))}
+        </section>
+      )}
+      {(reviewables?.status === "pending" || reviewables?.status === "demo") && (
+        <section className="account-card grid gap-2" aria-labelledby="review-h">
+          <h2 id="review-h" className="font-semibold text-forest">
+            {r("title")}
+          </h2>
+          <p className="loyalty-note">
+            <Icon name="leaf" size={18} />
+            <span>{reviewables.status === "pending" ? r("pending") : r("demo")}</span>
+          </p>
         </section>
       )}
     </div>

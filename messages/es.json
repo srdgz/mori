@@ -737,6 +737,8 @@
       "update": "Actualizar reseña",
       "saved": "¡Gracias! Tu reseña ya está publicada.",
       "hidden": "El equipo ha ocultado esta reseña. Puedes editarla, pero seguirá oculta.",
+      "pending": "Podrás valorar tus bebidas cuando recojas el pedido o te lo entreguemos.",
+      "demo": "Las reseñas no están disponibles en la cuenta demo, porque la comparte todo el mundo. Crea tu propia cuenta para valorar tus bebidas.",
       "errors": {
         "rating": "Elige de 1 a 5 estrellas.",
         "body": "El texto puede tener como mucho 280 caracteres.",
@@ -824,6 +826,9 @@
       "testCard": "Modo de prueba: no se cobra nada. Paga con la tarjeta 4242 4242 4242 4242, cualquier fecha futura y cualquier CVC.",
       "pay": "Pagar {amount}",
       "paying": "Procesando el pago…",
+      "freeNote": "Este pedido no tiene coste, así que no hace falta tarjeta.",
+      "confirmFree": "Confirmar pedido",
+      "confirming": "Confirmando tu pedido…",
       "summary": "Resumen",
       "showSummary": "Ver resumen · {amount}",
       "subtotal": "Subtotal",
@@ -848,7 +853,8 @@
         "payment": "El pago no se ha completado: {message}",
         "generic": "Algo ha fallado. Inténtalo de nuevo.",
         "unavailable": "Los pagos online no están configurados en este entorno.",
-        "loyalty_unavailable": "Ya no tienes sellos suficientes para la bebida gratis. Quítala y vuelve a intentarlo."
+        "loyalty_unavailable": "Ya no tienes sellos suficientes para la bebida gratis. Quítala y vuelve a intentarlo.",
+        "below_card_minimum": "El importe mínimo para pagar con tarjeta es 0,50 €. Añade algo más o quita el cupón."
       },
       "paused": "Ahora mismo no aceptamos pedidos online. Vuelve en un rato o pásate por la tienda.",
       "emptyTitle": "Tu pedido está vacío",

@@ -142,6 +142,7 @@ export interface OrderRepository {
   create(order: NewOrder): Promise<{ id: string; trackingToken: string } | "slot_full" | "code_taken">;
   attachPayment(orderId: string, paymentIntentId: string): Promise<void>;
   confirmPayment(paymentIntentId: string): Promise<{ orderId: string; confirmedNow: boolean } | null>;
+  confirmFree(orderId: string): Promise<boolean>;
   byId(id: string): Promise<OrderView | null>;
   byCode(code: string): Promise<OrderView | null>;
   paidOrderCount(email: string, customerId: UserId | null): Promise<number>;

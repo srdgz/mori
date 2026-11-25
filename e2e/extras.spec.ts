@@ -47,6 +47,27 @@ test("a full MŌRI card gives the chosen drink for free at checkout", async ({ p
   await expect(summary.locator(".totals__total")).toContainText("5,60 €");
 });
 
+test("a free drink with nothing else to pay is confirmed without a card", async ({ page }) => {
+  const email = uniqueEmail("free-order");
+  await signUpNew(page, email);
+  await addStamps(email, 8);
+  await addDrink(page, "classic-matcha");
+  await page.goto("/checkout");
+  const summary = page.getByRole("complementary", { name: "Resumen" });
+  await summary.getByRole("switch", { name: /Usar 8 sellos/ }).click();
+  await expect(summary.locator(".totals__total")).toContainText("0,00 €");
+  const thumb = await summary.locator(".switch__thumb").boundingBox();
+  const toggle = await summary.getByRole("switch", { name: /Usar 8 sellos/ }).boundingBox();
+  expect(thumb && toggle && thumb.y >= toggle.y && thumb.x >= toggle.x).toBe(true);
+  await expect(page.getByText("Este pedido no tiene coste")).toBeVisible();
+  await page.getByLabel("Teléfono").fill("600000000");
+  await page.getByRole("button", { name: "Confirmar pedido" }).click();
+  await expect(page).toHaveURL(/\/pedido\/MR-/);
+  await expect(page.getByText("Recibido").first()).toBeVisible();
+  await page.goto("/cuenta");
+  await expect(page.getByRole("region", { name: "Tarjeta MŌRI" })).toContainText("0 / 8");
+});
+
 test("visitors are invited to collect stamps", async ({ page }) => {
   await addDrink(page, "classic-matcha");
   await page.goto("/checkout");
@@ -57,7 +78,10 @@ test("a customer reviews a drink they received", async ({ page }) => {
   const email = uniqueEmail("review");
   await signUpNew(page, email, undefined, "Lucía Martín");
   const order = await placePaidOrder({ email, customerEmail: email, slug: "coconut-matcha", quantity: 1 });
-  for (const step of ["preparing", "ready", "completed"]) await advanceOrder(order.id, step);
+  await advanceOrder(order.id, "preparing");
+  await page.goto(`/cuenta/pedidos/${order.code}`);
+  await expect(page.getByText("Podrás valorar tus bebidas cuando recojas el pedido")).toBeVisible();
+  for (const step of ["ready", "completed"]) await advanceOrder(order.id, step);
 
   await page.goto(`/cuenta/pedidos/${order.code}`);
   const form = page.getByRole("form", { name: "¿Qué tal tu Coconut Matcha?" });

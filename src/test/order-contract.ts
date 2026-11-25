@@ -129,6 +129,23 @@ export function orderRepositoryContract(name: string, setup: () => Promise<Order
       expect(await orders.paidOrderCount("other@example.com", customerId)).toBe(1);
     });
 
+    it("confirms a free order without a payment, redeeming the stamps once and no stamp for the free drink", async () => {
+      const { orders, loyalty, customerId } = await setup();
+      const start = await loyalty.balance(customerId);
+      const paid = await orders.create(newOrder({ customerId }));
+      if (typeof paid === "string") throw new Error(paid);
+      expect(await orders.confirmFree(paid.id)).toBe(false);
+
+      const free = await orders.create(newOrder({ customerId, discount: money(1680), total: money(0), vat: money(0), stampsRedeemed: 8 }));
+      if (typeof free === "string") throw new Error(free);
+      expect(await orders.confirmFree(free.id)).toBe(true);
+      expect(await orders.confirmFree(free.id)).toBe(false);
+      expect(await orders.confirmFree("00000000-0000-4000-8000-000000000000")).toBe(false);
+      expect((await orders.byId(free.id))?.status).toBe("received");
+      expect((await orders.byId(paid.id))?.status).toBe("pending_payment");
+      expect(await loyalty.balance(customerId)).toBe(start - 8 + 2);
+    });
+
     it("records each step, advances only along the flow and lists a customer's orders", async () => {
       const { orders, customerId } = await setup();
       const input = newOrder({ customerId, contact: { name: "Noa", email: "noa@example.com", phone: "600000000" } });
@@ -220,7 +237,7 @@ export function orderRepositoryContract(name: string, setup: () => Promise<Order
       expect(await loyalty.balance(customerId)).toBe(start + 3);
 
       const redeemed = await pay({ stampsRedeemed: 2 });
-      expect(await loyalty.balance(customerId)).toBe(start + 4);
+      expect(await loyalty.balance(customerId)).toBe(start + 3);
       expect(await orders.advance(redeemed, "cancelled", null)).toBe("advanced");
       expect(await loyalty.balance(customerId)).toBe(start + 3);
 
