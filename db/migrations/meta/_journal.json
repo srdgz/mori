@@ -57,6 +57,20 @@
       "when": 1795083303209,
       "tag": "0007_remove_theme",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795620120855,
+      "tag": "0008_free_orders",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795620961520,
+      "tag": "0009_redeemed_drink_no_stamp",
+      "breakpoints": true
     }
   ]
 }

@@ -139,8 +139,16 @@ export class MemoryOrderRepository implements OrderRepository, LoyaltyRepository
 
   async confirmPayment(paymentIntentId: string): Promise<{ orderId: string; confirmedNow: boolean } | null> {
     const index = this.orders.findIndex((o) => o.paymentIntentId === paymentIntentId);
-    const order = this.orders[index];
-    if (!order) return null;
+    return index < 0 ? null : this.confirm(index);
+  }
+
+  async confirmFree(orderId: string): Promise<boolean> {
+    const index = this.orders.findIndex((o) => o.id === orderId && o.total.cents === 0 && o.paymentIntentId === null);
+    return index >= 0 && this.confirm(index).confirmedNow;
+  }
+
+  private confirm(index: number): { orderId: string; confirmedNow: boolean } {
+    const order = this.orders[index]!;
     if (order.status !== "pending_payment" && order.status !== "expired") return { orderId: order.id, confirmedNow: false };
     this.orders[index] = { ...order, status: "received", events: [...order.events, { status: "received", at: new Date() }] };
     if (order.couponId) this.coupons?.redemptions.push({ couponId: order.couponId, email: order.contactEmail });
@@ -148,7 +156,7 @@ export class MemoryOrderRepository implements OrderRepository, LoyaltyRepository
       if (order.stampsRedeemed > 0) {
         this.ledger.push({ userId: order.customerId, orderId: order.id, delta: -order.stampsRedeemed, reason: "redeem" });
       }
-      const drinks = order.lines.reduce((sum, l) => sum + l.quantity, 0);
+      const drinks = order.lines.reduce((sum, l) => sum + l.quantity, 0) - (order.stampsRedeemed > 0 ? 1 : 0);
       if (drinks > 0) this.ledger.push({ userId: order.customerId, orderId: order.id, delta: drinks, reason: "purchase" });
     }
     return { orderId: order.id, confirmedNow: true };

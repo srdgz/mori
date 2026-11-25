@@ -737,6 +737,8 @@
       "update": "Update review",
       "saved": "Thank you! Your review is live.",
       "hidden": "The team has hidden this review. You can edit it, but it will stay hidden.",
+      "pending": "You can rate your drinks once you collect the order or we deliver it.",
+      "demo": "Reviews aren't available on the demo account, because everyone shares it. Create your own account to rate your drinks.",
       "errors": {
         "rating": "Choose from 1 to 5 stars.",
         "body": "The text can be 280 characters at most.",
@@ -824,6 +826,9 @@
       "testCard": "Test mode: nothing is charged. Pay with card 4242 4242 4242 4242, any future date and any CVC.",
       "pay": "Pay {amount}",
       "paying": "Processing your payment…",
+      "freeNote": "This order costs nothing, so no card is needed.",
+      "confirmFree": "Confirm order",
+      "confirming": "Confirming your order…",
       "summary": "Summary",
       "showSummary": "Show summary · {amount}",
       "subtotal": "Subtotal",
@@ -848,7 +853,8 @@
         "payment": "The payment didn’t go through: {message}",
         "generic": "Something went wrong. Try again.",
         "unavailable": "Online payments aren’t set up in this environment.",
-        "loyalty_unavailable": "You no longer have enough stamps for the free drink. Remove it and try again."
+        "loyalty_unavailable": "You no longer have enough stamps for the free drink. Remove it and try again.",
+        "below_card_minimum": "The minimum card payment is €0.50. Add something else or remove the coupon."
       },
       "paused": "We’re not taking online orders right now. Come back in a while or visit the shop.",
       "emptyTitle": "Your order is empty",

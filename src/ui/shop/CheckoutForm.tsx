@@ -8,6 +8,7 @@ import type { CheckoutQuote } from "@/core/application/checkout/checkout";
 import type { Address } from "@/core/domain/account/address";
 import type { Cart } from "@/core/domain/cart/cart";
 import { firstAvailable, type PickupDay } from "@/core/domain/fulfilment/pickup-slots";
+import { paymentMode } from "@/core/domain/ordering/checkout";
 import type { Locale } from "@/core/domain/shared/locale";
 import { lineKey } from "@/core/domain/cart/cart";
 import { localize } from "@/core/domain/shared/locale";
@@ -26,7 +27,8 @@ type FulfilmentInput =
   | { kind: "pickup"; slotStart: string | null }
   | { kind: "delivery"; address: { line1: string; line2: string | null; postalCode: string; city: string; instructions: string | null } };
 
-type PlaceResult = { ok: true; code: string; trackingToken: string; clientSecret: string; total: Money } | { ok: false; error: string };
+type PlaceResult =
+  { ok: true; code: string; trackingToken: string; clientSecret: string | null; total: Money } | { ok: false; error: string };
 
 export type CheckoutActions = {
   quote: (input: {
@@ -161,6 +163,7 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
   }, [actions, lines, fulfilment, coupon, contact.email, ready, redeemLine]);
 
   const total = quote?.totals.total ?? priced.subtotal;
+  const mode = quote ? paymentMode(quote.totals.total) : "card";
   const stripePromise = publishableKey ? stripeFor(publishableKey) : null;
 
   if (ready && lines.length === 0) {
@@ -189,15 +192,49 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (paying) return;
+    if (mode === "below_card_minimum") {
+      setError(t("errors.below_card_minimum"));
+      return;
+    }
     const { stripe, elements } = bridge.current;
-    if (!stripe || !elements || paying) return;
+    if (mode === "card" && (!stripe || !elements)) return;
     setError("");
     setPaying(true);
     try {
-      await pay(stripe, elements);
+      if (stripe && elements && mode === "card") await pay(stripe, elements);
+      else await confirmFree();
     } finally {
       setPaying(false);
     }
+  }
+
+  async function placeOnce(): Promise<Extract<PlaceResult, { ok: true }> | null> {
+    const key = JSON.stringify({ lines, fulfilment, coupon, contact, notes, redeemLine });
+    if (placed?.key === key) return placed.result;
+    const response = await actions.place({ cart: lines, contact, fulfilment, notes, couponCode: coupon, redeemLine, locale });
+    if (!response.ok) {
+      const errorKey = `errors.${response.error}` as "errors.generic";
+      setError(t.has(errorKey) ? t(errorKey) : t("errors.generic"));
+      return null;
+    }
+    setPlaced({ key, result: response });
+    return response;
+  }
+
+  function trackingHref(result: Extract<PlaceResult, { ok: true }>): string {
+    const path = getPathname({ locale, href: { pathname: "/order/[code]", params: { code: result.code } } });
+    return `${window.location.origin}${path}?t=${result.trackingToken}`;
+  }
+
+  async function confirmFree() {
+    const result = await placeOnce();
+    if (!result) return;
+    if (result.clientSecret) {
+      setError(t("errors.cart_changed"));
+      return;
+    }
+    window.location.assign(trackingHref(result));
   }
 
   async function pay(stripe: Stripe, elements: StripeElements) {
@@ -206,23 +243,16 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
       setError(submitted.error.message ?? t("errors.generic"));
       return;
     }
-    const key = JSON.stringify({ lines, fulfilment, coupon, contact, notes, redeemLine });
-    let result = placed?.key === key ? placed.result : null;
-    if (!result) {
-      const response = await actions.place({ cart: lines, contact, fulfilment, notes, couponCode: coupon, redeemLine, locale });
-      if (!response.ok) {
-        const key = `errors.${response.error}` as "errors.generic";
-        setError(t.has(key) ? t(key) : t("errors.generic"));
-        return;
-      }
-      result = response;
-      setPlaced({ key, result });
+    const result = await placeOnce();
+    if (!result) return;
+    if (!result.clientSecret) {
+      window.location.assign(trackingHref(result));
+      return;
     }
-    const path = getPathname({ locale, href: { pathname: "/order/[code]", params: { code: result.code } } });
     const confirmation = await stripe.confirmPayment({
       elements,
       clientSecret: result.clientSecret,
-      confirmParams: { return_url: `${window.location.origin}${path}?t=${result.trackingToken}` },
+      confirmParams: { return_url: trackingHref(result) },
     });
     if (confirmation.error) setError(t("errors.payment", { message: confirmation.error.message ?? "" }));
   }
@@ -423,16 +453,34 @@ export function CheckoutForm({ days, deliveryEta, user, addresses, publishableKe
           <h2 id="payment-h" className="font-semibold text-forest">
             3 · {t("paymentTitle")}
           </h2>
-          <TestCard />
-          {publishableKey ? <PaymentElement options={{ layout: "tabs" }} /> : <p className="form-note">{t("errors.unavailable")}</p>}
+          {mode === "free" ? (
+            <p className="loyalty-note">
+              <Icon name="check" size={18} />
+              <span>{t("freeNote")}</span>
+            </p>
+          ) : !publishableKey ? (
+            <p className="form-note">{t("errors.unavailable")}</p>
+          ) : (
+            <>
+              <TestCard />
+              <PaymentElement options={{ layout: "tabs" }} />
+            </>
+          )}
+          {mode === "below_card_minimum" && !error && <p className="form-note">{t("errors.below_card_minimum")}</p>}
           <p role="alert" className={cx("form-note", !error && "is-empty")}>
             {error}
           </p>
-          {publishableKey && (
+          {(publishableKey || mode === "free") && (
             <div className="buy-bar buy-bar--static">
-              <Submit pending={paying} pendingLabel={t("paying")} className="btn--matcha w-full">
-                {t("pay", { amount: formatMoney(total, locale) })}
-              </Submit>
+              {mode === "free" ? (
+                <Submit pending={paying} pendingLabel={t("confirming")} className="btn--matcha w-full">
+                  {t("confirmFree")}
+                </Submit>
+              ) : (
+                <Submit pending={paying} pendingLabel={t("paying")} className="btn--matcha w-full">
+                  {t("pay", { amount: formatMoney(total, locale) })}
+                </Submit>
+              )}
             </div>
           )}
         </section>
@@ -602,7 +650,7 @@ function LoyaltyBox({
         className="loyalty-redeem__toggle"
         onClick={() => onChange(on ? null : mostExpensive ? lineKey(mostExpensive.line) : null)}
       >
-        <span className="switch" aria-hidden="true">
+        <span className="switch__track" aria-hidden="true">
           <span className="switch__thumb" />
         </span>
         <span className="grid text-left">

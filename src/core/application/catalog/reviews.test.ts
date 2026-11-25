@@ -81,19 +81,39 @@ describe("GetOrderReviews", () => {
     const code = await delivered("u-1");
     customer();
     await submit()({ productId: VANILLA, rating: 4, body: null });
-    expect(await makeGetOrderReviews({ identity, orders, reviews })(code.toLowerCase())).toEqual([
-      { productId: CLASSIC, productName: "Classic Matcha", mine: null },
-      { productId: VANILLA, productName: "Vanilla Matcha", mine: { rating: 4, body: null, isHidden: false } },
-    ]);
+    expect(await makeGetOrderReviews({ identity, orders, reviews })(code.toLowerCase())).toEqual({
+      status: "open",
+      items: [
+        { productId: CLASSIC, productName: "Classic Matcha", mine: null },
+        { productId: VANILLA, productName: "Vanilla Matcha", mine: { rating: 4, body: null, isHidden: false } },
+      ],
+    });
   });
 
-  it("offers nothing for orders in progress, other people's orders or visitors", async () => {
+  it("explains that drinks can be rated once the order is collected", async () => {
+    const preparing = await delivered("u-1", "preparing");
+    customer();
+    expect(await makeGetOrderReviews({ identity, orders, reviews })(preparing)).toEqual({ status: "pending" });
+  });
+
+  it("tells the shared demo account that it can't review", async () => {
+    const done = await delivered("u-demo");
+    const preparing = await delivered("u-demo", "preparing");
+    customer("u-demo", true);
+    const get = makeGetOrderReviews({ identity, orders, reviews });
+    expect(await get(done)).toEqual({ status: "demo" });
+    expect(await get(preparing)).toEqual({ status: "demo" });
+  });
+
+  it("offers nothing for unpaid or cancelled orders, other people's orders or visitors", async () => {
     const preparing = await delivered("u-1", "preparing");
     const other = await delivered("u-2");
+    const unpaid = newOrder({ customerId: "u-1" as UserId });
+    await orders.create(unpaid);
     const get = makeGetOrderReviews({ identity, orders, reviews });
     expect(await get(preparing)).toBeNull();
     customer();
-    expect(await get(preparing)).toBeNull();
+    expect(await get(unpaid.code)).toBeNull();
     expect(await get(other)).toBeNull();
     expect(await get("MR-NONE")).toBeNull();
   });

@@ -108,9 +108,11 @@ function build() {
     placeOrder: (...args: Parameters<ReturnType<typeof makePlaceOrder>>) =>
       makePlaceOrder({
         ...deps,
-        payments: payments(),
+        payments: paymentsEnabled() ? payments() : null,
         random: { next: () => randomInt(0, 1_000_000) / 1_000_000 },
         limiter: new DrizzleRateLimiter(db, systemClock),
+        mailer: getMailer(),
+        trackingUrl,
       })(...args),
     confirmPayment: (...args: Parameters<ReturnType<typeof makeConfirmPayment>>) =>
       makeConfirmPayment({ orders: deps.orders, payments: payments(), mailer: getMailer(), trackingUrl })(...args),

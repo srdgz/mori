@@ -26,6 +26,11 @@ export type ReviewableItem = Readonly<{
   mine: Readonly<{ rating: number; body: string | null; isHidden: boolean }> | null;
 }>;
 
+export type OrderReviews =
+  Readonly<{ status: "open"; items: ReviewableItem[] }> | Readonly<{ status: "pending" }> | Readonly<{ status: "demo" }>;
+
+const IN_PROGRESS = new Set(["received", "preparing", "ready", "out_for_delivery"]);
+
 export type SubmitReviewResult =
   Readonly<{ status: "saved" }> | Readonly<{ status: "forbidden" }> | Readonly<{ status: "invalid"; errors: ReviewError }>;
 
@@ -46,20 +51,24 @@ export function makeGetProductReviews(reviews: ReviewRepository) {
 }
 
 export function makeGetOrderReviews(deps: { identity: Identity; orders: OrderRepository; reviews: ReviewRepository }) {
-  return async (code: string): Promise<ReviewableItem[] | null> => {
+  return async (code: string): Promise<OrderReviews | null> => {
     const actor = await currentActor(deps.identity);
     if (actor.kind !== "customer") return null;
     const order = await deps.orders.byCode(code.toUpperCase());
-    if (!order || order.customerId !== actor.id || order.status !== "completed") return null;
+    if (!order || order.customerId !== actor.id) return null;
+    if (order.status !== "completed" && !IN_PROGRESS.has(order.status)) return null;
+    if (!can(actor, "reviews.write")) return { status: "demo" };
+    if (order.status !== "completed") return { status: "pending" };
     const products = [...new Map(order.lines.map((l) => [l.productId, l.productName])).entries()];
     const mine = await deps.reviews.mine(
       actor.id,
       products.map(([id]) => id),
     );
-    return products.map(([productId, productName]) => {
+    const items = products.map(([productId, productName]) => {
       const review = mine.find((r) => r.productId === productId);
       return { productId, productName, mine: review ? { rating: review.rating, body: review.body, isHidden: review.isHidden } : null };
     });
+    return { status: "open", items };
   };
 }
 

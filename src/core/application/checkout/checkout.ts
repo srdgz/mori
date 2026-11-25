@@ -2,7 +2,7 @@ import { actorFor, can, GUEST, type Actor, type UserId } from "@/core/domain/acc
 import { priceCart, type Cart, type PricedCart } from "@/core/domain/cart/cart";
 import { quoteDelivery, type DeliveryQuote } from "@/core/domain/fulfilment/delivery";
 import { findSlot, pickupDays, type PickupDay } from "@/core/domain/fulfilment/pickup-slots";
-import { checkoutTotals, pickupCode, type Totals } from "@/core/domain/ordering/checkout";
+import { checkoutTotals, paymentMode, pickupCode, type Totals } from "@/core/domain/ordering/checkout";
 import { applyCoupon, normaliseCode, type CouponResult } from "@/core/domain/promotions/coupon";
 import { loyaltyCard, redeemFreeDrink, type LoyaltyCard, type Redemption, type RedemptionResult } from "@/core/domain/promotions/loyalty";
 import { isLocale, type Locale } from "@/core/domain/shared/locale";
@@ -196,10 +196,12 @@ export type PlaceOrderError =
   | "slot_full"
   | "delivery_unavailable"
   | "coupon_invalid"
-  | "loyalty_unavailable";
+  | "loyalty_unavailable"
+  | "below_card_minimum"
+  | "unavailable";
 
 export type PlaceOrderResult =
-  | Readonly<{ ok: true; code: string; trackingToken: string; clientSecret: string; total: Totals["total"] }>
+  | Readonly<{ ok: true; code: string; trackingToken: string; clientSecret: string | null; total: Totals["total"] }>
   | Readonly<{ ok: false; error: PlaceOrderError }>;
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -218,8 +220,31 @@ export function snapshot(cart: PricedCart): OrderLineSnapshot[] {
   }));
 }
 
+type ConfirmationDeps = {
+  orders: OrderRepository;
+  mailer: Mailer;
+  trackingUrl: (code: string, token: string, locale: Locale) => string;
+};
+
+async function sendConfirmation(deps: ConfirmationDeps, orderId: string): Promise<void> {
+  const order = await deps.orders.byId(orderId);
+  if (!order) return;
+  await deps.mailer.send({
+    kind: "order_confirmed",
+    to: order.contactEmail,
+    name: order.contactName,
+    locale: order.locale,
+    code: order.code,
+    url: deps.trackingUrl(order.code, order.trackingToken, order.locale),
+    total: order.total,
+    fulfilment: order.fulfilment,
+    slotStart: order.slotStart,
+    lines: order.lines.map((l) => ({ name: l.productName, quantity: l.quantity })),
+  });
+}
+
 export function makePlaceOrder(
-  deps: Dependencies & { identity: Identity; payments: PaymentGateway; random: Random; limiter: RateLimiter },
+  deps: Dependencies & ConfirmationDeps & { identity: Identity; payments: PaymentGateway | null; random: Random; limiter: RateLimiter },
 ) {
   return async (input: PlaceOrderInput): Promise<PlaceOrderResult> => {
     const shop = await deps.settings.load();
@@ -247,6 +272,10 @@ export function makePlaceOrder(
     if (input.redeemLine && !result.loyalty?.redemption) return { ok: false, error: "loyalty_unavailable" };
     if (result.cart.issues.length > 0 || result.cart.lines.length === 0) return { ok: false, error: "cart_changed" };
     if (input.couponCode && !result.coupon?.ok) return { ok: false, error: "coupon_invalid" };
+    const mode = paymentMode(result.totals.total);
+    if (mode === "below_card_minimum") return { ok: false, error: "below_card_minimum" };
+    const payments = deps.payments;
+    if (mode === "card" && !payments) return { ok: false, error: "unavailable" };
 
     let slotStart: Date | null = null;
     if (input.fulfilment.kind === "pickup") {
@@ -276,7 +305,11 @@ export function makePlaceOrder(
       });
       if (created === "slot_full") return { ok: false, error: "slot_full" };
       if (created === "code_taken") continue;
-      const intent = await deps.payments.createIntent({ orderId: created.id, code, amount: result.totals.total, email: contact.email });
+      if (mode === "free" || !payments) {
+        if (await deps.orders.confirmFree(created.id)) await sendConfirmation(deps, created.id);
+        return { ok: true, code, trackingToken: created.trackingToken, clientSecret: null, total: result.totals.total };
+      }
+      const intent = await payments.createIntent({ orderId: created.id, code, amount: result.totals.total, email: contact.email });
       await deps.orders.attachPayment(created.id, intent.id);
       return { ok: true, code, trackingToken: created.trackingToken, clientSecret: intent.clientSecret, total: result.totals.total };
     }
@@ -284,33 +317,14 @@ export function makePlaceOrder(
   };
 }
 
-export function makeConfirmPayment(deps: {
-  orders: OrderRepository;
-  payments: PaymentGateway;
-  mailer: Mailer;
-  trackingUrl: (code: string, token: string, locale: Locale) => string;
-}) {
+export function makeConfirmPayment(deps: ConfirmationDeps & { payments: PaymentGateway }) {
   return async (rawBody: string, signature: string): Promise<"confirmed" | "already_confirmed" | "ignored"> => {
     const event = deps.payments.parseWebhook(rawBody, signature);
     if (event.type !== "succeeded" || !event.paymentIntentId) return "ignored";
     const confirmed = await deps.orders.confirmPayment(event.paymentIntentId);
     if (!confirmed) return "ignored";
     if (!confirmed.confirmedNow) return "already_confirmed";
-    const order = await deps.orders.byId(confirmed.orderId);
-    if (order) {
-      await deps.mailer.send({
-        kind: "order_confirmed",
-        to: order.contactEmail,
-        name: order.contactName,
-        locale: order.locale,
-        code: order.code,
-        url: deps.trackingUrl(order.code, order.trackingToken, order.locale),
-        total: order.total,
-        fulfilment: order.fulfilment,
-        slotStart: order.slotStart,
-        lines: order.lines.map((l) => ({ name: l.productName, quantity: l.quantity })),
-      });
-    }
+    await sendConfirmation(deps, confirmed.orderId);
     return "confirmed";
   };
 }

@@ -201,6 +201,11 @@ export class DrizzleOrderRepository implements OrderRepository {
     return row ? { orderId: row.order_id, confirmedNow: row.confirmed_now } : null;
   }
 
+  async confirmFree(orderId: string): Promise<boolean> {
+    const [row] = await rows<{ confirmed: boolean }>(this.db, sql`select confirm_free_order(${orderId}) as confirmed`);
+    return row?.confirmed === true;
+  }
+
   private async view(where: SQL): Promise<OrderView | null> {
     const [order] = await this.db.select().from(orders).where(where);
     if (!order) return null;

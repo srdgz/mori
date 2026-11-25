@@ -59,6 +59,19 @@ const coupons: StoredCoupon[] = [
     endsAt: null,
     isActive: true,
   },
+  {
+    id: "c3",
+    code: "CASIGRATIS",
+    kind: "amount",
+    value: 500,
+    minSubtotal: money(0),
+    firstOrderOnly: false,
+    maxUses: null,
+    perCustomerLimit: null,
+    startsAt: null,
+    endsAt: null,
+    isActive: true,
+  },
 ];
 
 const now = new Date("2026-11-20T09:07:00Z");
@@ -84,6 +97,8 @@ function deps() {
     payments,
     random: new SequenceRandom([0.1, 0.2, 0.3, 0.4]),
     limiter: new MemoryRateLimiter(new FixedClock(now)),
+    mailer,
+    trackingUrl: (code: string, token: string) => `https://mori.test/pedido/${code}?t=${token}`,
   };
 }
 
@@ -242,6 +257,38 @@ describe("PlaceOrder", () => {
     const result = await makePlaceOrder(deps())(order({ redeemLine: lineKey(cart[1]!) }));
     expect(result).toMatchObject({ ok: true, total: money(1160) });
     expect(orders.orders[0]).toMatchObject({ stampsRedeemed: 8, discount: money(520) });
+  });
+
+  it("confirms a free order at once without asking for a card", async () => {
+    const user = identity.addUser({ email: "ana@example.com" });
+    identity.signInAs(user);
+    orders.ledger.push({ userId: user.id as UserId, orderId: null, delta: 8, reason: "adjustment" });
+    const single = [cart[1]!];
+    const result = await makePlaceOrder(deps())(order({ cart: single, redeemLine: lineKey(single[0]!) }));
+    expect(result).toEqual({ ok: true, code: "MR-DGKP", trackingToken: "token-1", clientSecret: null, total: money(0) });
+    expect(payments.intents).toEqual([]);
+    expect(orders.orders[0]).toMatchObject({ status: "received", paymentIntentId: null, stampsRedeemed: 8 });
+    expect(await orders.balance(user.id as UserId)).toBe(0);
+    expect(mailer.sent).toHaveLength(1);
+    expect(mailer.sent[0]).toMatchObject({ kind: "order_confirmed", code: "MR-DGKP", url: "https://mori.test/pedido/MR-DGKP?t=token-1" });
+  });
+
+  it("refuses a total the card network can't charge", async () => {
+    expect(await makePlaceOrder(deps())(order({ cart: [cart[1]!], couponCode: "CASIGRATIS" }))).toEqual({
+      ok: false,
+      error: "below_card_minimum",
+    });
+    expect(orders.orders).toEqual([]);
+  });
+
+  it("only takes free orders when card payments are not set up", async () => {
+    const place = makePlaceOrder({ ...deps(), payments: null });
+    expect(await place(order())).toEqual({ ok: false, error: "unavailable" });
+    expect(orders.orders).toEqual([]);
+    const user = identity.addUser({ email: "ana@example.com" });
+    identity.signInAs(user);
+    orders.ledger.push({ userId: user.id as UserId, orderId: null, delta: 8, reason: "adjustment" });
+    expect(await place(order({ cart: [cart[1]!], redeemLine: lineKey(cart[1]!) }))).toMatchObject({ ok: true, clientSecret: null });
   });
 
   it("links the order to the signed-in customer", async () => {

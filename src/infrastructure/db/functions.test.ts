@@ -168,7 +168,7 @@ describe("confirm_payment", () => {
     expect(await test.db.$count(loyaltyLedger)).toBe(2);
     expect(await test.db.$count(orderEvents, eq(orderEvents.orderId, id))).toBe(2);
     const [balance] = await query<{ stamps: number }>(sql`select stamps from loyalty_balance where user_id = ${customerId}`);
-    expect(balance?.stamps).toBe(3 - 8);
+    expect(balance?.stamps).toBe(2 - 8);
   });
 
   it("records the coupon redemption", async () => {

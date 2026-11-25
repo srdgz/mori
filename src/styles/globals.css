@@ -2447,7 +2447,10 @@ a.account-card:hover {
   align-items: center;
   text-align: left;
 }
-.loyalty-redeem__toggle[aria-checked="true"] .switch {
+.loyalty-redeem__toggle .switch__track {
+  flex: none;
+}
+.loyalty-redeem__toggle[aria-checked="true"] .switch__track {
   background: var(--color-forest);
 }
 .loyalty-redeem__toggle[aria-checked="true"] .switch__thumb {
