@@ -23,9 +23,13 @@ Todo funciona como en una tienda de verdad, pero no se cobra nada y no se prepar
 
 ## Capturas
 
-| Configurador de bebidas                                                                                        | Checkout                                                                                                                     |
-| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| ![Página de Classic Matcha con opciones de tamaño, leche y extras, y el precio](docs/screenshots/product.webp) | ![Checkout con franjas de recogida, datos de contacto, pago con Stripe y resumen del pedido](docs/screenshots/checkout.webp) |
+| Configurador de bebidas                                                                                        | Checkout                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| ![Página de Classic Matcha con opciones de tamaño, leche y extras, y el precio](docs/screenshots/product.webp) | ![Checkout con pago con Stripe y un resumen en el que 8 sellos hacen gratis el Strawberry Matcha](docs/screenshots/checkout.webp) |
+
+| Tarjeta MŌRI                                                                                                                           | Reseñas                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Cuenta de cliente con la tarjeta MŌRI completa, 8 sellos y una bebida gratis lista para canjear](docs/screenshots/loyalty-card.webp) | ![Reseñas del Classic Matcha: media de 4,7 con 6 reseñas, todas marcadas como compra verificada](docs/screenshots/product-reviews.webp) |
 
 | Seguimiento en directo                                                                                   | Tablero del panel                                                                                                                |
 | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |

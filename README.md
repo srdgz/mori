@@ -23,9 +23,13 @@ Everything works like a real shop, but nothing is charged and no drink is made.
 
 ## Screenshots
 
-| Drink configurator                                                                                     | Checkout                                                                                                         |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| ![Classic Matcha page with size, milk and extras options and the price](docs/screenshots/product.webp) | ![Checkout with pickup slots, contact details, Stripe payment and order summary](docs/screenshots/checkout.webp) |
+| Drink configurator                                                                                     | Checkout                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| ![Classic Matcha page with size, milk and extras options and the price](docs/screenshots/product.webp) | ![Checkout with Stripe payment and an order summary where 8 stamps make the Strawberry Matcha free](docs/screenshots/checkout.webp) |
+
+| MŌRI card                                                                                                                  | Reviews                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| ![Customer account with a full MŌRI card of 8 stamps and a free drink ready to redeem](docs/screenshots/loyalty-card.webp) | ![Classic Matcha reviews: 4.7 average from 6 reviews, each marked as a verified purchase](docs/screenshots/product-reviews.webp) |
 
 | Live tracking                                                                                       | Store panel board                                                                                                  |
 | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
